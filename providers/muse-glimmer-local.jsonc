@@ -28,7 +28,7 @@
     {
       "id": "muse-glimmer-ollama",
       "name": "Muse Glimmer 30B (Ollama, локально)",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "http://localhost:11434/v1",
       "auth": "none",
@@ -51,7 +51,7 @@
     {
       "id": "muse-glimmer-vllm",
       "name": "Muse Glimmer 30B (vLLM, локально)",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "http://localhost:8000/v1",
       "auth": "none",

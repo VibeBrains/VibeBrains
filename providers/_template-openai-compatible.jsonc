@@ -1,5 +1,7 @@
 // Шаблон: свой OpenAI-совместимый провайдер «с нуля» (прокси, self-host, новый вендор).
-// Замените id/name/baseURL/apiKeyEnv на свои и поставьте "active": true.
+// Это ОБРАЗЕЦ для копирования, единственный выключенный файл каталога: id и baseURL здесь
+// вымышленные. Скопируйте файл под своим именем, замените id/name/baseURL/apiKeyEnv
+// и поставьте "active": true.
 // auth: "bearer" | "none" | { "type": "header", "name": "x-api-key" } | { "type": "query", "name": "key" }.
 // models.fetch: true — авто-список моделей с <baseURL>/models; строка — свой полный URL
 // каталога; false — только кастомные из static. Полная спека — docs/vibe/manuals/providersSpec.md.
@@ -9,7 +11,7 @@
     {
       "id": "my-provider",
       "name": "Мой провайдер",
-      "active": false,
+      "active": false, // образец не включаем: заполните поля в своей копии и поставьте true
       "protocol": "openai", // openai (дефолт) | anthropic | gemini
       "baseURL": "https://api.example.com/v1",
       "auth": "bearer",

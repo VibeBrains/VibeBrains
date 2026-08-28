@@ -1,7 +1,7 @@
 // MiniMax — два маршрута к одним моделям:
 //   1) "minimax" — OpenAI-совместимый API (включён);
 //   2) "minimax-anthropic" — клон через extends по нативному Anthropic-совместимому
-//      эндпоинту вендора (выключен; для гиков — обходит расхождения OpenAI-слоя в tool-use).
+//      эндпоинту вендора (для гиков — обходит расхождения OpenAI-слоя в tool-use).
 // Ключ один на оба: MINIMAX_API_KEY в .vibe/.env или поле в настройках.
 {
   "version": 1,
@@ -9,7 +9,7 @@
     {
       "id": "minimax",
       "name": "MiniMax",
-      "active": true,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.minimax.io/v1",
       "auth": "bearer",
@@ -28,14 +28,14 @@
       "id": "minimax-anthropic",
       "extends": "minimax",
       "name": "MiniMax (Anthropic-протокол)",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "anthropic",
       "baseURL": "https://api.minimax.io/anthropic/v1",
       "auth": { "type": "header", "name": "x-api-key" },
       "apiKeyRef": "minimax", // тот же ключ, что у основного маршрута
       "order": 31,
       "models": {
-        "fetch": false
+        "fetch": true
         // "static": [
         //   { "id": "MiniMax-M3", "name": "MiniMax M3 (Anthropic, 1M)", "default": true, "contextWindow": 1000000 }
         // ]

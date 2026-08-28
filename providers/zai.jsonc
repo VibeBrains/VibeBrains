@@ -15,7 +15,7 @@
     {
       "id": "zai",
       "name": "Z.AI (GLM)",
-      "active": true,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.z.ai/api/coding/paas/v4",
       "auth": "bearer",

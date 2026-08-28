@@ -14,7 +14,7 @@
     {
       "id": "meta-muse",
       "name": "Meta Muse Spark",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.meta.ai/v1",
       "auth": "bearer",
@@ -22,7 +22,7 @@
       "apiKeyEnv": "MODEL_API_KEY",
       "order": 90,
       "models": {
-        "fetch": false
+        "fetch": true
         // "static": [
         //   { "id": "muse-spark-1.2", "name": "Muse Spark 1.2 (1M)", "default": true, "contextWindow": 1000000 }
         // ]
@@ -35,14 +35,14 @@
       "id": "meta-muse-anthropic",
       "extends": "meta-muse",
       "name": "Meta Muse Spark (Anthropic-протокол)",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "anthropic",
       "baseURL": "https://api.meta.ai/v1",
       "auth": { "type": "header", "name": "x-api-key" },
       "apiKeyRef": "meta-muse", // тот же ключ, что у основного маршрута
       "order": 91,
       "models": {
-        "fetch": false
+        "fetch": true
         // "static": [
         //   { "id": "muse-spark-1.2", "name": "Muse Spark 1.2 (Anthropic, 1M)", "default": true, "contextWindow": 1000000 }
         // ]
@@ -59,11 +59,11 @@
       "id": "meta-muse-contributor",
       "extends": "meta-muse",
       "name": "Meta Muse Spark (Contributor — данные идут на обучение)",
-      "active": false,
+      "active": false, // ОСОЗНАННО ВЫКЛЮЧЕН: тариф отдаёт ваши промпты и код вендору на обучение — включайте руками
       "apiKeyRef": "meta-muse", // тот же ключ, что у основного маршрута
       "order": 92,
       "models": {
-        "fetch": false
+        "fetch": true
         // "static": [
         //   { "id": "muse-spark-1.2-contributor", "name": "Muse Spark 1.2 (Contributor, 1M)", "default": true, "contextWindow": 1000000 }
         // ]

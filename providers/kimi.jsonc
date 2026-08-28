@@ -11,7 +11,7 @@
     {
       "id": "kimi",
       "name": "Kimi (Moonshot)",
-      "active": true,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.moonshot.ai/v1",
       "auth": "bearer",

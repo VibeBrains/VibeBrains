@@ -8,7 +8,7 @@
     {
       "id": "anthropic",
       "name": "Anthropic (Claude)",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "anthropic",
       "baseURL": "https://api.anthropic.com/v1",
       "auth": { "type": "header", "name": "x-api-key" },

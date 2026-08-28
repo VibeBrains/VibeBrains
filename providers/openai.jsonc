@@ -1,5 +1,5 @@
-// OpenAI — выключен по умолчанию: включите, если есть ключ (OPENAI_API_KEY в .vibe/.env,
-// взять: platform.openai.com/api-keys).
+// OpenAI — включён; заработает, как только появится ключ (OPENAI_API_KEY в .vibe/.env
+// или поле в настройках; взять: platform.openai.com/api-keys).
 //
 // ЛОВУШКА ТАРИФА (поколение GPT-5.6): голый алиас "gpt-5.6" ведёт на флагманский тир Sol.
 // Для дешёвых маршрутов выбирайте полный id тира (gpt-5.6-terra / gpt-5.6-luna) — иначе
@@ -11,7 +11,7 @@
     {
       "id": "openai",
       "name": "OpenAI",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.openai.com/v1",
       "auth": "bearer",

@@ -21,14 +21,14 @@
     {
       "id": "alibaba-coding",
       "name": "Alibaba Coding Plan",
-      "active": false,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://coding-intl.dashscope.aliyuncs.com/v1",
       "auth": "bearer",
       "apiKeyEnv": "DASHSCOPE_API_KEY",
       "order": 80,
       "models": {
-        "fetch": false, // см. пункт 1 в шапке: каталог плана возвращает лишнее
+        "fetch": true, // см. пункт 1 в шапке: каталог плана возвращает лишнее
         "static": [
           { "id": "qwen3.7-plus", "name": "Qwen 3.7 Plus", "default": true, "pinned": true, "contextWindow": 1000000 },
           { "id": "qwen3-coder-next", "name": "Qwen 3 Coder Next", "contextWindow": 1000000 },

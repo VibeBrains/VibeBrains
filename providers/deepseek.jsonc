@@ -13,7 +13,7 @@
     {
       "id": "deepseek",
       "name": "DeepSeek",
-      "active": true,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://api.deepseek.com/v1",
       "auth": "bearer",

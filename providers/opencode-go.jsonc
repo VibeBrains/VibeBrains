@@ -8,7 +8,7 @@
     {
       "id": "opencode-go",
       "name": "OpenCode Go",
-      "active": true,
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://opencode.ai/zen/go/v1",
       "auth": "bearer",
