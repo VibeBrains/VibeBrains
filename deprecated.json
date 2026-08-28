@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "comment": "Устаревшие сиды: файлы, которые раньше засевались, а затем были удалены/переименованы в наборе. Сеялки обоих продуктов удаляют такой файл из .vibe проекта, ТОЛЬКО если его sha256 совпадает с одной из перечисленных исторических версий (значит, пользователь его не правил); правленный файл не трогается. Служебный файл набора — в проекты не засевается.",
+  "deprecated": [
+    {
+      "path": "providers/openai-gpt56.jsonc",
+      "replacedBy": "providers/openai.jsonc",
+      "sha256": [
+        "b54d6f5705ee2e4b8124bf1df090f3b15de2a729c112b21030752ec512e3c2b8"
+      ]
+    },
+    {
+      "path": "providers/deepseek-v4.jsonc",
+      "replacedBy": "providers/deepseek.jsonc",
+      "sha256": [
+        "1e59aea746337a86163a04063c52fb0eff47011dc94b7e91d9caea713e1a07ad",
+        "33367e4f286adddfc45983011f47f0358e76a15b5fcffe9342f7277336217c3b",
+        "6f25b8b44bee84639fe89fb71f369f0ad9194637641be2f553a2b7af84c6d23e"
+      ]
+    },
+    {
+      "path": "providers/moonshot-kimi.jsonc",
+      "replacedBy": "providers/kimi.jsonc",
+      "sha256": [
+        "0797c0513dbc153c79e835529ea791843cf3f623785a286c0f22e65060862fbd",
+        "1462de8b5c55c6c1f1a52c9024e83b824bd39cf7c0a566b534eca5aa74a0a36e",
+        "b379d0cf19ce410d33046756adae2ffe2a77433d3f025565579374dceb5cee60",
+        "c9dd826bc21ae67d5c727d6cdecb1111aa5a00b6fc6e349d41963b56370b19d7"
+      ]
+    }
+  ]
+}
