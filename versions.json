@@ -3,12 +3,13 @@
   "comment": "Ревизии файлов набора. Генерируется bump.mjs — руками не править. history хранит sha256 прошлых ревизий: по ним сеялка узнаёт нетронутую копию старого релиза.",
   "files": {
     "README.md": {
-      "version": 4,
-      "sha256": "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1",
+      "version": 5,
+      "sha256": "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
-        "3ab39f3dbd12fbe9cb3d752959f65a2d789a01dc7e983de294f1a9b9ecb4eae3"
+        "3ab39f3dbd12fbe9cb3d752959f65a2d789a01dc7e983de294f1a9b9ecb4eae3",
+        "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1"
       ]
     },
     "agents.example.jsonc": {
@@ -90,15 +91,16 @@
       ]
     },
     "providers/README.md": {
-      "version": 8,
-      "sha256": "22a887d100dc59594eaacaf673dd7744978d19943b107f51588fda9cfc48a45b",
+      "version": 9,
+      "sha256": "bd35e775003cb98c2cfc7aedaa5320850495f9a4b1e49e59ab2d8d74ee98fe4e",
       "history": [
         "541456bdca5484c2f83b77ea4608bcc5c3bbec1e3d99359cc6c464d0a805836d",
         "ef01bc2f85c2f6eac12247d00ba88a395467e50e021a92487e2c007b0a537c7e",
         "35604c3607278f97adad81ef9f9b87ad8b56f03b42a96efc52dc4bf632a0657b",
         "18c9f5a52386a7704caf480f844f9aeea7b28808500e5c44f2cf5facd95528da",
         "c4251e6dacdf06a6cc6210a43b0e146f2f3c2d4ff1fb9b988ba1fd64dbc86b95",
-        "2cff98fda4e67f58d81aa1ee91a2ad86db057f3e7e475ac2db3ba670cfcf052b"
+        "2cff98fda4e67f58d81aa1ee91a2ad86db057f3e7e475ac2db3ba670cfcf052b",
+        "22a887d100dc59594eaacaf673dd7744978d19943b107f51588fda9cfc48a45b"
       ]
     },
     "providers/_template-openai-compatible.jsonc": {
