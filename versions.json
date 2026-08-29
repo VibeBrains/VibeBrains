@@ -32,9 +32,11 @@
       ]
     },
     "gitignore.seed": {
-      "version": 1,
-      "sha256": "1b1ffe85756f800736a6cf6899aacafba075533806dd7a6fbd7068f1d2899466",
-      "history": []
+      "version": 2,
+      "sha256": "f0ab2b7d2fa0342081207af296b02dd9927e12142029242f59c8fb4eb02e074b",
+      "history": [
+        "1b1ffe85756f800736a6cf6899aacafba075533806dd7a6fbd7068f1d2899466"
+      ]
     },
     "hooks.example.jsonc": {
       "version": 2,

@@ -2,5 +2,6 @@
 audit.jsonl
 audit.*.jsonl.gz
 checkpoints.jsonl
+agent-runs.jsonl
 .seeded.json
 .env
