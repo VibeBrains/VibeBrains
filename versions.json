@@ -357,6 +357,11 @@
         "43e03b56bb6ffb43ab879cbc0179dcb2db938bf269a157f15240e018d92aebc3"
       ]
     },
+    "skills/incident-review/SKILL.md": {
+      "version": 1,
+      "sha256": "b99d44335b4949445c70ef7b338a4bb52e93ea2b8f28c2c3a94e4f3526dd11b7",
+      "history": []
+    },
     "skills/optimize-by-metric/SKILL.md": {
       "version": 1,
       "sha256": "13973698c31616de03af8892ac15db16ff2ad369514dde0f732cbabb640b3870",
@@ -407,6 +412,11 @@
     "skills/teach/SKILL.md": {
       "version": 1,
       "sha256": "6f19ad23f40f46b1f2b732706b9b6d40fb88d95c5403ba8eaedf96da981ab22a",
+      "history": []
+    },
+    "skills/triage-failing-test/SKILL.md": {
+      "version": 1,
+      "sha256": "3f647b3b708b32b9ac1afe53680b16c20f970e1eea19537fd769f67954ee8145",
       "history": []
     },
     "skills/update-skill/SKILL.md": {
