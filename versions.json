@@ -50,6 +50,11 @@
       "sha256": "238c4c84cd4d128439b1a032f053a36c4f9cc2a764ab3836984f534e1e55dc53",
       "history": []
     },
+    "modelQuirks.example.jsonc": {
+      "version": 1,
+      "sha256": "0edd30c53819c5d344cf99603cfff7ea82e9f8735910ba635ccca2d38061080a",
+      "history": []
+    },
     "pipelines.example.jsonc": {
       "version": 2,
       "sha256": "9fa09215e0237f049353fa11748dbef225f5277a804ec269efd459c26db56373",
