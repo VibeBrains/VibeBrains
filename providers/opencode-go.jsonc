@@ -29,7 +29,14 @@
           { "id": "qwen3.8-flash", "protocol": "anthropic" },
           { "id": "qwen3.7-max", "protocol": "anthropic" },
           { "id": "qwen3.7-plus", "protocol": "anthropic" },
-          { "id": "qwen3.6-plus", "protocol": "anthropic" }
+          { "id": "qwen3.6-plus", "protocol": "anthropic" },
+          // Третий формат: /v1/responses. Это ОТДЕЛЬНЫЙ эндпоинт, а не диалект chat-completions —
+          // модель оттуда отвечает 404 на /v1/chat/completions и наоборот.
+          // ВНИМАНИЕ: маршрут покрыт типами и тестом, но живьём не проверялся — ключа с доступом
+          // к этим моделям у нас не было. Если запрос не проходит, начните с проверки этого поля.
+          { "id": "grok-4.6", "protocol": "openai-responses" },
+          { "id": "gpt-5.6-luna", "protocol": "openai-responses" },
+          { "id": "muse-spark-1.2-contributor", "protocol": "openai-responses" }
         ]
       }
     }
