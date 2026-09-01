@@ -35,10 +35,21 @@
       "apiKeyRef": "minimax", // тот же ключ, что у основного маршрута
       "order": 31,
       "models": {
-        "fetch": true
-        // "static": [
-        //   { "id": "MiniMax-M3", "name": "MiniMax M3 (Anthropic, 1M)", "default": true, "contextWindow": 1000000 }
-        // ]
+        // Каталога на этом эндпоинте нет, поэтому список задаётся здесь.
+        "fetch": false,
+        "static": [
+          {
+            // contextWindow задан ВРУЧНУЮ намеренно. Anthropic-слой MiniMax отдаёт
+            // 200000 — судя по всему, унаследованное значение Claude Sonnet, а не
+            // реальное окно M3. Клиент верит метаданным вендора и жмёт автокомпакт
+            // около 167K, теряя пять шестых окна. Источник: MiniMax-AI/MiniMax-M2.7#46.
+            "id": "MiniMax-M3",
+            "name": "MiniMax M3 (Anthropic, 1M)",
+            "default": true,
+            "contextWindow": 1000000,
+            "toolFormat": "anthropic"
+          }
+        ]
       }
     }
   ]
