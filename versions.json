@@ -52,9 +52,11 @@
       "history": []
     },
     "modelQuirks.example.jsonc": {
-      "version": 1,
-      "sha256": "0edd30c53819c5d344cf99603cfff7ea82e9f8735910ba635ccca2d38061080a",
-      "history": []
+      "version": 2,
+      "sha256": "b32012d83e3a11738df6bce1785c47b158e82d4be5a80172150932d9c0c3d38e",
+      "history": [
+        "0edd30c53819c5d344cf99603cfff7ea82e9f8735910ba635ccca2d38061080a"
+      ]
     },
     "pipelines.example.jsonc": {
       "version": 2,
