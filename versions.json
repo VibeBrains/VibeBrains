@@ -194,10 +194,11 @@
       ]
     },
     "providers/opencode-go.jsonc": {
-      "version": 3,
-      "sha256": "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd",
+      "version": 4,
+      "sha256": "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078",
       "history": [
-        "4450c9d3e49895c39db77ed6ee64fdaa648cf86b28819bded0a039b0c669efaf"
+        "4450c9d3e49895c39db77ed6ee64fdaa648cf86b28819bded0a039b0c669efaf",
+        "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd"
       ]
     },
     "providers/opencode-zen.jsonc": {

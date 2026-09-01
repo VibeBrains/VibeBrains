@@ -15,7 +15,23 @@
       "apiKeyRef": "opencode", // один ключ на Go и Zen в защищённом хранилище
       "apiKeyEnv": "OPENCODE_API_KEY", // либо OPENCODE_API_KEY=... в .vibe/.env
       "order": 10,
-      "models": { "fetch": true }
+      // ВАЖНО: у Go формат API привязан к МОДЕЛИ, а не к провайдеру (docs: opencode.ai/docs/go).
+      // Провайдерский "protocol" выше — умолчание для тех, кто ниже ничего не сказал; MiniMax и
+      // Qwen обслуживаются Anthropic-совместимым /v1/messages, поэтому у них свой "protocol".
+      // Без этих строк автоматически подтянутый каталог зовёт половину моделей не тем протоколом.
+      "models": {
+        "fetch": true,
+        "static": [
+          { "id": "minimax-m3", "protocol": "anthropic" },
+          { "id": "minimax-m2.7", "protocol": "anthropic" },
+          { "id": "minimax-m2.5", "protocol": "anthropic" },
+          { "id": "qwen3.8-max", "protocol": "anthropic" },
+          { "id": "qwen3.8-flash", "protocol": "anthropic" },
+          { "id": "qwen3.7-max", "protocol": "anthropic" },
+          { "id": "qwen3.7-plus", "protocol": "anthropic" },
+          { "id": "qwen3.6-plus", "protocol": "anthropic" }
+        ]
+      }
     }
   ]
 }
