@@ -3,13 +3,14 @@
   "comment": "Ревизии файлов набора. Генерируется bump.mjs — руками не править. history хранит sha256 прошлых ревизий: по ним сеялка узнаёт нетронутую копию старого релиза.",
   "files": {
     "README.md": {
-      "version": 5,
-      "sha256": "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
+      "version": 6,
+      "sha256": "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
         "3ab39f3dbd12fbe9cb3d752959f65a2d789a01dc7e983de294f1a9b9ecb4eae3",
-        "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1"
+        "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1",
+        "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c"
       ]
     },
     "agents.example.jsonc": {
