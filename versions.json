@@ -18,6 +18,11 @@
       "sha256": "2d976a2cfcbf3cfa58b804c3d8ed5767a250d8239b2078ce14636c31401e056a",
       "history": []
     },
+    "dataSources.example.jsonc": {
+      "version": 1,
+      "sha256": "949cad76ecfde81091a82ef78b02c3ebde2ee0aeade11aff38f5d7f36c0cfa90",
+      "history": []
+    },
     "design/components.md": {
       "version": 2,
       "sha256": "2224d31b1dc0498f82e26ee56e1fd41c7ce3934a1e078edb978370acdab371dc",
@@ -45,6 +50,11 @@
       "history": [
         "81712e2c9a8c2d7bcda89cc756f2cbd8cdd423dd95845860a7ca0a7502581833"
       ]
+    },
+    "httpClientEnv.example.jsonc": {
+      "version": 1,
+      "sha256": "abd5530b6417391d863fdefa1ea00f3becaca3f49735654c2b5da51a40196cb7",
+      "history": []
     },
     "learning/MISSION.example.md": {
       "version": 1,
@@ -163,13 +173,14 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 6,
-      "sha256": "9202c9d80baae7caf4c7dc6795b63a34ecfa2a95004c005a61eae9097e024ef5",
+      "version": 7,
+      "sha256": "4f19a5ec5d8b42b46140689d5c8070e223f2c500e589bfb51fee7dd130e1214a",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
         "17358babac4fba02cf74002840bf49a5a728e1f41f60e6c11c98492539a2a095",
-        "3e28766568820c6b6f187a0025fd9c6efaee7226b774c05e334189eebd7c51bf"
+        "3e28766568820c6b6f187a0025fd9c6efaee7226b774c05e334189eebd7c51bf",
+        "9202c9d80baae7caf4c7dc6795b63a34ecfa2a95004c005a61eae9097e024ef5"
       ]
     },
     "providers/muse-glimmer-local.jsonc": {
@@ -196,11 +207,12 @@
       ]
     },
     "providers/opencode-go.jsonc": {
-      "version": 4,
-      "sha256": "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078",
+      "version": 5,
+      "sha256": "9c69f9642687549be2c1a543250cfc4ed816c2356a2f575ec2e377e06b51d167",
       "history": [
         "4450c9d3e49895c39db77ed6ee64fdaa648cf86b28819bded0a039b0c669efaf",
-        "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd"
+        "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd",
+        "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078"
       ]
     },
     "providers/opencode-zen.jsonc": {
@@ -226,6 +238,11 @@
         "2fc4e6f58ec58bc3c494373c4f8cec4fb9d072b2a38a0c25356cbc1509ae14c2",
         "64a9b5edaf17c7348940a07d6947cb01b43760dc3dd054f2d8cc0eb56b58a167"
       ]
+    },
+    "requests.example.http": {
+      "version": 1,
+      "sha256": "6877ab8f7d97283e960a1a20cec76a173aa36bb7e804f69233cf17ef9665c7a2",
+      "history": []
     },
     "rules.md": {
       "version": 1,

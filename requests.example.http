@@ -1,0 +1,57 @@
+### ─────────────────────────────────────────────────────────────────────────
+### .vibe/requests.example.http — запросы к API прямо в редакторе (VibeIDEA)
+###
+### Это ПРИМЕР. Скопируйте его туда, где живут запросы вашего проекта —
+### обычно рядом с кодом: api/requests.http, docs/api.http. Файлы .http едут
+### в git, поэтому запрос виден в код-ревью и откатывается вместе с кодом.
+###
+### Как выполнить: Ctrl+Alt+Enter в редакторе (выполнится запрос под курсором),
+### зелёная стрелка на полях или панель «HTTP» справа.
+### Полная спека формата: docs/vibe/manuals/httpClientSpec.md
+### ─────────────────────────────────────────────────────────────────────────
+
+# Переменные файла видны всем запросам ниже и СИЛЬНЕЕ окружения — их для того
+# рядом с запросом и пишут. Окружения живут в http-client.env.json (см. пример рядом).
+@host = {{host}}
+
+### Здоровье сервиса
+GET {{host}}/health
+Accept: application/json
+
+### Список пользователей с заголовком авторизации
+# @name Пользователи
+GET {{host}}/api/users?limit=10
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Создание — тело прямо в файле
+POST {{host}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Иван",
+  "email": "ivan@example.com"
+}
+
+### Загрузка большого тела из соседнего файла и сохранение ответа
+# @timeout 60
+POST {{host}}/api/import
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+< payload.json
+>> out/last-import.json
+
+### Проверка редиректа — по 3xx не идём, смотрим сам заголовок Location
+# @no-redirect
+GET {{host}}/old-path
+
+### Динамические значения: {{$uuid}}, {{$timestamp}}, {{$randomInt}}
+POST {{host}}/api/events
+Content-Type: application/json
+
+{
+  "id": "{{$uuid}}",
+  "at": {{$timestamp}}
+}
