@@ -20,6 +20,15 @@
       "stopCommand": "docker compose down" },
 
     { "id": "web", "dir": "web", "command": "npm run dev", "port": 5173,
-      "readyCheck": "log", "readyPattern": "Ready in", "readyTimeoutMs": 420000 }
+      "readyCheck": "log", "readyPattern": "Ready in", "readyTimeoutMs": 420000 },
+
+    // Внешний инструмент с веб-интерфейсом поднимается той же записью: сам он в IDE не встроен,
+    // ставится и обновляется вами. previewPath открывает его кнопкой «Превью» во встроенном
+    // браузере — иначе адрес приходится держать в голове.
+    { "id": "raytsystem", "active": false, "dir": "../raytsystem",
+      "command": "uv run raytsystem start", "port": 8765,
+      "readyCheck": "http", "readyPath": "/", "previewPath": "/",
+      "readyTimeoutMs": 180000,
+      "note": "агентная система знаний, ставится отдельно: github.com/romarayt/raytsystem-public-os" }
   ]
 }
