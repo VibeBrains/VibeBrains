@@ -68,6 +68,11 @@
         "0edd30c53819c5d344cf99603cfff7ea82e9f8735910ba635ccca2d38061080a"
       ]
     },
+    "patrols.example.jsonc": {
+      "version": 1,
+      "sha256": "74afef528a2bf2f21293a1132fad97e4b38dd4a478f21013efa8111977206d0e",
+      "history": []
+    },
     "pipelines.example.jsonc": {
       "version": 2,
       "sha256": "9fa09215e0237f049353fa11748dbef225f5277a804ec269efd459c26db56373",
