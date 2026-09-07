@@ -1,0 +1,38 @@
+// Google Gemini — нативный протокол вендора (не OpenAI-совместимый слой).
+// Ключ: GEMINI_API_KEY в .vibe/.env или поле в настройках (AI Studio выдаёт его бесплатно).
+//
+// Выключен по умолчанию, как и остальной каталог: включается переопределением
+// {"id": "google-gemini", "active": true} в своём providers.json.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "google-gemini",
+      "name": "Google Gemini",
+      "active": false, // тумблер: true — провайдер появляется в списках
+      "protocol": "gemini",
+      "baseURL": "https://generativelanguage.googleapis.com/v1beta",
+      "auth": { "type": "query", "name": "key" },
+      "apiKeyRef": "google-gemini",
+      "apiKeyEnv": "GEMINI_API_KEY",
+      "order": 40,
+      "models": {
+        // Каталог у вендора есть — список моделей приезжает сам.
+        "fetch": true,
+        "static": [
+          {
+            // Цена ВВОДНАЯ и действует до 31.12.2026 включительно: с 01.01.2027
+            // вендор объявил $1.50 / $7.50 за 1M — ровно вдвое.
+            // Источник: blog.google, «Gemini 3.8 Flash», 02.09.2026.
+            // priceValidUntil заставит IDE сказать об этом до того, как счёт удвоится
+            // молча: диагностика предупредит за неделю, отчёт о расходе пометит суммы.
+            "id": "gemini-3.8-flash",
+            "name": "Gemini 3.8 Flash",
+            "pricing": { "input": 0.75, "output": 3.75, "currency": "USD" },
+            "priceValidUntil": "2026-12-31"
+          }
+        ]
+      }
+    }
+  ]
+}
