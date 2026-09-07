@@ -155,6 +155,11 @@
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9"
       ]
     },
+    "providers/google-gemini.jsonc": {
+      "version": 1,
+      "sha256": "e99fdc24d0a41d56cc63f993b42e074c72d2bace7037dcfb6a272ad8b745b782",
+      "history": []
+    },
     "providers/kimi.jsonc": {
       "version": 4,
       "sha256": "d47d912ebcd215e16c2822f8fbb98aaed54b04f19b057cfe9bf8a7aa9c60df82",
@@ -342,10 +347,11 @@
       "history": []
     },
     "servers.example.jsonc": {
-      "version": 2,
-      "sha256": "b86dcfe9759f306069089f498175ab6e8fbde4dfbe0d7506770eca94d9c5a9be",
+      "version": 3,
+      "sha256": "c929cdd3428bbd67a839ccbf18e570a58ca7d8eeeeb7ab1364cd1243fbaf512d",
       "history": [
-        "9de33dd6c98299b4b92573f6ee8a3edad87c68d36a8957e71d4b4d1ad81067c1"
+        "9de33dd6c98299b4b92573f6ee8a3edad87c68d36a8957e71d4b4d1ad81067c1",
+        "b86dcfe9759f306069089f498175ab6e8fbde4dfbe0d7506770eca94d9c5a9be"
       ]
     },
     "skills/design-vocabulary/SKILL.md": {
