@@ -21,7 +21,21 @@
       "auth": "bearer",
       "apiKeyEnv": "ZAI_API_KEY",
       "order": 40,
-      "models": { "fetch": true } // каталог у z.ai живёт на <baseURL>/models — ровно туда и ходим
+      "models": {
+        "fetch": true, // каталог у z.ai живёт на <baseURL>/models — ровно туда и ходим
+        // Статические записи МЕРЖАТСЯ с авто-списком по id: здесь только то, чего в каталоге нет.
+        "static": [
+          {
+            // Стартовая акция −50% заканчивается 09.09.2026 в 24:00 UTC+8 = 16:00 UTC.
+            // Дальше цена ровно вдвое выше, кэш — тоже (docs.z.ai/guides/overview/pricing).
+            "id": "glm-5.3-flash",
+            "cost": { "input": 0.075, "output": 0.25, "cacheRead": 0.015 },
+            "costValidUntil": "2026-09-09T16:00:00Z",
+            "costAfter": { "input": 0.15, "output": 0.50, "cacheRead": 0.03 },
+            "costNote": "стартовая акция −50%, docs.z.ai/guides/overview/pricing"
+          }
+        ]
+      }
     }
 
     // ── Z.AI (GLM) по нативному протоколу Anthropic (кодинг-план) ──────────────────
