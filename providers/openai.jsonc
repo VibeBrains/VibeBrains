@@ -30,7 +30,18 @@
         //   { "id": "gpt-5.6-luna", "name": "GPT-5.6 Luna (самый дешёвый)", "pinned": true,
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true },
         //   { "id": "gpt-5.6-sol", "name": "GPT-5.6 Sol (флагман)",
-        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true }
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true },
+        //   // GPT-6 Astra (анонс 03.09.2026, developers.openai.com/api/docs/models/gpt-6-astra):
+        //   // контекст 1 050 000, выход 128 000, $10 / $50 за 1M, чтение кэша $1.
+        //   // Сверх 272K входных токенов вендор считает по премиальному тарифу —
+        //   // цена ниже верна для обычного режима.
+        //   // ВАЖНО: модель не принимает temperature / top_p / logprobs — их снимает
+        //   // правило причуд (modelQuirks), иначе запрос уходит в 400. Вызов
+        //   // инструментов у неё живёт только в Responses API, которого наш прямой
+        //   // чат не говорит: здесь она работает как собеседник, инструменты — через ACP.
+        //   { "id": "gpt-6-astra", "name": "GPT-6 Astra",
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
+        //     "pricing": { "input": 10, "output": 50, "cacheRead": 1, "currency": "USD" } }
         // ]
       }
     }

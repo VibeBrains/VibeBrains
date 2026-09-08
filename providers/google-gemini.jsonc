@@ -29,7 +29,10 @@
             "id": "gemini-3.8-flash",
             "name": "Gemini 3.8 Flash",
             "pricing": { "input": 0.75, "output": 3.75, "currency": "USD" },
-            "priceValidUntil": "2026-12-31"
+            "priceValidUntil": "2026-12-31",
+            // Цена «после» объявлена вместе с датой — записываем обе, чтобы предупреждение
+            // называло не только «срок вышел», но и во сколько раз станет дороже.
+            "priceAfter": { "input": 1.50, "output": 7.50, "currency": "USD" }
           }
         ]
       }
