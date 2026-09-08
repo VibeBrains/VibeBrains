@@ -371,11 +371,12 @@
       "history": []
     },
     "servers.example.jsonc": {
-      "version": 3,
-      "sha256": "c929cdd3428bbd67a839ccbf18e570a58ca7d8eeeeb7ab1364cd1243fbaf512d",
+      "version": 4,
+      "sha256": "4d7f233b863801cba54354f2c5a60d4f991175ffca26e48a5b1477b12a0e2a5c",
       "history": [
         "9de33dd6c98299b4b92573f6ee8a3edad87c68d36a8957e71d4b4d1ad81067c1",
-        "b86dcfe9759f306069089f498175ab6e8fbde4dfbe0d7506770eca94d9c5a9be"
+        "b86dcfe9759f306069089f498175ab6e8fbde4dfbe0d7506770eca94d9c5a9be",
+        "c929cdd3428bbd67a839ccbf18e570a58ca7d8eeeeb7ab1364cd1243fbaf512d"
       ]
     },
     "skills/design-vocabulary/SKILL.md": {

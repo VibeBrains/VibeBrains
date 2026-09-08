@@ -19,7 +19,10 @@
       "pathPrepend": ["/opt/homebrew/opt/node@20/bin"],
       "stopCommand": "docker compose down" },
 
-    { "id": "web", "dir": "web", "command": "npm run dev", "port": 5173,
+    // autoStart поднимает запись при открытии проекта — но только в доверенном проекте и только
+    // после того, как вы один раз согласитесь в уведомлении: файл лежит в репозитории, и без
+    // спроса это означало бы запуск чужих команд на клонировании.
+    { "id": "web", "dir": "web", "command": "npm run dev", "port": 5173, "autoStart": true,
       "readyCheck": "log", "readyPattern": "Ready in", "readyTimeoutMs": 420000 },
 
     // Внешний инструмент с веб-интерфейсом поднимается той же записью: сам он в IDE не встроен,
