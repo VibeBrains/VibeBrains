@@ -77,11 +77,12 @@
       "history": []
     },
     "pipelines.example.jsonc": {
-      "version": 3,
-      "sha256": "016018cabe89be8aab984f1e9b51c6b8b8626a2cebf0dd694dbfa875be308c4c",
+      "version": 4,
+      "sha256": "f62b8d3b1d2f8a3c212081bcb3e89e1c4009b32ff1ca579afcc2e7b1eb6cdfb7",
       "history": [
         "621750349179a985971c9f43f5d976bbb7f100ebd3f1695dca3317bf76bece35",
-        "9fa09215e0237f049353fa11748dbef225f5277a804ec269efd459c26db56373"
+        "9fa09215e0237f049353fa11748dbef225f5277a804ec269efd459c26db56373",
+        "016018cabe89be8aab984f1e9b51c6b8b8626a2cebf0dd694dbfa875be308c4c"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
