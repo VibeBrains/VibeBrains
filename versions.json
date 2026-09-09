@@ -14,9 +14,11 @@
       ]
     },
     "agents.json": {
-      "version": 1,
-      "sha256": "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd",
-      "history": []
+      "version": 2,
+      "sha256": "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36",
+      "history": [
+        "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd"
+      ]
     },
     "dataSources.json": {
       "version": 1,
