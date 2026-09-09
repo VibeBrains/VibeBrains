@@ -1,9 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  .vibe/hooks.json — хуки проекта (формат VibeIDE)
 //
-//  Это ПРИМЕР. Чтобы включить: скопируйте нужные блоки в файл .vibe/hooks.json
-//  (строгий JSON — комментарии убрать) и включите настройку
-//  Settings → Tools → VibeIDEA → Агент → «Включить хуки проекта».
+//  Это РАБОЧИЙ файл, а не пример: отдельного файла-двойника рядом больше нет. Все записи
+//  ниже выключены ("active": false) — уберите поле у нужной, поправьте команду под свой
+//  проект и включите настройку Settings → Tools → VibeIDEA → Агент → «Включить хуки проекта»
+//  (без неё не работает ни один хук, даже включённый здесь: два выключателя намеренно —
+//  хук запускает ваш код).
+//  Комментарии писать МОЖНО: формат JSONC, как и у остальных конфигов .vibe.
 //  Хук — команда ВАШЕГО проекта вокруг действий агента; её код выхода решает:
 //  0 = разрешено (+stdout заметкой), 2 = отказ, прочее/таймаут = поломка хука (не блокирует).
 //  Полная спека: docs/vibe/manuals/hooksSpec.md (можно скормить любой LLM).
@@ -11,15 +14,15 @@
 {
   "hooks": [
     // preToolUse блокирует в точках, которыми владеет клиент: запрос разрешения и запись через fs/write.
-    { "event": "preToolUse", "command": "node .vibe/hooks/no-migrations.js", "tools": ["write_text_file"], "label": "миграции только руками" },
+    { "event": "preToolUse", "command": "node .vibe/hooks/no-migrations.js", "tools": ["write_text_file"], "label": "миграции только руками", "active": false },
     // postToolUse не отменяет сделанное — формулирует требование исправить.
-    { "event": "postToolUse", "command": "npm run lint --silent", "tools": ["write_text_file"], "timeoutMs": 60000, "label": "линтер после записи" },
+    { "event": "postToolUse", "command": "npm run lint --silent", "tools": ["write_text_file"], "timeoutMs": 60000, "label": "линтер после записи", "active": false },
     // turnEnd срабатывает в конце хода; изменённые файлы приходят в stdin-JSON (changedFiles).
-    { "event": "turnEnd", "command": "npm test --silent", "timeoutMs": 300000, "label": "тесты в конце хода" },
+    { "event": "turnEnd", "command": "npm test --silent", "timeoutMs": 300000, "label": "тесты в конце хода", "active": false },
     // pipelineStepEnd — гейт приёмки между шагами пайплайна (каскад «дешёвая модель, потом
     // дорогая»). В stdin-JSON приходят pipeline, step, role, model и answer — ответ шага,
     // обрезанный. Код выхода 0 = «черновик принят», и шаги с "escalation": true пропускаются;
     // код 2 = «не принят», и они выполняются. Поле tools здесь не применяется.
-    { "event": "pipelineStepEnd", "command": "node .vibe/hooks/accept-draft.js", "timeoutMs": 120000, "label": "гейт приёмки черновика" }
+    { "event": "pipelineStepEnd", "command": "node .vibe/hooks/accept-draft.js", "timeoutMs": 120000, "label": "гейт приёмки черновика", "active": false }
   ]
 }

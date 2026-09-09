@@ -1,8 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  .vibe/servers.json — декларативный дев-стек (формат VibeIDE)
 //
-//  Это ПРИМЕР. Чтобы включить: скопируйте в .vibe/servers.json (строгий JSON,
-//  без комментариев). Управление — тулвиндоу «Vibe Server».
+//  Это РАБОЧИЙ файл, а не пример: файла-двойника рядом больше нет. Комментарии писать
+//  МОЖНО — формат JSONC, как и у остальных конфигов .vibe.
+//  Все записи выключены ("active": false) — снимите поле у нужной. Пока активных нет,
+//  панель «Vibe Server» продолжает УГАДЫВАТЬ дев-сервер по вашему проекту, как и без файла.
 //  kind: "service" (живёт, есть readyCheck по порту/логу) или "task" (отработал и вышел).
 //  dependsOn строит волны запуска топосортом; skipIf пропускает уже готовое.
 //  Полная спека: docs/vibe/manuals/serversSpec.md.
@@ -11,10 +13,10 @@
   "version": 1,
   "servers": [
     // Инфраструктура — это task (+readyCheck exit +skipIf), не service!
-    { "id": "colima", "kind": "task", "command": "colima start",
+    { "id": "colima", "active": false, "kind": "task", "command": "colima start",
       "readyCheck": "exit", "skipIf": "docker info" },
 
-    { "id": "api", "dir": "api", "command": "yarn dev", "port": 3000,
+    { "id": "api", "active": false, "dir": "api", "command": "yarn dev", "port": 3000,
       "readyTimeoutMs": 180000, "dependsOn": ["colima"],
       "pathPrepend": ["/opt/homebrew/opt/node@20/bin"],
       "stopCommand": "docker compose down" },
@@ -22,7 +24,7 @@
     // autoStart поднимает запись при открытии проекта — но только в доверенном проекте и только
     // после того, как вы один раз согласитесь в уведомлении: файл лежит в репозитории, и без
     // спроса это означало бы запуск чужих команд на клонировании.
-    { "id": "web", "dir": "web", "command": "npm run dev", "port": 5173, "autoStart": true,
+    { "id": "web", "active": false, "dir": "web", "command": "npm run dev", "port": 5173, "autoStart": true,
       "readyCheck": "log", "readyPattern": "Ready in", "readyTimeoutMs": 420000 },
 
     // Внешний инструмент с веб-интерфейсом поднимается той же записью: сам он в IDE не встроен,
