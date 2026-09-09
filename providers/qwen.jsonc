@@ -1,0 +1,78 @@
+// Qwen (Alibaba Model Studio / DashScope) — ОПЛАТА ЗА ТОКЕНЫ.
+//
+// Это НЕ подписка. Подписочный Alibaba Coding Plan живёт в соседнем файле
+// providers/alibaba-coding-plan.jsonc, и путать их нельзя: у них разные хосты И разные ключи,
+// а дока вендора говорит прямо — «два набора ключей и baseURL не взаимозаменяемы»
+// (alibabacloud.com/help/en/model-studio/coding-plan, проверено 09.09.2026).
+//
+//   подписка (Coding Plan)   coding-intl.dashscope.aliyuncs.com   ключ sk-sp-…
+//   за токены (этот файл)    dashscope-intl.aliyuncs.com          ключ sk-…
+//
+// Ключ: QWEN_API_KEY=sk-… в .vibe/.env (консоль Model Studio → API keys).
+// Для материкового Китая замените dashscope-intl на dashscope в обоих адресах.
+//
+// ЗАЧЕМ ЭТОТ ФАЙЛ, если план дешевле: в плане нет qwen3.8-max — самой большой модели линейки
+// (1M контекста, вход текст + изображение + видео). За неё платят по токенам, иначе никак.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "qwen",
+      "name": "Qwen (за токены)",
+      // Выключен намеренно: у большинства подписка, и второй Qwen в списке моделей сбивает
+      // с толку. Включите, если платите за токены.
+      "active": false,
+      "protocol": "openai",
+      "baseURL": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "QWEN_API_KEY",
+      "order": 82,
+      "models": {
+        "fetch": true,
+        "static": [
+          {
+            "id": "qwen3.8-max",
+            "name": "Qwen 3.8 Max",
+            "default": true,
+            // Окно 1M: вход до 991 808 токенов, выход до 131 072
+            // (alibabacloud.com/help/en/model-studio/qwen3-8-max, проверено 09.09.2026).
+            "contextWindow": 1000000,
+            "maxOutputTokens": 131072,
+            "vision": true,
+            // Цена по доке вендора (Пекин, за 1M токенов). В прессе ходят другие числа —
+            // считайте по доке. Своей таблицы цен у IDE нет и не будет: это факт о ВАШЕМ
+            // договоре, поэтому проверьте его в консоли, прежде чем полагаться на суммы.
+            "cost": { "input": 1.65, "output": 4.951, "cacheRead": 0.137 },
+            "costNote": "alibabacloud.com/help/en/model-studio/qwen3-8-max, сверено 09.09.2026"
+          },
+          {
+            // Снапшот той же модели: имя приколочено к дате, поведение не меняется под вами.
+            // Полезен там, где ответ должен быть воспроизводим (гейты, сравнения, тесты).
+            "id": "qwen3.8-max-0902",
+            "name": "Qwen 3.8 Max (снапшот 02.09.2026)",
+            "contextWindow": 1000000,
+            "maxOutputTokens": 131072,
+            "vision": true,
+            "active": false
+          }
+        ]
+      }
+    }
+
+    // ── Qwen по нативному протоколу Anthropic (за токены) ────────────────────────────────
+    // Маршрут подтверждён докой: dashscope-intl.aliyuncs.com/apps/anthropic, отдаёт только
+    // /v1/messages — КАТАЛОГА МОДЕЛЕЙ НЕТ, поэтому "fetch": false и список вручную.
+    // Почему ниже «/apps/anthropic/v1», а в доке «/apps/anthropic»: SDK Anthropic дописывает
+    // к базе «/v1/messages», а наш клиент — РОВНО «/messages», поэтому версионный сегмент у
+    // нас входит в baseURL. Полный URL совпадает.
+    // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
+    // ,{
+    //   "id": "qwen-anthropic", "extends": "qwen", "name": "Qwen (Anthropic-протокол)",
+    //   "protocol": "anthropic", "baseURL": "https://dashscope-intl.aliyuncs.com/apps/anthropic/v1",
+    //   "auth": { "type": "header", "name": "x-api-key" }, "order": 83,
+    //   "models": { "fetch": false, "static": [
+    //     { "id": "qwen3.8-max", "name": "Qwen 3.8 Max (Anthropic)", "contextWindow": 1000000 }
+    //   ] }
+    // }
+  ]
+}
