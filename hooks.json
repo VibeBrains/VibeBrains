@@ -13,6 +13,23 @@
 // ─────────────────────────────────────────────────────────────────────────────
 {
   "hooks": [
+    // Детектор, а НЕ граница. Ловит запись и запуск по тексту — то есть ту форму, которую агент
+    // обычно и пишет; переписанную или обёрнутую (`sh -c`, абсолютный путь) он не поймает.
+    // Настоящую границу ставят права процесса и отсутствие токена в окружении. Смысл хука —
+    // назвать действие вслух и оставить след в журнале.
+    // Код выхода 2 = «не делай»; 0 = «можно». Включите, сняв "active": false.
+    {
+      "event": "preToolUse",
+      "command": "jq -e -r '(.params.path // .params.command // \"\")' | grep -qiE '(^|/)\\.(ssh|aws|netrc|npmrc|pypirc)|(^|/)\\.env($|\\.)|\\.(pem|p12|keychain)$|gcloud/|docker/config\\.json' && exit 2 || exit 0",
+      "label": "секреты не читаем",
+      "active": false
+    },
+    {
+      "event": "preToolUse",
+      "command": "jq -e -r '(.params.command // \"\")' | grep -qE '(npm|yarn|pnpm) +publish|cargo +publish|twine +upload|gem +push|docker +push|gh +release +create' && exit 2 || exit 0",
+      "label": "публикация — только руками",
+      "active": false
+    },
     // preToolUse блокирует в точках, которыми владеет клиент: запрос разрешения и запись через fs/write.
     { "event": "preToolUse", "command": "node .vibe/hooks/no-migrations.js", "tools": ["write_text_file"], "label": "миграции только руками", "active": false },
     // postToolUse не отменяет сделанное — формулирует требование исправить.
