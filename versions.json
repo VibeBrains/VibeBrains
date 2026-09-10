@@ -77,6 +77,11 @@
       "sha256": "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
       "history": []
     },
+    "products.json": {
+      "version": 1,
+      "sha256": "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
+      "history": []
+    },
     "prompts/CLAUDE-FABLE-5.md": {
       "version": 1,
       "sha256": "ead9837874b9ff947cc7ed8ffe3083dffff819990214492227fb2e1769a06b5f",
