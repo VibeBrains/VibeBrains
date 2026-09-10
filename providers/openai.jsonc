@@ -41,7 +41,13 @@
         //   // чат не говорит: здесь она работает как собеседник, инструменты — через ACP.
         //   { "id": "gpt-6-astra", "name": "GPT-6 Astra",
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
-        //     "pricing": { "input": 10, "output": 50, "cacheRead": 1, "currency": "USD" } }
+        //     // Цены и порог — с вендорской страницы модели (developers.openai.com, 10.09.2026).
+        //     // Агрегаторы (llm-stats и прочие) порог НЕ называют и округляют окно до 1.1M —
+        //     // каталог, собранный по ним, посчитает длинные промпты вдвое дешевле реального.
+        //     "cost": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5, "currency": "USD",
+        //       // «more than 272K input tokens are priced at 2x input and cache rates and 1.5x
+        //       // output for the full request» — надбавка на ВЕСЬ запрос, не на превышение.
+        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } }
         // ]
       }
     }

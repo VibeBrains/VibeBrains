@@ -220,12 +220,13 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 5,
-      "sha256": "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc",
+      "version": 6,
+      "sha256": "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
-        "626f3b90ae77da66bbee08f2964a9715b0bc1b87faa0dff2a9b1a71543e7153a"
+        "626f3b90ae77da66bbee08f2964a9715b0bc1b87faa0dff2a9b1a71543e7153a",
+        "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc"
       ]
     },
     "providers/opencode-go.jsonc": {
