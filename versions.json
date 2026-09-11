@@ -41,11 +41,12 @@
       ]
     },
     "gitignore.seed": {
-      "version": 3,
-      "sha256": "1ae1bc71e9b20930277cdac64265632698a3bc0e8fa970aaea4646ff6b6013bc",
+      "version": 4,
+      "sha256": "2b2e919461870c2feb6a30ca2a8816020d64908d4d28ecd7fb12355c0dab6d2a",
       "history": [
         "1b1ffe85756f800736a6cf6899aacafba075533806dd7a6fbd7068f1d2899466",
-        "f0ab2b7d2fa0342081207af296b02dd9927e12142029242f59c8fb4eb02e074b"
+        "f0ab2b7d2fa0342081207af296b02dd9927e12142029242f59c8fb4eb02e074b",
+        "1ae1bc71e9b20930277cdac64265632698a3bc0e8fa970aaea4646ff6b6013bc"
       ]
     },
     "hooks.json": {
