@@ -1,12 +1,24 @@
-// DeepSeek — OpenAI-совместимый API. «Умный и дешёвый»: V4-Pro — лучший open-weights
-// результат SWE-bench при цене на порядок ниже флагманов; учтите, модель многословна
-// (примерно вдвое больше выходных токенов, чем у сопоставимых).
-// Ключ: DEEPSEEK_API_KEY=<ключ> в .vibe/.env (взять: platform.deepseek.com/api_keys).
+// DeepSeek — OpenAI-совместимый API. Ключ: DEEPSEEK_API_KEY=<ключ> в .vibe/.env
+// (взять: platform.deepseek.com/api_keys).
 //
-// МОДЕЛИ TEXT-ONLY: картинку модель не примет — ошибка придёт от провайдера.
-// Чтобы композер блокировал вложения заранее, зафиксируйте модель кастомной записью
-// с "vision": false — готовые записи закомментированы ниже.
-// Старые id deepseek-chat / deepseek-reasoner отключены провайдером 2026-07-24.
+// МОДЕЛИ (api-docs.deepseek.com, сверено 11.09.2026):
+//   • deepseek-flash — V4.1-Flash, вышла 10.09.2026: окно 1M, ответ до 384K, ПРИНИМАЕТ КАРТИНКИ;
+//   • deepseek-v4-pro — только текст. С 14.09.2026 04:00 UTC вендор отвечает на этот id моделью
+//     V4.1-Flash по цене Flash — до выхода V4.1-Pro;
+//   • deepseek-v4-flash и deepseek-v4-flash-vision-exp сняты и временно отвечают V4.1-Flash;
+//   • deepseek-chat / deepseek-reasoner отключены 2026-07-24.
+// Модель без картинок (v4-pro) фиксируйте записью с "vision": false — тогда композер откажет во
+// вложении заранее, а не после ошибки провайдера.
+//
+// РАССУЖДЕНИЕ ВКЛЮЧЕНО ПО УМОЛЧАНИЮ, уровень high; уровни — low / high / max («medium» вендор
+// приводит к high). Выключается фрагментом {"thinking": {"type": "disabled"}}: в записях ниже он
+// объявлен как "reasoning.off", и ползунок в положении «выключено» отправляет именно его. Сборка,
+// которая "off" не знает, в этом положении не шлёт ничего — и модель думает на уровне вендора.
+// temperature и штрафы в режиме рассуждения не действуют, top_p ниже 0.95 поднимается до 0.95.
+//
+// ЦЕНА ЗАВИСИТ ОТ ЧАСА: пик — 01:00–04:00 и 06:00–10:00 UTC с понедельника по пятницу, в остальное
+// время — половина пиковой ставки. В записях ниже ставки пиковые, а "timeOfDay" описывает
+// расписание. Кэширование контекста включено по умолчанию; кэш-хит у Flash в 50 раз дешевле промаха.
 {
   "version": 1,
   "providers": [
@@ -15,40 +27,57 @@
       "name": "DeepSeek",
       "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
-      "baseURL": "https://api.deepseek.com/v1",
+      // База без /v1 — как в доке вендора: клиент дописывает «/chat/completions» и «/models».
+      "baseURL": "https://api.deepseek.com",
       "auth": "bearer",
       "apiKeyEnv": "DEEPSEEK_API_KEY",
       "order": 60,
       "models": {
         "fetch": true
 
-        // ── Кастомные записи V4 (характеристики из каталога VibeIDE) ─────────────
-        // Раскомментируйте, чтобы зафиксировать text-only и декларации. Знание о
-        // кэше: кэширование контекста у DeepSeek включено ПО УМОЛЧАНИЮ и в агентном
-        // цикле срабатывает почти на каждом ходе (системный промпт, длинный документ);
-        // кэш-хит у V4-Flash в ~50 раз дешевле промаха (проверено 2026-08-05).
+        // ── Кастомные записи (api-docs.deepseek.com/quick_start/pricing, сверено 11.09.2026) ──
+        // Раскомментируйте, чтобы зафиксировать картинки, рассуждение и цену.
         // "static": [
-        //   { "id": "deepseek-v4-pro", "name": "DeepSeek V4-Pro (1M)", "default": true, "pinned": true,
-        //     "contextWindow": 1000000, "maxOutputTokens": 32768, "vision": false },
-        //   { "id": "deepseek-v4-flash", "name": "DeepSeek V4-Flash (1M)",
-        //     "contextWindow": 1000000, "maxOutputTokens": 32768, "vision": false }
+        //   { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (1M)", "default": true, "pinned": true,
+        //     "contextWindow": 1000000, "vision": true,
+        //     "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"],
+        //                    "off": { "thinking": { "type": "disabled" } } },
+        //     "cost": { "input": 0.30, "output": 1.20, "cacheRead": 0.006, "currency": "USD",
+        //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
+        //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
+        //     "costNote": "api-docs.deepseek.com/quick_start/pricing" },
+        //   // С 14.09.2026 04:00 UTC вендор отвечает на этот id моделью V4.1-Flash по цене Flash —
+        //   // поэтому у записи срок цены и цена «после».
+        //   { "id": "deepseek-v4-pro", "name": "DeepSeek V4-Pro (1M, только текст)",
+        //     "contextWindow": 1000000, "vision": false,
+        //     "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"],
+        //                    "off": { "thinking": { "type": "disabled" } } },
+        //     "cost": { "input": 1.32, "output": 3.96, "cacheRead": 0.044, "currency": "USD",
+        //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
+        //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
+        //     "costValidUntil": "2026-09-14T04:00:00Z",
+        //     "costAfter": { "input": 0.30, "output": 1.20, "cacheRead": 0.006, "currency": "USD",
+        //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
+        //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
+        //     "costNote": "api-docs.deepseek.com/quick_start/pricing" }
         // ]
       }
     }
 
-    // ── DeepSeek по нативному протоколу Anthropic (кодинг-план) ──────────────────
-    // НЕ ПРОВЕРЕНО ПЕРВОИСТОЧНИКОМ: маршрут и имя модели взяты из сводной таблицы
-    // сообщества github.com/Alorse/cc-compatible-models (сверено 08.09.2026), доками
-    // вендора не подтверждены. Сверьтесь с его документацией, прежде чем полагаться.
-    // baseURL обязан заканчиваться на /v1: клиент дописывает РОВНО «/messages»
-    // (урок MiniMax 06.08.2026 — без /v1 вендор отвечает 404).
-    // Каталога моделей на этих эндпоинтах, как правило, нет — модель задаётся вручную.
+    // ── DeepSeek по протоколу Anthropic ──────────────────────────────────────────
+    // Маршрут вендора — https://api.deepseek.com/anthropic (api-docs.deepseek.com/guides/anthropic_api,
+    // сверено 11.09.2026). У нас baseURL обязан заканчиваться на /v1: клиент дописывает РОВНО
+    // «/messages». thinking на этом маршруте принимается, но budget_tokens игнорируется; top_k,
+    // cache_control, mcp_servers и container игнорируются тоже. Рассуждение включено по умолчанию и
+    // тратит тот же лимит ответа, поэтому maxOutputTokens задан явно — без него уйдёт 8192.
+    // Каталога моделей на этом маршруте нет — модель задаётся вручную.
     // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
     // ,{
     //   "id": "deepseek-anthropic", "extends": "deepseek", "name": "DeepSeek (Anthropic-протокол)",
     //   "protocol": "anthropic", "baseURL": "https://api.deepseek.com/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 61,
-    //   "models": { "fetch": false, "static": [ { "id": "deepseek-reasoner", "name": "DeepSeek Reasoner (Anthropic)" } ] }
+    //   "models": { "fetch": false, "static": [ { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (Anthropic)",
+    //     "contextWindow": 1000000, "maxOutputTokens": 65536 } ] }
     // }
   ]
 }

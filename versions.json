@@ -14,10 +14,11 @@
       ]
     },
     "agents.json": {
-      "version": 2,
-      "sha256": "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36",
+      "version": 3,
+      "sha256": "e6e20596065429345b3b793d93b850c921c47cc404ca365ec4fec0fc9f0679f3",
       "history": [
-        "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd"
+        "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd",
+        "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36"
       ]
     },
     "dataSources.json": {
@@ -157,12 +158,13 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 5,
-      "sha256": "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385",
+      "version": 6,
+      "sha256": "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
-        "43ddb5bb33a7ea9e788537921e92d228b19caf9380113cf583f51e3cf6be1b39"
+        "43ddb5bb33a7ea9e788537921e92d228b19caf9380113cf583f51e3cf6be1b39",
+        "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385"
       ]
     },
     "providers/google-gemini.jsonc": {
@@ -174,12 +176,13 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 5,
-      "sha256": "020c3b895253df7fde666e9e51c43401da01b6ca4efa1f1da830e7125f9dd584",
+      "version": 6,
+      "sha256": "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
-        "d47d912ebcd215e16c2822f8fbb98aaed54b04f19b057cfe9bf8a7aa9c60df82"
+        "d47d912ebcd215e16c2822f8fbb98aaed54b04f19b057cfe9bf8a7aa9c60df82",
+        "020c3b895253df7fde666e9e51c43401da01b6ca4efa1f1da830e7125f9dd584"
       ]
     },
     "providers/meta-muse.jsonc": {
@@ -192,8 +195,8 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 9,
-      "sha256": "b4e99fa27f3a781db1862f70a67434afcffcd1e08a14a0be640f2e2bf3d6600b",
+      "version": 10,
+      "sha256": "a50bc3b104753d74b76c0ac04391a380c27af1dd57e093cb16a4b315202fad18",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
@@ -201,7 +204,8 @@
         "3e28766568820c6b6f187a0025fd9c6efaee7226b774c05e334189eebd7c51bf",
         "9202c9d80baae7caf4c7dc6795b63a34ecfa2a95004c005a61eae9097e024ef5",
         "4f19a5ec5d8b42b46140689d5c8070e223f2c500e589bfb51fee7dd130e1214a",
-        "aa9bcdb6d960a25d8c863a846ada187e22b328a35487b684bd8985b2275c0da2"
+        "aa9bcdb6d960a25d8c863a846ada187e22b328a35487b684bd8985b2275c0da2",
+        "b4e99fa27f3a781db1862f70a67434afcffcd1e08a14a0be640f2e2bf3d6600b"
       ]
     },
     "providers/muse-glimmer-local.jsonc": {
@@ -382,15 +386,16 @@
       "history": []
     },
     "skills/design-vocabulary/SKILL.md": {
-      "version": 7,
-      "sha256": "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750",
+      "version": 8,
+      "sha256": "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf",
       "history": [
         "8fa01867972ead00f56e95ae756440f2ca0bba0dbc4a09c51b3dddcddbf77a7f",
         "3a943b7046326b97328df00b7bf1716bfcd771b890d7f3823c73b69f6e093a10",
         "e1bdbc2ea682d172bd21bf17dd5450abe79b9ff882597cc92c87f46f111b6c55",
         "eb8124de4eccd63ee5ffe531aa36fe78c971c1d63a89ac059f13ec3a128a46b3",
         "f9caf3e92cbc94d83982455aab18aef63f798e23f9f388fa198b5ed0ac184ee0",
-        "2cd693ba1c86714c94311f00fd93c28c42101039f9661a5ebc64cf438ab6516a"
+        "2cd693ba1c86714c94311f00fd93c28c42101039f9661a5ebc64cf438ab6516a",
+        "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750"
       ]
     },
     "skills/example/SKILL.md": {
@@ -458,6 +463,11 @@
         "cf08aed02d8cc8b9affe96b4ecca81d0fb6124dc4f862a3e0463ff331595754d",
         "101d4be414f3f70f3c41971e4ff1d7b5cc8b5149946c59ff965f08b76ca2e78d"
       ]
+    },
+    "skills/screenshot-review/SKILL.md": {
+      "version": 1,
+      "sha256": "df022b51f1c2cc9f4d5f32425a4cf98cc5c8e7c79f7815f79ce5d7d3de5ad276",
+      "history": []
     },
     "skills/spec-driven-implementation/SKILL.md": {
       "version": 4,

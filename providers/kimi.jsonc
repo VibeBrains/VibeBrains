@@ -1,10 +1,16 @@
 // Kimi (Moonshot) — OpenAI-совместимый API, «думающие» модели.
 // Ключ: MOONSHOT_API_KEY=<ключ> в .vibe/.env (взять: platform.moonshot.ai/console/api-keys).
 //
-// ЭКОНОМИКА K3: выключить размышление у kimi-k3 нельзя, и на простую задачу уходит
-// порядка 13 тысяч токенов рассуждений — для рутины модель невыгодна, берите её под
-// фронтенд-задачи (лидер Frontend Code arena). Тумблер thinking у Moonshot — отдельное
-// поле в теле запроса: кастомная запись с extraBody, образец закомментирован ниже.
+// МОДЕЛИ (platform.kimi.ai/docs/models, сверено 11.09.2026): kimi-k3 (окно 1M), kimi-k2.7-code и
+// kimi-k2.7-code-highspeed (256K), kimi-k2.6 (256K). kimi-k2.5 и серия moonshot-v1 сняты
+// 31.08.2026 — запрос к ним возвращает 404. Картинки принимают все четыре: base64 data URL или файл
+// ms://<id>, публичные URL — нет (platform.kimi.ai/docs/guide/use-kimi-vision-model).
+//
+// ЭКОНОМИКА K3: выключить рассуждение у kimi-k3 нельзя, уровни — low / high / max, и по умолчанию
+// стоит самый дорогой max (platform.kimi.ai/docs/guide/use-reasoning-effort). В записи ниже это
+// объявлено, и ползунок в положении «выключено» отправляет low, а не оставляет max. На простую
+// задачу у K3 уходит порядка 13 тысяч токенов рассуждений — для рутины модель невыгодна. В
+// многоходовом диалоге вендор требует возвращать ответ ассистента целиком, вместе с reasoning_content.
 {
   "version": 1,
   "providers": [
@@ -20,23 +26,27 @@
       "models": {
         "fetch": true
 
-        // ── Кастомные записи (характеристики из каталога VibeIDE) ────────────────
-        // K2.7 Code: thinking включается вендоро-специфичным полем в extraBody —
-        // оно уходит в тело запроса как есть.
+        // ── Кастомные записи (platform.kimi.ai, сверено 11.09.2026) ────────────────
+        // K2.7 Code рассуждает всегда: при выключенном рассуждении вендор отвечает ошибкой, а
+        // {"thinking": {"type": "enabled"}} — его настройка по умолчанию; в extraBody она уходит как есть.
         // "static": [
-        //   { "id": "kimi-k3", "name": "Kimi K3 (1M, фронтенд)", "pinned": true,
-        //     "contextWindow": 1048576, "maxOutputTokens": 32768 },
+        //   { "id": "kimi-k3", "name": "Kimi K3 (1M)", "pinned": true,
+        //     "contextWindow": 1048576, "vision": true,
+        //     "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] },
+        //     "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.30, "currency": "USD" },
+        //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
         //   { "id": "kimi-k2.7-code", "name": "Kimi K2.7 Code", "default": true,
-        //     "contextWindow": 262144, "maxOutputTokens": 32768,
+        //     "contextWindow": 262144, "vision": true,
         //     "extraBody": { "thinking": { "type": "enabled" } } }
         // ]
       }
     }
 
     // ── Kimi (Moonshot) по нативному протоколу Anthropic (кодинг-план) ──────────────────
-    // НЕ ПРОВЕРЕНО ПЕРВОИСТОЧНИКОМ: маршрут и имя модели взяты из сводной таблицы
-    // сообщества github.com/Alorse/cc-compatible-models (сверено 08.09.2026), доками
-    // вендора не подтверждены. Сверьтесь с его документацией, прежде чем полагаться.
+    // НЕ ПРОВЕРЕНО ПЕРВОИСТОЧНИКОМ: маршрут взят из сводной таблицы сообщества
+    // github.com/Alorse/cc-compatible-models (сверено 08.09.2026); в инструкции вендора по K3
+    // (platform.kimi.ai/docs/guide/kimi-k3-quickstart, 11.09.2026) назван только OpenAI-адрес.
+    // Сверьтесь с документацией вендора, прежде чем полагаться.
     // baseURL обязан заканчиваться на /v1: клиент дописывает РОВНО «/messages»
     // (урок MiniMax 06.08.2026 — без /v1 вендор отвечает 404).
     // Каталога моделей на этих эндпоинтах, как правило, нет — модель задаётся вручную.
@@ -45,7 +55,7 @@
     //   "id": "kimi-anthropic", "extends": "kimi", "name": "Kimi (Anthropic-протокол)",
     //   "protocol": "anthropic", "baseURL": "https://api.moonshot.ai/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 51,
-    //   "models": { "fetch": false, "static": [ { "id": "kimi-k2.5", "name": "Kimi K2.5 (Anthropic)" } ] }
+    //   "models": { "fetch": false, "static": [ { "id": "kimi-k3", "name": "Kimi K3 (Anthropic)" } ] }
     // }
   ]
 }
