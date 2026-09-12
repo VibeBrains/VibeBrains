@@ -406,6 +406,16 @@
         "b1a170e5c89f9742b52ab9ac04fc6c59cc51841be341234835fdb5aeed61d86d"
       ]
     },
+    "skills/example/evals/evals.json": {
+      "version": 1,
+      "sha256": "06dc0e456504a82957fe291621ebc413e1444e187caaadf57460f42f1e2d4be8",
+      "history": []
+    },
+    "skills/example/evals/snippet.ts": {
+      "version": 1,
+      "sha256": "dbe1056f9498079287e9fed95a5a6c6673c6e52436f3e0e16b87fefd087c281c",
+      "history": []
+    },
     "skills/grill/SKILL.md": {
       "version": 1,
       "sha256": "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9",
