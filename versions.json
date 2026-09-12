@@ -489,10 +489,11 @@
       "history": []
     },
     "skills/update-skill/SKILL.md": {
-      "version": 2,
-      "sha256": "1ede18428ec2482e8ce842ee72cbd2ad4ea3e742db81e2c6fe35b95f2830d928",
+      "version": 3,
+      "sha256": "6a73988c6c8d13ae9bb2ff53ad7f1d6a2b32029080afcc1ae973d9db18cb1004",
       "history": [
-        "3dd876276aef0652208e28e8adb6b2a9223f166138b1961c4cfd005912319068"
+        "3dd876276aef0652208e28e8adb6b2a9223f166138b1961c4cfd005912319068",
+        "1ede18428ec2482e8ce842ee72cbd2ad4ea3e742db81e2c6fe35b95f2830d928"
       ]
     },
     "skills/update-skill/references/best-practices.md": {
