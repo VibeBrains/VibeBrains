@@ -271,9 +271,11 @@
       "history": []
     },
     "providers/sakana.jsonc": {
-      "version": 1,
-      "sha256": "1084c9b81017f8c3783b0bdfbb65be83b4187de81533ced97d44f792e47b4d79",
-      "history": []
+      "version": 2,
+      "sha256": "5eb7e3db01dc8a72f5d24fac9999152e7e89e65c627f14c14f9ab94ea51a1b29",
+      "history": [
+        "1084c9b81017f8c3783b0bdfbb65be83b4187de81533ced97d44f792e47b4d79"
+      ]
     },
     "providers/zai.jsonc": {
       "version": 9,
