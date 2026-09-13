@@ -159,13 +159,14 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 6,
-      "sha256": "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47",
+      "version": 7,
+      "sha256": "62a91a240eda6de905176f2e29ce6f4a80314df814840471ded04f5aee4d087e",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
         "43ddb5bb33a7ea9e788537921e92d228b19caf9380113cf583f51e3cf6be1b39",
-        "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385"
+        "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385",
+        "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47"
       ]
     },
     "providers/google-gemini.jsonc": {
