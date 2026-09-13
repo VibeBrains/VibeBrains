@@ -183,6 +183,11 @@
         "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc"
       ]
     },
+    "providers/inference-net.jsonc": {
+      "version": 1,
+      "sha256": "b534109c830c9d2b3f146c65f2cfb3dbabc535f57995091f4d85527df36ad2cc",
+      "history": []
+    },
     "providers/kimi.jsonc": {
       "version": 6,
       "sha256": "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a",

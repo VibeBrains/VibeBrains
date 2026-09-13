@@ -1,0 +1,39 @@
+// inference.net — модели-«рабочие лошадки», OpenAI-совместимый API. Ключ: INFERENCE_API_KEY=<ключ>
+// в .vibe/.env (взять: inference.net → Dashboard → API Keys).
+//
+// ЗАЧЕМ ЗДЕСЬ: Schematron — модель извлечения данных из HTML по JSON-схеме. Чатом с ней не
+// поговорить: «This model does not use user/system prompts. It only uses the schema to extract the
+// data» (docs.inference.net/workhorse-models/schematron, сверено 13.09.2026). В VibeIDE она
+// работает через инструмент агента extract_structured: укажите её в настройке
+//   vibeide.extract.model = inference-net/inference-net/schematron-v2-turbo
+// Та же модель есть у OpenRouter: openRouter/inference-net/schematron-v2-turbo.
+//
+// МОДЕЛИ (сверено 13.09.2026): schematron-v2-turbo — быстрее и дешевле, schematron-v2-small — точнее.
+// Окно у обеих 128K. Старые id schematron-3b и schematron-8b вендор перенаправляет на V2.
+// Веса V2 закрыты; открыты только V1 3B и 8B на Hugging Face.
+//
+// ЦЕНЫ РАСХОДЯТСЯ ПО ИСТОЧНИКАМ: блог вендора называет Turbo $0.06 / $0.15 и Small $0.10 / $0.25 за
+// миллион, каталог OpenRouter — $0.03 / $0.15 и $0.05 / $0.23. Здесь цены не зашиты: возьмите
+// действующие у того, через кого ходите.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "inference-net",
+      "name": "inference.net",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://api.inference.net/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "INFERENCE_API_KEY",
+      "order": 86,
+      "models": {
+        "fetch": false,
+        "static": [
+          { "id": "inference-net/schematron-v2-turbo", "name": "Schematron V2 Turbo (извлечение, 128K)", "contextWindow": 128000 },
+          { "id": "inference-net/schematron-v2-small", "name": "Schematron V2 Small (извлечение, 128K)", "contextWindow": 128000 }
+        ]
+      }
+    }
+  ]
+}
