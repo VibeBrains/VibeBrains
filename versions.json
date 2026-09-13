@@ -78,9 +78,11 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 1,
-      "sha256": "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
-      "history": []
+      "version": 2,
+      "sha256": "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
+      "history": [
+        "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab"
+      ]
     },
     "products.json": {
       "version": 1,
