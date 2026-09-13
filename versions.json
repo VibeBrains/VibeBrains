@@ -78,10 +78,11 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 2,
-      "sha256": "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
+      "version": 3,
+      "sha256": "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895",
       "history": [
-        "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab"
+        "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
+        "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189"
       ]
     },
     "products.json": {
