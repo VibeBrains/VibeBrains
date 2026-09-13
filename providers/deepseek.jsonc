@@ -1,7 +1,7 @@
 // DeepSeek — OpenAI-совместимый API. Ключ: DEEPSEEK_API_KEY=<ключ> в .vibe/.env
 // (взять: platform.deepseek.com/api_keys).
 //
-// МОДЕЛИ (api-docs.deepseek.com, сверено 11.09.2026):
+// МОДЕЛИ (api-docs.deepseek.com, сверено 13.09.2026):
 //   • deepseek-flash — V4.1-Flash, вышла 10.09.2026: окно 1M, ответ до 384K, ПРИНИМАЕТ КАРТИНКИ;
 //   • deepseek-v4-pro — только текст. С 14.09.2026 04:00 UTC вендор отвечает на этот id моделью
 //     V4.1-Flash по цене Flash — до выхода V4.1-Pro;
@@ -31,11 +31,11 @@
       "baseURL": "https://api.deepseek.com",
       "auth": "bearer",
       "apiKeyEnv": "DEEPSEEK_API_KEY",
-      "order": 60,
+      "order": 32, // сразу после MiniMax (30–31)
       "models": {
         "fetch": true
 
-        // ── Кастомные записи (api-docs.deepseek.com/quick_start/pricing, сверено 11.09.2026) ──
+        // ── Кастомные записи (api-docs.deepseek.com/quick_start/pricing, сверено 13.09.2026) ──
         // Раскомментируйте, чтобы зафиксировать картинки, рассуждение и цену.
         // "static": [
         //   { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (1M)", "default": true, "pinned": true,
@@ -75,7 +75,7 @@
     // ,{
     //   "id": "deepseek-anthropic", "extends": "deepseek", "name": "DeepSeek (Anthropic-протокол)",
     //   "protocol": "anthropic", "baseURL": "https://api.deepseek.com/anthropic/v1",
-    //   "auth": { "type": "header", "name": "x-api-key" }, "order": 61,
+    //   "auth": { "type": "header", "name": "x-api-key" }, "order": 33,
     //   "models": { "fetch": false, "static": [ { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (Anthropic)",
     //     "contextWindow": 1000000, "maxOutputTokens": 65536 } ] }
     // }

@@ -16,7 +16,7 @@
       "baseURL": "https://api.openai.com/v1",
       "auth": "bearer",
       "apiKeyEnv": "OPENAI_API_KEY",
-      "order": 70,
+      "order": 34, // сразу после DeepSeek (32–33)
       "models": {
         "fetch": true
 

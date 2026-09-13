@@ -159,13 +159,14 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 6,
-      "sha256": "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47",
+      "version": 7,
+      "sha256": "945892a7e4e9b36cb241802eba9cba4aadded7db3b8bdc596a5c8ead551a1a8e",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
         "43ddb5bb33a7ea9e788537921e92d228b19caf9380113cf583f51e3cf6be1b39",
-        "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385"
+        "64dfc6d439760e24a383523b1f83c65ea7ae147856500863333be40457fd6385",
+        "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47"
       ]
     },
     "providers/google-gemini.jsonc": {
@@ -225,13 +226,14 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 6,
-      "sha256": "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a",
+      "version": 7,
+      "sha256": "6714e84c41616c794abad2e4ccdf84aa9460eb1dc50565e37368412040bb58af",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
         "626f3b90ae77da66bbee08f2964a9715b0bc1b87faa0dff2a9b1a71543e7153a",
-        "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc"
+        "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc",
+        "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a"
       ]
     },
     "providers/opencode-go.jsonc": {
