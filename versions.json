@@ -295,6 +295,11 @@
       "sha256": "66e123dfac84d90f07c1f260d07531de17ed32d55a80d63efb8655ba8e09ace3",
       "history": []
     },
+    "roles.json": {
+      "version": 1,
+      "sha256": "76e0f2ece04cdeaa497d064fff7ce713493349d1f1034302c63fd2ec6dbb93b7",
+      "history": []
+    },
     "rules.md": {
       "version": 1,
       "sha256": "52dab81e5e5f6d549daada2ee6d3aa1acd5989d0960249118fb7d21ff2223b49",
