@@ -6,7 +6,17 @@
 //   • /api/coding/paas/v4 — GLM Coding Plan (подписка), OpenAI-совместимый. Ключ из раздела
 //     «Model & Personal Coding Plan» работает ТОЛЬКО здесь. Это дефолт ниже.
 //   • /api/paas/v4        — оплата за токены (pay-as-you-go): замените baseURL.
-//   • /api/anthropic      — нативный протокол Anthropic (кодинг-план), блок в конце файла.
+//   • /api/anthropic      — нативный протокол Anthropic, блок в конце файла.
+//
+// GLM-5.3 У ПОДПИСЧИКОВ CODING PLAN — ТОЛЬКО OpenAI-МАРШРУТ /api/coding/paas/v4. Вендор: «If you have
+// previously subscribed to a GLM Coding Plan, including an expired subscription, you can currently
+// access the model API only through the OpenAI Chat Completion-compatible protocol». Значит, Anthropic
+// и Responses для такого ключа закрыты, даже если подписка кончилась (docs.z.ai/guides/llm/glm-5.3,
+// сверено 14.09.2026).
+//
+// РАССУЖДЕНИЕ GLM-5.3 НЕ ВЫКЛЮЧАЕТСЯ: уровни low / high / max, дефолт вендора — max, самый дорогой.
+// Старый фрагмент {"thinking": {"type": "disabled"}} теперь ломает запрос. IDE шлёт уровень всегда:
+// ползунок «выключено» для этой модели становится low. Клиент вне IDE без reasoning_effort получит max.
 //
 // Симптом перепутанного эндпоинта — не «неверный ключ», а HTTP 429 с кодом 1113
 // «Insufficient balance or no resource package. Please recharge»: подписочный ключ ушёл
@@ -76,9 +86,11 @@
       }
     }
 
-    // ── Z.AI (GLM) по нативному протоколу Anthropic (кодинг-план) ──────────────────
+    // ── Z.AI (GLM) по нативному протоколу Anthropic ────────────────────────────────
     // Маршрут ПОДТВЕРЖДЁН ДОКОЙ ВЕНДОРА (docs.z.ai/devpack/quick-start, 09.09.2026):
     // Anthropic Messages живёт на https://api.z.ai/api/anthropic.
+    // НО ДЛЯ GLM-5.3 ключу Coding Plan (и истёкшему) этот маршрут закрыт — только OpenAI-маршрут выше
+    // (docs.z.ai/guides/llm/glm-5.3, сверено 14.09.2026).
     //
     // Почему ниже написано «/anthropic/v1», а в доке — «/anthropic»: это одно и то же место.
     // SDK Anthropic дописывает к базе «/v1/messages», а наш клиент — РОВНО «/messages»,

@@ -3,8 +3,8 @@
 //
 // МОДЕЛИ (api-docs.deepseek.com, сверено 13.09.2026):
 //   • deepseek-flash — V4.1-Flash, вышла 10.09.2026: окно 1M, ответ до 384K, ПРИНИМАЕТ КАРТИНКИ;
-//   • deepseek-v4-pro — только текст. С 14.09.2026 04:00 UTC вендор отвечает на этот id моделью
-//     V4.1-Flash по цене Flash — до выхода V4.1-Pro;
+//   • deepseek-v4-pro — только текст. Работает и после 14.09.2026 по прежней цене: вендор отменил
+//     перевод на Flash (api-docs.deepseek.com/updates, запись 10.09.2026, сверено 14.09.2026);
 //   • deepseek-v4-flash и deepseek-v4-flash-vision-exp сняты и временно отвечают V4.1-Flash;
 //   • deepseek-chat / deepseek-reasoner отключены 2026-07-24.
 // Модель без картинок (v4-pro) фиксируйте записью с "vision": false — тогда композер откажет во
@@ -58,17 +58,12 @@
         //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
         //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
         //     "costNote": "api-docs.deepseek.com/quick_start/pricing" },
-        //   // С 14.09.2026 04:00 UTC вендор отвечает на этот id моделью V4.1-Flash по цене Flash —
-        //   // поэтому у записи срок цены и цена «после».
+        //   // Цена Pro своя и после 14.09.2026: вендор оставил модель с прежним тарифом (api-docs.deepseek.com/updates).
         //   { "id": "deepseek-v4-pro", "name": "DeepSeek V4-Pro (1M, только текст)",
         //     "contextWindow": 1000000, "vision": false,
         //     "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"],
         //                    "off": { "thinking": { "type": "disabled" } } },
         //     "cost": { "input": 1.32, "output": 3.96, "cacheRead": 0.044, "currency": "USD",
-        //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
-        //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
-        //     "costValidUntil": "2026-09-14T04:00:00Z",
-        //     "costAfter": { "input": 0.30, "output": 1.20, "cacheRead": 0.006, "currency": "USD",
         //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
         //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
         //     "costNote": "api-docs.deepseek.com/quick_start/pricing" }
@@ -83,13 +78,20 @@
     // cache_control, mcp_servers и container игнорируются тоже. Рассуждение включено по умолчанию и
     // тратит тот же лимит ответа, поэтому maxOutputTokens задан явно — без него уйдёт 8192.
     // Каталога моделей на этом маршруте нет — модель задаётся вручную.
+    // НЕЗНАКОМЫЙ ID ЭТОТ МАРШРУТ НЕ ОТВЕРГАЕТ, А ТИХО ОТДАЁТ deepseek-flash (id Opus — deepseek-v4-pro):
+    // опечатка в имени модели даёт работающую, но другую модель. IDE скажет об этом строкой о подмене.
+    // Уровень рассуждения здесь пишется иначе, чем на OpenAI-маршруте: {"reasoning": {"effort": "none|low|high|max"}},
+    // и "none" выключает рассуждение — поэтому у записи ниже свой "reasoning.off"
+    // (api-docs.deepseek.com/guides/anthropic_api и guides/thinking_mode, сверено 14.09.2026).
     // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
     // ,{
     //   "id": "deepseek-anthropic", "extends": "deepseek", "name": "DeepSeek (Anthropic-протокол)",
     //   "protocol": "anthropic", "baseURL": "https://api.deepseek.com/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 33,
     //   "models": { "fetch": false, "static": [ { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (Anthropic)",
-    //     "contextWindow": 1000000, "maxOutputTokens": 65536 } ] }
+    //     "contextWindow": 1000000, "maxOutputTokens": 65536,
+    //     "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"],
+    //                    "off": { "reasoning": { "effort": "none" } } } } ] }
     // }
   ]
 }
