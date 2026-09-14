@@ -184,9 +184,11 @@
       ]
     },
     "providers/inference-net.jsonc": {
-      "version": 1,
-      "sha256": "b534109c830c9d2b3f146c65f2cfb3dbabc535f57995091f4d85527df36ad2cc",
-      "history": []
+      "version": 2,
+      "sha256": "b88a70be86bf83ab13ed619551f7284bc48bb6c0b1d428d152223d2340fa3cb5",
+      "history": [
+        "b534109c830c9d2b3f146c65f2cfb3dbabc535f57995091f4d85527df36ad2cc"
+      ]
     },
     "providers/kimi.jsonc": {
       "version": 6,

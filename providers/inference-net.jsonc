@@ -8,6 +8,10 @@
 //   vibeide.extract.model = inference-net/inference-net/schematron-v2-turbo
 // Та же модель есть у OpenRouter: openRouter/inference-net/schematron-v2-turbo.
 //
+// МОДЕЛИ СКРЫТЫ ("active": false): в выборе модели чата им делать нечего. Извлечению это не мешает —
+// extract_structured берёт модель из настройки напрямую, скрытость не проверяет (сверено по коду
+// VibeIDE 14.09.2026). В VibeIDEA скрытие убирает их из чата так же.
+//
 // МОДЕЛИ (сверено 13.09.2026): schematron-v2-turbo — быстрее и дешевле, schematron-v2-small — точнее.
 // Окно у обеих 128K. Старые id schematron-3b и schematron-8b вендор перенаправляет на V2.
 // Веса V2 закрыты; открыты только V1 3B и 8B на Hugging Face.
@@ -30,8 +34,8 @@
       "models": {
         "fetch": false,
         "static": [
-          { "id": "inference-net/schematron-v2-turbo", "name": "Schematron V2 Turbo (извлечение, 128K)", "contextWindow": 128000 },
-          { "id": "inference-net/schematron-v2-small", "name": "Schematron V2 Small (извлечение, 128K)", "contextWindow": 128000 }
+          { "id": "inference-net/schematron-v2-turbo", "name": "Schematron V2 Turbo (извлечение, 128K)", "contextWindow": 128000, "active": false },
+          { "id": "inference-net/schematron-v2-small", "name": "Schematron V2 Small (извлечение, 128K)", "contextWindow": 128000, "active": false }
         ]
       }
     }
