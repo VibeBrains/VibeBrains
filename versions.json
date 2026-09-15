@@ -14,12 +14,13 @@
       ]
     },
     "agents.json": {
-      "version": 4,
-      "sha256": "944b2db864d7d905e9a407d929cbe22954ffc72d02b04aabae8a5b501cdf0287",
+      "version": 5,
+      "sha256": "9e06f283052199e4a082d8112f418c606f09fc381612a049bba6264417df9a79",
       "history": [
         "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd",
         "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36",
-        "e6e20596065429345b3b793d93b850c921c47cc404ca365ec4fec0fc9f0679f3"
+        "e6e20596065429345b3b793d93b850c921c47cc404ca365ec4fec0fc9f0679f3",
+        "944b2db864d7d905e9a407d929cbe22954ffc72d02b04aabae8a5b501cdf0287"
       ]
     },
     "dataSources.json": {
@@ -78,11 +79,12 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 3,
-      "sha256": "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895",
+      "version": 4,
+      "sha256": "871544608400a46a0535d674f6d78d45f840ea2d62205fba0985e9fce9b343aa",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
-        "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189"
+        "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
+        "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895"
       ]
     },
     "products.json": {
@@ -287,8 +289,8 @@
       ]
     },
     "providers/zai.jsonc": {
-      "version": 11,
-      "sha256": "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe",
+      "version": 12,
+      "sha256": "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b",
       "history": [
         "bc0e1025aa398b0d162764ac7e03f4a097b9b76da5ac904d92f537c782b913ef",
         "33c1f61375f204285975d9a05b8b6e17a9adfe23a7f6a39b5665de7c0b9fe6fa",
@@ -298,7 +300,8 @@
         "700443027e0aa08b9f3aeac951d9e37252695b58bc9cb988d00677af7a15c918",
         "528d7de51851273cbae1b193985016c38bb2e3e3a3a29deea52f85519b5fa61e",
         "9d66d853b181713bdbedd1da97ec575b9ca7f435a3f6c09be2c0ac0f51afea1f",
-        "e8d837fdef40571bc56bbe231e4bb2e933642e33fb546a046394a9bee40c4238"
+        "e8d837fdef40571bc56bbe231e4bb2e933642e33fb546a046394a9bee40c4238",
+        "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe"
       ]
     },
     "requests.http": {
