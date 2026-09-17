@@ -389,9 +389,11 @@
       ]
     },
     "rules/roadmap-autopilot.mdc": {
-      "version": 1,
-      "sha256": "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640",
-      "history": []
+      "version": 2,
+      "sha256": "702df9a15848cf09d77eab52e727bccd05242edc0a28d24bdde294057406b8dd",
+      "history": [
+        "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640"
+      ]
     },
     "rules/roadmap.mdc": {
       "version": 1,
