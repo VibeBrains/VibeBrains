@@ -79,12 +79,13 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 4,
-      "sha256": "871544608400a46a0535d674f6d78d45f840ea2d62205fba0985e9fce9b343aa",
+      "version": 5,
+      "sha256": "c65f5e319bcbf3fe10103b3c394f8e2dd1ef95d0dd3b08938bce6758cae9fb2f",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
-        "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895"
+        "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895",
+        "871544608400a46a0535d674f6d78d45f840ea2d62205fba0985e9fce9b343aa"
       ]
     },
     "products.json": {
@@ -165,8 +166,8 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 10,
-      "sha256": "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed",
+      "version": 11,
+      "sha256": "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
@@ -175,7 +176,8 @@
         "0539f2b8c7694b6c599e98b898606d26e55fe3fd12b937311d0473d140283f47",
         "945892a7e4e9b36cb241802eba9cba4aadded7db3b8bdc596a5c8ead551a1a8e",
         "8183a68dfaf7fbe8121a1dac8044e978cbe388f7ab8e82521a208d90e4b35e9c",
-        "b7b56f4485d8e1e0af258d4050823552727e8a1e4f6f542a596a362b3b0b8989"
+        "b7b56f4485d8e1e0af258d4050823552727e8a1e4f6f542a596a362b3b0b8989",
+        "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed"
       ]
     },
     "providers/google-gemini.jsonc": {
@@ -213,8 +215,8 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 11,
-      "sha256": "5cc0b33f9a96b4e0ee7b206dddb7e4e4aed006c1b5dc56428e8b3208b9d0c7cb",
+      "version": 12,
+      "sha256": "ce0e9614fb942925134bd1732878a3d37131e4edfa6eb08d80be3d538a7c05bb",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
@@ -224,7 +226,8 @@
         "4f19a5ec5d8b42b46140689d5c8070e223f2c500e589bfb51fee7dd130e1214a",
         "aa9bcdb6d960a25d8c863a846ada187e22b328a35487b684bd8985b2275c0da2",
         "b4e99fa27f3a781db1862f70a67434afcffcd1e08a14a0be640f2e2bf3d6600b",
-        "a50bc3b104753d74b76c0ac04391a380c27af1dd57e093cb16a4b315202fad18"
+        "a50bc3b104753d74b76c0ac04391a380c27af1dd57e093cb16a4b315202fad18",
+        "5cc0b33f9a96b4e0ee7b206dddb7e4e4aed006c1b5dc56428e8b3208b9d0c7cb"
       ]
     },
     "providers/muse-glimmer-local.jsonc": {
@@ -289,8 +292,8 @@
       ]
     },
     "providers/zai.jsonc": {
-      "version": 12,
-      "sha256": "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b",
+      "version": 13,
+      "sha256": "1b86b265ac3a2e2c3cf2d46501f82ad0cdfdf81bb607e98438db57862cdb1393",
       "history": [
         "bc0e1025aa398b0d162764ac7e03f4a097b9b76da5ac904d92f537c782b913ef",
         "33c1f61375f204285975d9a05b8b6e17a9adfe23a7f6a39b5665de7c0b9fe6fa",
@@ -301,7 +304,8 @@
         "528d7de51851273cbae1b193985016c38bb2e3e3a3a29deea52f85519b5fa61e",
         "9d66d853b181713bdbedd1da97ec575b9ca7f435a3f6c09be2c0ac0f51afea1f",
         "e8d837fdef40571bc56bbe231e4bb2e933642e33fb546a046394a9bee40c4238",
-        "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe"
+        "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe",
+        "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b"
       ]
     },
     "requests.http": {

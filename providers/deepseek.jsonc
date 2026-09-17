@@ -89,9 +89,14 @@
     //   "protocol": "anthropic", "baseURL": "https://api.deepseek.com/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 33,
     //   "models": { "fetch": false, "static": [ { "id": "deepseek-flash", "name": "DeepSeek V4.1 Flash (Anthropic)",
-    //     "contextWindow": 1000000, "maxOutputTokens": 65536,
+    //     "contextWindow": 1000000, "maxOutputTokens": 65536, "vision": true,
     //     "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"],
-    //                    "off": { "reasoning": { "effort": "none" } } } } ] }
+    //                    "off": { "reasoning": { "effort": "none" } } },
+    //     // Цена та же, что на OpenAI-маршруте: тариф у модели, а не у протокола.
+    //     "cost": { "input": 0.30, "output": 1.20, "cacheRead": 0.006, "currency": "USD",
+    //       "timeOfDay": { "peakUtc": ["01:00-04:00", "06:00-10:00"],
+    //                      "peakDays": ["mon", "tue", "wed", "thu", "fri"], "offPeakFactor": 0.5 } },
+    //     "costNote": "api-docs.deepseek.com/quick_start/pricing" } ] }
     // }
   ]
 }

@@ -36,7 +36,14 @@
       "apiKeyRef": "minimax", // общий ref: ключ из настроек достаётся и Anthropic-клону ниже
       "apiKeyEnv": "MINIMAX_API_KEY",
       "order": 30,
-      "models": { "fetch": true }
+      "models": { "fetch": true },
+      // Остаток Token Plan — официальный запрос вендора (platform.minimax.io/docs/token-plan/faq). IDE задаёт его
+      // только когда вы просите отчёт о расходе (/spend, «Расходы»), и показывает ответ вендора, а не свой подсчёт.
+      // Смысл полей ответа вендор не документирует; IDE читает их так же, как его собственный CLI
+      // (github.com/MiniMax-AI/cli, сверено 17.09.2026). С ключом поштучной оплаты (sk-api-…) остатка нет —
+      // вендор ответит ошибкой, и её покажет отчёт; уберите поле, если платите поштучно.
+      // Anthropic-клон ниже наследует поле через extends; одна подписка спрашивается один раз.
+      "quota": { "url": "https://api.minimax.io/v1/token_plan/remains", "format": "minimax-token-plan" }
     },
 
     // ── MiniMax по нативному протоколу Anthropic ──────────────────────────────
