@@ -10,7 +10,12 @@
 // стоит самый дорогой max (platform.kimi.ai/docs/guide/use-reasoning-effort). В записи ниже это
 // объявлено, и ползунок в положении «выключено» отправляет low, а не оставляет max. На простую
 // задачу у K3 уходит порядка 13 тысяч токенов рассуждений — для рутины модель невыгодна. В
-// многоходовом диалоге вендор требует возвращать ответ ассистента целиком, вместе с reasoning_content.
+// многоходовом диалоге вендор требует возвращать ответ ассистента целиком, вместе с reasoning_content, — и у
+// сообщений с вызовами инструментов тоже. IDE делает это сама (причуда ECHO_REASONING вшита для kimi-k3,
+// kimi-k2.6, kimi-k2.7-code, kimi-for-coding и k3).
+//
+// СЭМПЛИНГ ЗАКРЕПЛЁН ВЕНДОРОМ: temperature 1.0 (у K2.6 без рассуждения 0.6), top_p 0.95 — другое значение даёт
+// ошибку (platform.kimi.ai/docs/api/models-overview, сверено 17.09.2026). Не задавайте их в записях.
 {
   "version": 1,
   "providers": [
@@ -42,11 +47,12 @@
       }
     }
 
-    // ── Kimi (Moonshot) по нативному протоколу Anthropic (кодинг-план) ──────────────────
-    // НЕ ПРОВЕРЕНО ПЕРВОИСТОЧНИКОМ: маршрут взят из сводной таблицы сообщества
-    // github.com/Alorse/cc-compatible-models (сверено 08.09.2026); в инструкции вендора по K3
-    // (platform.kimi.ai/docs/guide/kimi-k3-quickstart, 11.09.2026) назван только OpenAI-адрес.
-    // Сверьтесь с документацией вендора, прежде чем полагаться.
+    // ── Kimi (Moonshot) по нативному протоколу Anthropic ────────────────────────────────
+    // Маршрут платформы с тем же ключом платформы: вендор даёт его в инструкции для Claude Code
+    // (адрес https://api.moonshot.ai/anthropic, модели kimi-k3, kimi-k2.7-code, kimi-k2.6;
+    // platform.kimi.ai/docs/guide/claude-code-kimi, сверено 17.09.2026).
+    // Возврат рассуждения в историю IDE делает только на OpenAI-маршруте — для многоходовой работы
+    // с инструментами берите основной провайдер выше.
     // baseURL обязан заканчиваться на /v1: клиент дописывает РОВНО «/messages»
     // (урок MiniMax 06.08.2026 — без /v1 вендор отвечает 404).
     // Каталога моделей на этих эндпоинтах, как правило, нет — модель задаётся вручную.
@@ -56,6 +62,27 @@
     //   "protocol": "anthropic", "baseURL": "https://api.moonshot.ai/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 51,
     //   "models": { "fetch": false, "static": [ { "id": "kimi-k3", "name": "Kimi K3 (Anthropic)" } ] }
+    // }
+
+    // ── Kimi Code — подписка, свой ключ и свой адрес ────────────────────────────────────
+    // ЭТО НЕ ПЛАТФОРМА: ключ Kimi Code берётся в kimi.com/code/console и на api.moonshot.ai не работает,
+    // а ключ платформы не работает здесь. Модели: kimi-for-coding — с 11.09.2026 это K2.8 Preview, окно 1M,
+    // рассуждение low / high / max; kimi-for-coding-highspeed (256K); k3 (1M) и k3-256k.
+    // У K2.8 Preview нет цены за токены на платформе — модель есть только в подписке.
+    // Маршрут OpenAI — https://api.kimi.com/coding/v1; Anthropic-маршрут у вендора тоже есть
+    // (https://api.kimi.com/coding/), но возврат рассуждения IDE делает только на OpenAI
+    // (kimi.com/code/docs/en/kimi-code/models.html и whats-new.html, сверено 17.09.2026).
+    // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
+    // ,{
+    //   "id": "kimi-code", "name": "Kimi Code (подписка)",
+    //   "protocol": "openai", "baseURL": "https://api.kimi.com/coding/v1",
+    //   "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
+    //   "models": { "fetch": false, "static": [
+    //     { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)", "default": true,
+    //       "contextWindow": 1048576, "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"] } },
+    //     { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576,
+    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } }
+    //   ] }
     // }
   ]
 }

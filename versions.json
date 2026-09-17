@@ -14,13 +14,14 @@
       ]
     },
     "agents.json": {
-      "version": 5,
-      "sha256": "9e06f283052199e4a082d8112f418c606f09fc381612a049bba6264417df9a79",
+      "version": 6,
+      "sha256": "2a339f7907eede7880c1637963842ac0882fb0864b0dcf7705a19636710008ce",
       "history": [
         "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd",
         "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36",
         "e6e20596065429345b3b793d93b850c921c47cc404ca365ec4fec0fc9f0679f3",
-        "944b2db864d7d905e9a407d929cbe22954ffc72d02b04aabae8a5b501cdf0287"
+        "944b2db864d7d905e9a407d929cbe22954ffc72d02b04aabae8a5b501cdf0287",
+        "9e06f283052199e4a082d8112f418c606f09fc381612a049bba6264417df9a79"
       ]
     },
     "dataSources.json": {
@@ -174,8 +175,8 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 11,
-      "sha256": "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21",
+      "version": 12,
+      "sha256": "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
@@ -185,7 +186,8 @@
         "945892a7e4e9b36cb241802eba9cba4aadded7db3b8bdc596a5c8ead551a1a8e",
         "8183a68dfaf7fbe8121a1dac8044e978cbe388f7ab8e82521a208d90e4b35e9c",
         "b7b56f4485d8e1e0af258d4050823552727e8a1e4f6f542a596a362b3b0b8989",
-        "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed"
+        "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed",
+        "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21"
       ]
     },
     "providers/google-gemini.jsonc": {
@@ -204,13 +206,14 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 6,
-      "sha256": "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a",
+      "version": 7,
+      "sha256": "1d98aa8f3aec30923932674a0871a49d94d03b4ded9951ecd529c74390154c77",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
         "d47d912ebcd215e16c2822f8fbb98aaed54b04f19b057cfe9bf8a7aa9c60df82",
-        "020c3b895253df7fde666e9e51c43401da01b6ca4efa1f1da830e7125f9dd584"
+        "020c3b895253df7fde666e9e51c43401da01b6ca4efa1f1da830e7125f9dd584",
+        "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a"
       ]
     },
     "providers/meta-muse.jsonc": {
@@ -300,8 +303,8 @@
       ]
     },
     "providers/zai.jsonc": {
-      "version": 13,
-      "sha256": "1b86b265ac3a2e2c3cf2d46501f82ad0cdfdf81bb607e98438db57862cdb1393",
+      "version": 14,
+      "sha256": "efc638bdce23c90a15a313bf03b6e43725f0f5c88ea2f467ac256ceda21deab5",
       "history": [
         "bc0e1025aa398b0d162764ac7e03f4a097b9b76da5ac904d92f537c782b913ef",
         "33c1f61375f204285975d9a05b8b6e17a9adfe23a7f6a39b5665de7c0b9fe6fa",
@@ -313,7 +316,8 @@
         "9d66d853b181713bdbedd1da97ec575b9ca7f435a3f6c09be2c0ac0f51afea1f",
         "e8d837fdef40571bc56bbe231e4bb2e933642e33fb546a046394a9bee40c4238",
         "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe",
-        "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b"
+        "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b",
+        "1b86b265ac3a2e2c3cf2d46501f82ad0cdfdf81bb607e98438db57862cdb1393"
       ]
     },
     "requests.http": {
