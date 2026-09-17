@@ -166,6 +166,11 @@
       "sha256": "9c06d946f1aeee74627ad0e0d3a1516c34d212c6e62d50b1a4e601fb8d4f444f",
       "history": []
     },
+    "providers/atria.jsonc": {
+      "version": 1,
+      "sha256": "4ffdfa09c1093ee39a8ff1726094086b6d91c9c38164e00cc5f7a6352734cf1e",
+      "history": []
+    },
     "providers/deepseek.jsonc": {
       "version": 11,
       "sha256": "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21",

@@ -1,0 +1,43 @@
+// Atria Dawn Preview (Shanghai AI Lab) — превью агентной модели, дообучение GLM-5.2: 744B MoE, веса под MIT.
+// Ключ: ATRIA_API_KEY=<ключ> в .vibe/.env (взять: консоль api.atria-asi.ai). Для материкового Китая у лаборатории
+// отдельный вход — discovery.intern-ai.org.cn.
+//
+// Выключен по умолчанию: это превью. Включается переопределением {"id": "atria", "active": true} в своём providers.json.
+//
+// ЧТО СКАЗАНО В ДОКУМЕНТАЦИИ API (api.atria-asi.ai/docs, сверено 17.09.2026):
+//   • три интерфейса на одном ключе — Chat Completions, Anthropic Messages (/v1/messages, заголовок x-api-key)
+//     и Responses; здесь используется Chat Completions;
+//   • окно 256K, ответ 1–65 536 токенов; только текст — картинка даёт 400 «not a multimodal model»;
+//   • уровни рассуждения — low / medium / high;
+//   • 60 запросов в минуту на аккаунт, общие для всех ключей и трёх интерфейсов; сверх — 429 с Retry-After.
+//
+// Вызовы инструментов модель пишет XML в стиле GLM (<tool_call>…<arg_key>), но это внутренний шаблон:
+// API отдаёт обычные вызовы, отдельная причуда не нужна. Живьём не проверено — нет ключа.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "atria",
+      "name": "Atria",
+      "active": false, // тумблер: true — провайдер появляется в списках
+      "protocol": "openai",
+      "baseURL": "https://api.atria-asi.ai/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "ATRIA_API_KEY",
+      "order": 88,
+      "models": {
+        "fetch": false,
+        "static": [
+          {
+            "id": "Atria-Dawn-Preview", // регистр важен: так id принимает API
+            "name": "Atria Dawn Preview (256K)",
+            "contextWindow": 256000,
+            "maxOutputTokens": 65536,
+            "vision": false,
+            "reasoning": { "effort": ["low", "medium", "high"] }
+          }
+        ]
+      }
+    }
+  ]
+}
