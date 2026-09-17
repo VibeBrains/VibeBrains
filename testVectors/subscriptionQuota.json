@@ -1,0 +1,81 @@
+{
+  "_comment": "Общие тестовые векторы разбора остатка подписки (поле quota у провайдеров). Читают тесты VibeIDE и VibeIDEA: один ответ вендора обязан читаться в обоих продуктах одинаково. Не сид — в products.json адресован пустому списку продуктов. Фикстура MiniMax — из CLI вендора (github.com/MiniMax-AI/cli, test/fixtures/quota-response.json, урезана); ответ Z.ai CREDIT_LIMIT — сырой ответ Lite 02.09.2026 (github.com/onllm-dev/onWatch/issues/122). Перенесено из SubscriptionQuotaTest.kt VibeIDEA 17.09.2026.",
+  "version": 1,
+  "parse": [
+    {
+      "name": "MiniMax без процента: счётчик — остаток; недельного окна текстовой модели нет в плане",
+      "format": "minimax-token-plan",
+      "body": "{\"base_resp\":{\"status_code\":0,\"status_msg\":\"success\"},\"model_remains\":[{\"model_name\":\"MiniMax-M*\",\"start_time\":1776355200000,\"end_time\":1776373200000,\"remains_time\":7151954,\"current_interval_total_count\":1500,\"current_interval_usage_count\":228,\"current_weekly_total_count\":0,\"current_weekly_usage_count\":0,\"weekly_start_time\":1776009600000,\"weekly_end_time\":1776614400000,\"weekly_remains_time\":248351954},{\"model_name\":\"speech-hd\",\"start_time\":1776355200000,\"end_time\":1776441600000,\"remains_time\":75551954,\"current_interval_total_count\":9000,\"current_interval_usage_count\":9000,\"current_weekly_total_count\":63000,\"current_weekly_usage_count\":63000,\"weekly_start_time\":1776009600000,\"weekly_end_time\":1776614400000,\"weekly_remains_time\":248351954}]}",
+      "expect": { "kind": "windows", "windows": [
+        { "scope": "MiniMax-M*", "windowMs": 18000000, "leftPercent": 15, "resetAtMs": 1776373200000 },
+        { "scope": "speech-hd", "windowMs": 86400000, "leftPercent": 100, "resetAtMs": 1776441600000 },
+        { "scope": "speech-hd", "windowMs": 604800000, "leftPercent": 100, "resetAtMs": 1776614400000 }
+      ] }
+    },
+    {
+      "name": "MiniMax: прочтение по проценту, недельный буст 1.5, модель вне плана, безлимитное окно",
+      "format": "minimax-token-plan",
+      "body": "{\"base_resp\":{\"status_code\":0},\"model_remains\":[{\"model_name\":\"MiniMax-M*\",\"start_time\":0,\"end_time\":18000000,\"current_interval_total_count\":1000,\"current_interval_usage_count\":900,\"current_interval_remaining_percent\":10,\"current_weekly_total_count\":7000,\"current_weekly_usage_count\":3500,\"current_weekly_remaining_percent\":50,\"weekly_start_time\":0,\"weekly_end_time\":604800000,\"weekly_boost_permille\":1500},{\"model_name\":\"video\",\"current_interval_total_count\":0,\"current_weekly_total_count\":0,\"current_interval_status\":3,\"current_weekly_status\":3},{\"model_name\":\"image-01\",\"start_time\":0,\"end_time\":86400000,\"current_interval_status\":3,\"current_weekly_total_count\":0}]}",
+      "expect": { "kind": "windows", "windows": [
+        { "scope": "MiniMax-M*", "windowMs": 18000000, "leftPercent": 10, "resetAtMs": 18000000 },
+        { "scope": "MiniMax-M*", "windowMs": 604800000, "leftPercent": 75, "resetAtMs": 604800000 },
+        { "scope": "image-01", "windowMs": 86400000, "leftPercent": null, "resetAtMs": 86400000 }
+      ] }
+    },
+    {
+      "name": "MiniMax: ошибка вендора",
+      "format": "minimax-token-plan",
+      "body": "{\"base_resp\":{\"status_code\":1004,\"status_msg\":\"login fail\"}}",
+      "expect": { "kind": "vendorError", "message": "login fail" }
+    },
+    {
+      "name": "MiniMax: незнакомая форма",
+      "format": "minimax-token-plan",
+      "body": "{\"remains\":[]}",
+      "expect": { "kind": "unreadable" }
+    },
+    {
+      "name": "MiniMax: не JSON",
+      "format": "minimax-token-plan",
+      "body": "<html>",
+      "expect": { "kind": "unreadable" }
+    },
+    {
+      "name": "Z.ai: окна кредитов — процент израсходованного, пять часов и неделя",
+      "format": "zai-monitor",
+      "body": "{\"code\":200,\"msg\":\"Operation successful\",\"data\":{\"limits\":[{\"type\":\"CREDIT_LIMIT\",\"unit\":3,\"number\":5,\"usage\":2000,\"currentValue\":402,\"remaining\":1597,\"percentage\":20,\"nextResetTime\":1788351145586},{\"type\":\"CREDIT_LIMIT\",\"unit\":6,\"number\":1,\"usage\":10000,\"currentValue\":5207,\"remaining\":4792,\"percentage\":52,\"nextResetTime\":1788784466996}],\"level\":\"lite\"},\"success\":true}",
+      "expect": { "kind": "windows", "windows": [
+        { "scope": null, "windowMs": 18000000, "leftPercent": 80, "resetAtMs": 1788351145586 },
+        { "scope": null, "windowMs": 604800000, "leftPercent": 48, "resetAtMs": 1788784466996 }
+      ] }
+    },
+    {
+      "name": "Z.ai: токены, окно MCP, незнакомые тип и единица, лимит без процента",
+      "format": "zai-monitor",
+      "body": "{\"code\":200,\"success\":true,\"data\":{\"limits\":[{\"type\":\"TOKENS_LIMIT\",\"unit\":3,\"number\":5,\"percentage\":7},{\"type\":\"TIME_LIMIT\",\"unit\":1,\"number\":30,\"percentage\":0},{\"type\":\"SOMETHING_NEW\",\"unit\":3,\"number\":5,\"percentage\":99},{\"type\":\"CREDIT_LIMIT\",\"unit\":42,\"number\":1,\"percentage\":10},{\"type\":\"CREDIT_LIMIT\",\"unit\":3,\"number\":5}]}}",
+      "expect": { "kind": "windows", "windows": [
+        { "scope": null, "windowMs": 18000000, "leftPercent": 93, "resetAtMs": null },
+        { "scope": "MCP", "windowMs": 2592000000, "leftPercent": 100, "resetAtMs": null },
+        { "scope": null, "windowMs": null, "leftPercent": 90, "resetAtMs": null }
+      ] }
+    },
+    {
+      "name": "Z.ai: ошибка вендора",
+      "format": "zai-monitor",
+      "body": "{\"code\":401,\"msg\":\"token expired\",\"success\":false}",
+      "expect": { "kind": "vendorError", "message": "token expired" }
+    },
+    {
+      "name": "Z.ai: пустой список лимитов",
+      "format": "zai-monitor",
+      "body": "{\"code\":200,\"success\":true,\"data\":{\"limits\":[]}}",
+      "expect": { "kind": "unreadable" }
+    }
+  ],
+  "leftShare": [
+    { "count": 228, "total": 1500, "remainingPercent": 84.8, "expect": 0.848 },
+    { "count": 228, "total": 1500, "remainingPercent": 15.2, "expect": 0.152 },
+    { "count": 228, "total": 1500, "remainingPercent": 50, "expect": null },
+    { "count": 1600, "total": 1500, "remainingPercent": null, "expect": null }
+  ]
+}

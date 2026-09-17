@@ -90,9 +90,11 @@
       ]
     },
     "products.json": {
-      "version": 1,
-      "sha256": "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
-      "history": []
+      "version": 2,
+      "sha256": "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
+      "history": [
+        "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c"
+      ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
       "version": 1,
@@ -593,6 +595,11 @@
       "history": [
         "f4357bc19c1007a68287a0f5e14e5b529f340a5761a5abbdbf6671f82ae1f907"
       ]
+    },
+    "testVectors/subscriptionQuota.json": {
+      "version": 1,
+      "sha256": "133a15d5a001018702a7e1f77c4259fee98fa8622478c6d18882bcb3f458fb4d",
+      "history": []
     }
   }
 }
