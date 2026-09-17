@@ -32,8 +32,10 @@
         "fetch": true
 
         // ── Кастомные записи (platform.kimi.ai, сверено 11.09.2026) ────────────────
-        // K2.7 Code рассуждает всегда: при выключенном рассуждении вендор отвечает ошибкой, а
-        // {"thinking": {"type": "enabled"}} — его настройка по умолчанию; в extraBody она уходит как есть.
+        // K2.7 Code рассуждает всегда, и вендор принимает у него РОВНО {"type":"enabled","keep":"all"}:
+        // «only {"type":"enabled","keep":"all"} is accepted; any other configuration returns an error»
+        // (platform.kimi.ai/docs/api/models-overview, сверено 17.09.2026 — спасибо VibeIDE за находку).
+        // Там же: temperature закреплена на 1.0, top_p на 0.95 — другое значение даёт ошибку.
         // "static": [
         //   { "id": "kimi-k3", "name": "Kimi K3 (1M)", "pinned": true,
         //     "contextWindow": 1048576, "vision": true,
@@ -42,7 +44,7 @@
         //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
         //   { "id": "kimi-k2.7-code", "name": "Kimi K2.7 Code", "default": true,
         //     "contextWindow": 262144, "vision": true,
-        //     "extraBody": { "thinking": { "type": "enabled" } } }
+        //     "extraBody": { "thinking": { "type": "enabled", "keep": "all" } } }
         // ]
       }
     }
@@ -69,6 +71,12 @@
     // а ключ платформы не работает здесь. Модели: kimi-for-coding — с 11.09.2026 это K2.8 Preview, окно 1M,
     // рассуждение low / high / max; kimi-for-coding-highspeed (256K); k3 (1M) и k3-256k.
     // У K2.8 Preview нет цены за токены на платформе — модель есть только в подписке.
+    // УСЛОВИЯ ВЕНДОРА (kimi.com/en/help/kimi-code/benefits, сверено 17.09.2026): подписка «for personal development
+    // only, not for enterprise development scenarios»; сторонним инструментам доступ дан ключом API, но подмена
+    // идентификатора клиента — нарушение: «tampering with the client identifier (User-Agent) will be treated as a
+    // violation and may result in suspension of your membership benefits». IDE User-Agent не подменяет.
+    // VibeIDE 17.09.2026 сообщает, что их клиенту вендор ответил 403 access_terminated_error, и они Kimi Code сняли;
+    // на странице условий такого правила нет. Проверьте своим ключом, прежде чем полагаться.
     // Маршрут OpenAI — https://api.kimi.com/coding/v1; Anthropic-маршрут у вендора тоже есть
     // (https://api.kimi.com/coding/), но возврат рассуждения IDE делает только на OpenAI
     // (kimi.com/code/docs/en/kimi-code/models.html и whats-new.html, сверено 17.09.2026).

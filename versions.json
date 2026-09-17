@@ -206,14 +206,15 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 7,
-      "sha256": "1d98aa8f3aec30923932674a0871a49d94d03b4ded9951ecd529c74390154c77",
+      "version": 8,
+      "sha256": "12a8b5795e498dd494efaeddb2c8ca4f16e36df082c6ffc622d9cab491dce20b",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
         "d47d912ebcd215e16c2822f8fbb98aaed54b04f19b057cfe9bf8a7aa9c60df82",
         "020c3b895253df7fde666e9e51c43401da01b6ca4efa1f1da830e7125f9dd584",
-        "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a"
+        "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a",
+        "1d98aa8f3aec30923932674a0871a49d94d03b4ded9951ecd529c74390154c77"
       ]
     },
     "providers/meta-muse.jsonc": {
