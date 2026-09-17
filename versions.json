@@ -534,6 +534,16 @@
       "sha256": "df022b51f1c2cc9f4d5f32425a4cf98cc5c8e7c79f7815f79ce5d7d3de5ad276",
       "history": []
     },
+    "skills/self-excuses/SKILL.md": {
+      "version": 1,
+      "sha256": "72845c9cf3083ab2cdf6cce8f8ff2a2419d1f8376df7617c7ca566f2a564a346",
+      "history": []
+    },
+    "skills/self-excuses/evals/evals.json": {
+      "version": 1,
+      "sha256": "699eaf030d2127c01e5966567f9abe9f703d3bb4d863eefc757dd9fd788a9179",
+      "history": []
+    },
     "skills/spec-driven-implementation/SKILL.md": {
       "version": 4,
       "sha256": "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913",
