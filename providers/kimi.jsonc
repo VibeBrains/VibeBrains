@@ -77,13 +77,22 @@
     // violation and may result in suspension of your membership benefits». IDE User-Agent не подменяет.
     // VibeIDE 17.09.2026 сообщает, что их клиенту вендор ответил 403 access_terminated_error, и они Kimi Code сняли;
     // на странице условий такого правила нет. Проверьте своим ключом, прежде чем полагаться.
-    // Маршрут OpenAI — https://api.kimi.com/coding/v1; Anthropic-маршрут у вендора тоже есть
-    // (https://api.kimi.com/coding/), но возврат рассуждения IDE делает только на OpenAI
-    // (kimi.com/code/docs/en/kimi-code/models.html и whats-new.html, сверено 17.09.2026).
+    // ХОСТ — kimi.AI, а не kimi.com: страница вендора для сторонних инструментов печатает
+    // ANTHROPIC_BASE_URL = "https://api.kimi.ai/coding/" (kimi.com/code/docs/en/third-party-tools/claude-code.html,
+    // сверено 18.09.2026). На kimi.com живёт консоль ключа — kimi.com/code/console; два разных домена
+    // у одного вендора, и перепутать их значит получить отказ, который выглядит как неверный ключ.
+    // Маршрут OpenAI — https://api.kimi.ai/coding/v1; Anthropic-маршрут — https://api.kimi.ai/coding/,
+    // но возврат рассуждения IDE делает только на OpenAI
+    // (kimi.com/code/docs/en/kimi-code/models.html, сверено 18.09.2026).
+    // Модели тарифа: k3, k3-256k, kimi-for-coding (= K2.8 Preview) и kimi-for-coding-highspeed;
+    // тариф Go кодинг-квоты не даёт вовсе. Уровень — reasoning_effort low/high/max, и ДЕФОЛТ РАЗНЫЙ
+    // в двух официальных источниках вендора: платформа объявляет max, документация Kimi Code для тех же
+    // k3/k3-256k — high, а max держит дефолтом только для kimi-for-coding. Это расхождение вендора,
+    // поэтому уровень задавайте явно, а не полагайтесь на умолчание.
     // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
     // ,{
     //   "id": "kimi-code", "name": "Kimi Code (подписка)",
-    //   "protocol": "openai", "baseURL": "https://api.kimi.com/coding/v1",
+    //   "protocol": "openai", "baseURL": "https://api.kimi.ai/coding/v1",
     //   "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
     //   "models": { "fetch": false, "static": [
     //     { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)", "default": true,
