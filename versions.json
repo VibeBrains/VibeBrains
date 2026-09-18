@@ -80,14 +80,15 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 6,
-      "sha256": "939815d0a2232d98263ea0a4504756ae1885c1b8dac3066bc937bf1f1473bb22",
+      "version": 7,
+      "sha256": "34dbcb56d0bd0da330467d9418ee8d1046499413c972bf88e0e76f1d381bda4b",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
         "f52aebf6f167c3c6e969797c09e86623326b27cb689168fde3d00a2fcf28e895",
         "871544608400a46a0535d674f6d78d45f840ea2d62205fba0985e9fce9b343aa",
-        "c65f5e319bcbf3fe10103b3c394f8e2dd1ef95d0dd3b08938bce6758cae9fb2f"
+        "c65f5e319bcbf3fe10103b3c394f8e2dd1ef95d0dd3b08938bce6758cae9fb2f",
+        "939815d0a2232d98263ea0a4504756ae1885c1b8dac3066bc937bf1f1473bb22"
       ]
     },
     "products.json": {
@@ -441,8 +442,8 @@
       "history": []
     },
     "skills/design-vocabulary/SKILL.md": {
-      "version": 8,
-      "sha256": "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf",
+      "version": 9,
+      "sha256": "f3eeec54bb17f92fcc9a83d40544d019cfe0995724909c475125691b945c135e",
       "history": [
         "8fa01867972ead00f56e95ae756440f2ca0bba0dbc4a09c51b3dddcddbf77a7f",
         "3a943b7046326b97328df00b7bf1716bfcd771b890d7f3823c73b69f6e093a10",
@@ -450,7 +451,8 @@
         "eb8124de4eccd63ee5ffe531aa36fe78c971c1d63a89ac059f13ec3a128a46b3",
         "f9caf3e92cbc94d83982455aab18aef63f798e23f9f388fa198b5ed0ac184ee0",
         "2cd693ba1c86714c94311f00fd93c28c42101039f9661a5ebc64cf438ab6516a",
-        "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750"
+        "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750",
+        "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf"
       ]
     },
     "skills/example/SKILL.md": {
