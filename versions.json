@@ -176,8 +176,8 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 12,
-      "sha256": "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079",
+      "version": 13,
+      "sha256": "ac8573a93700a67dbce3473c568bd928fa77af0f9adb155f8e14ff763f7b96d3",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
@@ -188,7 +188,8 @@
         "8183a68dfaf7fbe8121a1dac8044e978cbe388f7ab8e82521a208d90e4b35e9c",
         "b7b56f4485d8e1e0af258d4050823552727e8a1e4f6f542a596a362b3b0b8989",
         "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed",
-        "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21"
+        "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21",
+        "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079"
       ]
     },
     "providers/google-gemini.jsonc": {

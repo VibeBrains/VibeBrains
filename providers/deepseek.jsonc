@@ -76,14 +76,20 @@
     // Маршрут вендора — https://api.deepseek.com/anthropic (api-docs.deepseek.com/guides/anthropic_api,
     // сверено 11.09.2026). У нас baseURL обязан заканчиваться на /v1: клиент дописывает РОВНО
     // «/messages». thinking на этом маршруте принимается, но budget_tokens игнорируется; top_k,
-    // cache_control, mcp_servers и container игнорируются тоже. Рассуждение включено по умолчанию и
-    // тратит тот же лимит ответа, поэтому maxOutputTokens задан явно — без него уйдёт 8192.
+    // cache_control, mcp_servers и container игнорируются тоже; top_p вне режима мышления закреплён на 1.0.
+    // Рассуждение включено по умолчанию и тратит тот же лимит ответа, поэтому maxOutputTokens задан явно.
+    // (Прежняя приписка «без него уйдёт 8192» снята 18.09.2026: на странице вендора max_tokens помечен
+    // полностью поддержанным, умолчания 8192 там нет.)
     // Каталога моделей на этом маршруте нет — модель задаётся вручную.
     // НЕЗНАКОМЫЙ ID ЭТОТ МАРШРУТ НЕ ОТВЕРГАЕТ, А ТИХО ОТДАЁТ deepseek-flash (id Opus — deepseek-v4-pro):
     // опечатка в имени модели даёт работающую, но другую модель. IDE скажет об этом строкой о подмене.
-    // Уровень рассуждения здесь пишется иначе, чем на OpenAI-маршруте: {"reasoning": {"effort": "none|low|high|max"}},
-    // и "none" выключает рассуждение — поэтому у записи ниже свой "reasoning.off"
-    // (api-docs.deepseek.com/guides/anthropic_api и guides/thinking_mode, сверено 14.09.2026).
+    // ТУМБЛЕР И УРОВЕНЬ ЗДЕСЬ — РАЗНЫЕ ПОЛЯ, и это главное отличие от OpenAI-маршрута
+    // (api-docs.deepseek.com/guides/thinking_mode, таблица сверена 18.09.2026):
+    //   тумблер — {"reasoning": {"effort": "none|low|high|max"}}, где "none" выключает рассуждение;
+    //   уровень — {"output_config": {"effort": "low|high|max"}}, и только effort из output_config поддержан.
+    // Поэтому у записи ниже свой "reasoning.off" — он про выключение, а не про силу.
+    // Уровень, который вы выбрали, вендор ещё и складывает по своей таблице: minimal и low → low,
+    // medium, high и xhigh → high, max и ultra → max. То есть xhigh стоит как high, а не как max.
     // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
     // ,{
     //   "id": "deepseek-anthropic", "extends": "deepseek", "name": "DeepSeek (Anthropic-протокол)",
