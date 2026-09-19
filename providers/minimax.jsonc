@@ -1,7 +1,10 @@
 // MiniMax — два маршрута к одним моделям:
 //   1) "minimax" — OpenAI-совместимый API (включён);
 //   2) "minimax-anthropic" — клон через extends по нативному Anthropic-совместимому
-//      эндпоинту вендора (для гиков — обходит расхождения OpenAI-слоя в tool-use).
+//      эндпоинту вендора. Вендор сам советует этот маршрут: «Anthropic-Compatible is recommended
+//      for prompt-cache benefits» (platform.minimax.io/docs/api-reference/text-anthropic-api,
+//      сверено 19.09.2026) — то есть кэш промпта работает именно здесь. Побочно он обходит
+//      расхождения OpenAI-слоя в вызове инструментов.
 // Ключ один на оба: MINIMAX_API_KEY в .vibe/.env или поле в настройках.
 //
 // ДВА РАЗНЫХ КЛЮЧА, ОДИН И ТОТ ЖЕ АДРЕС. У MiniMax подписка и поштучная оплата различаются
@@ -81,6 +84,17 @@
             "contextWindow": 1000000,
             "toolFormat": "anthropic"
           }
+
+          // ── Остальные модели маршрута ──────────────────────────────────────────
+          // Каталога на этом эндпоинте нет, поэтому спросить их не у кого: список взят из
+          // справочника вендора (platform.minimax.io/docs/api-reference/text-anthropic-api,
+          // сверено 19.09.2026). Окно у всей линейки M2.x — 204 800 токенов.
+          // Модели с суффиксом `-highspeed` — быстрый вариант той же модели у вендора.
+          // Раскомментируйте нужные вместе с ведущей запятой.
+          // ,{ "id": "MiniMax-M2.7", "name": "MiniMax M2.7 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
+          // ,{ "id": "MiniMax-M2.7-highspeed", "name": "MiniMax M2.7 highspeed (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
+          // ,{ "id": "MiniMax-M2.5", "name": "MiniMax M2.5 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
+          // ,{ "id": "MiniMax-M2.1", "name": "MiniMax M2.1 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
         ]
       }
     }
