@@ -193,6 +193,11 @@
         "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079"
       ]
     },
+    "providers/edge0.jsonc": {
+      "version": 1,
+      "sha256": "f11fa2d68e6ea0e933ddf13d6c659a4d57863a9ef61576f30f1183d174b4e35e",
+      "history": []
+    },
     "providers/google-gemini.jsonc": {
       "version": 3,
       "sha256": "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731",
