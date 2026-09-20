@@ -76,7 +76,13 @@
             // инструкции вендора для Claude Code — пометка самого Claude Code: по ней он выбирает
             // миллионное окно и срезает её перед запросом (code.claude.com/docs/en/model-config,
             // сверено 11.09.2026). Нужна она только там, где MiniMax стоит за ACP-агентом Claude
-            // Code; окно ему задаёт CLAUDE_CODE_MAX_CONTEXT_TOKENS. «Anthropic-слой отдаёт 200000» —
+            // Code; порог автокомпакта ему задаёт CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 — именно эту
+            // переменную вендор предписывает рядом с ANTHROPIC_MODEL="MiniMax-M3[1m]"
+            // (platform.minimax.io/docs/token-plan/claude-code, сверено 20.09.2026). Прежняя запись звала
+            // здесь CLAUDE_CODE_MAX_CONTEXT_TOKENS — это другая ручка: она объявляет размер окна, а сжимать
+            // историю Claude Code начинает по своему порогу: без него миллионное окно срезалось бы
+            // автокомпактом около 167K (тикет MiniMax-AI/MiniMax-M2.7#46; официального ответа вендора
+            // в тикете нет). «Anthropic-слой отдаёт 200000» —
             // это окно, которое Claude Code предполагает для незнакомого id, а не поле вендора.
             "id": "MiniMax-M3",
             "name": "MiniMax M3 (Anthropic, 1M)",

@@ -2,6 +2,11 @@
   "version": 1,
   "comment": "Ревизии файлов набора. Генерируется bump.mjs — руками не править. history хранит sha256 прошлых ревизий: по ним сеялка узнаёт нетронутую копию старого релиза.",
   "files": {
+    "AGENTS.template.md": {
+      "version": 1,
+      "sha256": "b5c685ee2cc0e9d92a900607fca8fe1095414d40009ed1d17bcbca37cb9bf891",
+      "history": []
+    },
     "README.md": {
       "version": 6,
       "sha256": "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
@@ -236,8 +241,8 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 13,
-      "sha256": "209e8e9385f14a7e5b478d941db17a200edc520418e05fa1d59e4d734cdc3bba",
+      "version": 14,
+      "sha256": "f51e281893c6c2660478d599a7b02c962650b291203460d99eed811477348ea3",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
@@ -249,7 +254,8 @@
         "b4e99fa27f3a781db1862f70a67434afcffcd1e08a14a0be640f2e2bf3d6600b",
         "a50bc3b104753d74b76c0ac04391a380c27af1dd57e093cb16a4b315202fad18",
         "5cc0b33f9a96b4e0ee7b206dddb7e4e4aed006c1b5dc56428e8b3208b9d0c7cb",
-        "ce0e9614fb942925134bd1732878a3d37131e4edfa6eb08d80be3d538a7c05bb"
+        "ce0e9614fb942925134bd1732878a3d37131e4edfa6eb08d80be3d538a7c05bb",
+        "209e8e9385f14a7e5b478d941db17a200edc520418e05fa1d59e4d734cdc3bba"
       ]
     },
     "providers/muse-glimmer-local.jsonc": {
