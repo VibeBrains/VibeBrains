@@ -319,6 +319,11 @@
         "1084c9b81017f8c3783b0bdfbb65be83b4187de81533ced97d44f792e47b4d79"
       ]
     },
+    "providers/stepfun.jsonc": {
+      "version": 1,
+      "sha256": "f27acc044ab2d77d8ee1515c830c029acdf75d0fba2cf2ed700cfd892eb86b34",
+      "history": []
+    },
     "providers/zai.jsonc": {
       "version": 14,
       "sha256": "efc638bdce23c90a15a313bf03b6e43725f0f5c88ea2f467ac256ceda21deab5",
