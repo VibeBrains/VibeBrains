@@ -1,0 +1,45 @@
+// StepFun — OpenAI-совместимый API. Ключ: STEPFUN_API_KEY=<ключ> в .vibe/.env
+// (взять: platform.stepfun.ai).
+//
+// АДРЕС. Вендор даёт два: OpenAI-совместимый https://api.stepfun.ai/step_plan/v1 и
+// Anthropic-совместимый https://api.stepfun.ai/step_plan (platform.stepfun.ai/docs/en/step-plan/
+// quick-start, сверено 21.09.2026). Часть обзоров называет https://api.stepfun.ai/v1 — верим
+// документации вендора, а не пересказам.
+//
+// МОДЕЛЬ (platform.stepfun.ai/docs/en/guides/models/step-5-preview, сверено 21.09.2026):
+//   • step-5-preview — окно 1M, вызов инструментов поддержан.
+//
+// РАССУЖДЕНИЕ. Уровни low / medium / high: в Chat Completions это `reasoning_effort`, в Messages
+// API — `output_config.effort`. Уровней у ползунка больше трёх, и лишние приводятся к ближайшему
+// вендорскому — приведение живёт в причудах модели, а не здесь.
+//
+// ЦЕНЫ НЕТ НАМЕРЕННО. Обзоры называют $1 за миллион входных и $2.70 за миллион выходных
+// (runtimewire.com/article/stepfun-step-5-preview-600b-agent-model-pricing, 20.09.2026), но на
+// страницах вендора я этих чисел не нашёл. Цена, поставленная по пересказу, врёт в отчёте «Ключи
+// и расход» убедительнее, чем её отсутствие: пустое поле видно, а неверное число — нет.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "stepfun",
+      "name": "StepFun",
+      "active": true,
+      "protocol": "openai",
+      "baseURL": "https://api.stepfun.ai/step_plan/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "STEPFUN_API_KEY",
+      "order": 70,
+      "models": {
+        "fetch": true,
+        "static": [
+          {
+            "id": "step-5-preview",
+            "name": "Step 5 Preview",
+            "contextWindow": 1000000,
+            "vision": false
+          }
+        ]
+      }
+    }
+  ]
+}
