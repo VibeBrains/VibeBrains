@@ -30,12 +30,12 @@
         // больше токенов — старые бюджеты в токенах занижают счёт.
         // "static": [
         //   { "id": "claude-fable-5-1", "name": "Claude Fable 5.1", "default": true,
-        //     "pricing": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" },
+        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" },
         //     "cacheTtl": "1h" },
         //   { "id": "claude-mythos-5-1", "name": "Claude Mythos 5.1 (по допуску)",
-        //     "pricing": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" } },
+        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" } },
         //   { "id": "claude-opus-5", "name": "Claude Opus 5",
-        //     "pricing": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25, "currency": "USD" } }
+        //     "cost": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25, "currency": "USD" } }
         // ]
       }
     }

@@ -164,11 +164,12 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 4,
-      "sha256": "4be0f48def6887df02f53ba19ccf7be5a960a36b7b1fb889ba3e8b2ec43705a9",
+      "version": 5,
+      "sha256": "08995671af07fb3ee1bb58ad60cb24b492e8f309407ccf6d58f9bf3e0630130d",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
-        "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3"
+        "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
+        "4be0f48def6887df02f53ba19ccf7be5a960a36b7b1fb889ba3e8b2ec43705a9"
       ]
     },
     "providers/arbr.jsonc": {
