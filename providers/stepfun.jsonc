@@ -7,7 +7,10 @@
 // документации вендора, а не пересказам.
 //
 // МОДЕЛЬ (platform.stepfun.ai/docs/en/guides/models/step-5-preview, сверено 21.09.2026):
-//   • step-5-preview — окно 1M, вызов инструментов поддержан.
+//   • step-5-preview — окно 1M, ответ до 64k, вызов инструментов поддержан.
+//     Вход: «Text, images, and video» — картинки модель принимает. Здесь стояло
+//     "vision": false (22.09.2026): поле блокирует картинки в композере, то есть
+//     отнимало возможность, которую вендор объявляет.
 //
 // РАССУЖДЕНИЕ. Уровни low / medium / high: в Chat Completions это `reasoning_effort`, в Messages
 // API — `output_config.effort`. Уровней у ползунка больше трёх, и лишние приводятся к ближайшему
@@ -36,7 +39,8 @@
             "id": "step-5-preview",
             "name": "Step 5 Preview",
             "contextWindow": 1000000,
-            "vision": false
+            "maxOutputTokens": 64000,
+            "reasoning": { "effort": ["low", "medium", "high"] }
           }
         ]
       }

@@ -1,0 +1,67 @@
+// Xiaomi MiMo — нативный протокол Anthropic. Ключ: MIMO_API_KEY=<ключ> в .vibe/.env
+// (взять: консоль mimo.mi.com).
+//
+// ЗАГОЛОВОК АВТОРИЗАЦИИ НЕ ТОТ, ЧТО У ANTHROPIC. Вендор ждёт "api-key", а не "x-api-key"
+// (mimo.mi.com/docs/en-US/api/chat/anthropic-api, сверено 22.09.2026). Ключ, отправленный
+// в привычном заголовке, вернёт 401 — и это выглядит как «неверный ключ», а не как
+// «не то имя заголовка».
+//
+// АДРЕС. Дока называет полный путь .../anthropic/v1/messages. Наш клиент дописывает к базе
+// РОВНО "/messages", поэтому версионный сегмент входит в baseURL ниже — тот же урок, что
+// с MiniMax и DashScope: без него вендор отвечает 404.
+//
+// МОДЕЛИ: mimo-v2.6-pro, mimo-v2.6-flash, mimo-v2.6-pro-ultraspeed, mimo-v2.5-pro, mimo-v2.5.
+// Точки в id обязательны — вендор отвечает 400 «Not supported model» на написание через дефис.
+//
+// ТРИ ВЕЩИ, О КОТОРЫХ ЛЕГКО СПОТКНУТЬСЯ:
+//  1. В режиме размышления temperature и top_p НЕ НАСТРАИВАЮТСЯ: дока говорит, что значения
+//     «will be forcibly set by the model to its recommended default values of 1.0 and 0.95».
+//     Переданное значение не вызывает ошибку — оно молча игнорируется. Поэтому во вшитом
+//     каталоге причуд VibeIDE эти числа объявлены явно: иначе ползунок температуры обещает
+//     влияние, которого нет.
+//  2. tool_choice работает только со значением "auto". Дока: «When a value other than auto is
+//     passed to type, the backend will remove this field by default» — принуждение к конкретному
+//     инструменту молча не срабатывает, и выглядит это как «модель проигнорировала указание».
+//  3. В режиме размышления модель возвращает блок thinking рядом с tool_use, и прошлые блоки
+//     надо возвращать обратно в следующих ходах. Есть нестандартная причина остановки
+//     repetition_truncation — обрыв по зацикливанию, а не по длине.
+//
+// Живьём не проверено — ключа Xiaomi нет. Цены нет по той же причине, что у соседних сидов:
+// на страницах вендора чисел не нашёл, а поставленная по пересказу цена врёт в отчёте
+// «Ключи и расход» убедительнее, чем её отсутствие.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "xiaomi-mimo",
+      "name": "Xiaomi MiMo",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "anthropic",
+      "baseURL": "https://api.xiaomimimo.com/anthropic/v1",
+      "auth": { "type": "header", "name": "api-key" },
+      "apiKeyEnv": "MIMO_API_KEY",
+      "order": 73,
+      "models": {
+        // Каталога моделей на этом эндпоинте нет — список задаётся вручную.
+        "fetch": false,
+        "static": [
+          {
+            "id": "mimo-v2.6-pro",
+            "name": "MiMo v2.6 Pro",
+            "default": true,
+            "pinned": true,
+            "extraBody": { "thinking": { "type": "enabled" } }
+          },
+          {
+            "id": "mimo-v2.6-flash",
+            "name": "MiMo v2.6 Flash"
+          },
+          {
+            "id": "mimo-v2.6-pro-ultraspeed",
+            "name": "MiMo v2.6 Pro Ultraspeed"
+          }
+        ]
+      }
+    }
+  ]
+}
