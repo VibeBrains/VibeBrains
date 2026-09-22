@@ -327,9 +327,11 @@
       ]
     },
     "providers/xai.jsonc": {
-      "version": 1,
-      "sha256": "970943f6d449a2b3a2454c24623e04c12b68b8876afd5746b85fca42062a5ee1",
-      "history": []
+      "version": 2,
+      "sha256": "372cbe6d64d2b3b2729ab6f6669212a91063e16f102e4490c42726c376b24afc",
+      "history": [
+        "970943f6d449a2b3a2454c24623e04c12b68b8876afd5746b85fca42062a5ee1"
+      ]
     },
     "providers/xiaomi-mimo.jsonc": {
       "version": 1,
