@@ -320,8 +320,20 @@
       ]
     },
     "providers/stepfun.jsonc": {
+      "version": 2,
+      "sha256": "2f522a6ddceaf5e969f6f8b9a93ef2226465993d08e86568bb3689a09ad56ea3",
+      "history": [
+        "f27acc044ab2d77d8ee1515c830c029acdf75d0fba2cf2ed700cfd892eb86b34"
+      ]
+    },
+    "providers/xai.jsonc": {
       "version": 1,
-      "sha256": "f27acc044ab2d77d8ee1515c830c029acdf75d0fba2cf2ed700cfd892eb86b34",
+      "sha256": "970943f6d449a2b3a2454c24623e04c12b68b8876afd5746b85fca42062a5ee1",
+      "history": []
+    },
+    "providers/xiaomi-mimo.jsonc": {
+      "version": 1,
+      "sha256": "d1be4717ba3a5f70ccccb2148a97eaf63f1d59b9888a297181e185eb3b1e8b44",
       "history": []
     },
     "providers/zai.jsonc": {
