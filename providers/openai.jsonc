@@ -5,10 +5,23 @@
 // Для дешёвых маршрутов выбирайте полный id тира (gpt-5.6-terra / gpt-5.6-luna) — иначе
 // будете платить по флагманскому тарифу. Terra и Luna — кандидаты на рутину (коммиты,
 // переименования, короткие правки), Sol оставляйте на сложные задачи.
+// У GPT-6 имена значат другое: флагман — Astra, Sol — средний тир, Luna — самый дешёвый, Terra нет,
+// а голого алиаса "gpt-6" в документации вендора нет вовсе (developers.openai.com/api/docs/models,
+// сверено 23.09.2026).
+//
+// GPT-6 И ИНСТРУМЕНТЫ. На chat/completions Sol и Luna вызывают функции ТОЛЬКО при
+// reasoning_effort: "none"; с рассуждением инструменты доступны лишь через Responses API
+// (developers.openai.com/api/docs/models/gpt-6-sol и /gpt-6-luna, сверено 23.09.2026). Умолчание
+// усилия у них — medium, поэтому запрос с инструментами без явного "none" получает 400. Astra на
+// chat/completions функций не вызывает вовсе, а "none" отвергает с 400. Модель, которой нужно и
+// рассуждение, и инструменты, объявляется с "protocol": "openai-responses" — это другой эндпоинт,
+// /v1/responses, а не диалект chat/completions.
 //
 // КЭШ ПРОМПТА: Chat Completions принимает prompt_cache_key (параметр в официальном SDK,
 // completion_create_params.py, сверено 23.09.2026). "promptCacheKey": true ниже объявляет,
 // что endpoint поле принимает; ключ, постоянный в пределах разговора, подставляет клиент.
+// С GPT-5.6 ключ уже не нужен для попаданий и только разводит учёт кэша; срок жизни кэша задаёт
+// отдельный prompt_cache_options (developers.openai.com/api/docs/guides/prompt-caching, сверено 23.09.2026).
 {
   "version": 1,
   "providers": [
@@ -41,9 +54,10 @@
         //   // Сверх 272K входных токенов вендор считает по премиальному тарифу —
         //   // цена ниже верна для обычного режима.
         //   // ВАЖНО: модель не принимает temperature / top_p / logprobs — их снимает
-        //   // правило причуд (modelQuirks), иначе запрос уходит в 400. Вызов
-        //   // инструментов у неё живёт только в Responses API, которого наш прямой
-        //   // чат не говорит: здесь она работает как собеседник, инструменты — через ACP.
+        //   // правило причуд (modelQuirks), иначе запрос уходит в 400. Рассуждение у неё не
+        //   // выключается ("none" — 400), а вызов инструментов живёт только в Responses API:
+        //   // на chat/completions она собеседник без инструментов, для инструментов объявите
+        //   // у записи "protocol": "openai-responses".
         //   { "id": "gpt-6-astra", "name": "GPT-6 Astra",
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     // Цены и порог — с вендорской страницы модели (developers.openai.com, 10.09.2026).
@@ -52,6 +66,20 @@
         //     "cost": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite": 12.5, "currency": "USD",
         //       // «more than 272K input tokens are priced at 2x input and cache rates and 1.5x
         //       // output for the full request» — надбавка на ВЕСЬ запрос, не на превышение.
+        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } },
+        //   // GPT-6 Sol и Luna (выпуск 22.09.2026, developers.openai.com/api/docs/models/gpt-6-sol и
+        //   // /gpt-6-luna, сверено 23.09.2026): контекст 1 050 000 (вход до 922 000), выход 128 000,
+        //   // картинки на входе. Запись в кэш — 1.25 от входа; сверх 272K входа тот же порог, что у Astra.
+        //   // Усилие: none, low, medium (умолчание), high, xhigh, max; "none" — положение «выключено».
+        //   { "id": "gpt-6-sol", "name": "GPT-6 Sol",
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
+        //     "reasoning": { "effort": ["low", "medium", "high", "xhigh", "max"] },
+        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5, "currency": "USD",
+        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } },
+        //   { "id": "gpt-6-luna", "name": "GPT-6 Luna (самый дешёвый)",
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
+        //     "reasoning": { "effort": ["low", "medium", "high", "xhigh", "max"] },
+        //     "cost": { "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite": 0.125, "currency": "USD",
         //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } }
         // ]
       }

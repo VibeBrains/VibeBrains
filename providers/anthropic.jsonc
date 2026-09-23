@@ -37,7 +37,15 @@
         //   { "id": "claude-mythos-5-1", "name": "Claude Mythos 5.1 (по допуску)",
         //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" } },
         //   { "id": "claude-opus-5", "name": "Claude Opus 5",
-        //     "cost": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25, "currency": "USD" } }
+        //     "cost": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite": 6.25, "currency": "USD" } },
+        //   // Claude Opus 5.5 (выпуск 22.09.2026; platform.claude.com/docs/en/about-claude/pricing и
+        //   // /models/overview, сверено 23.09.2026): окно 1M, выход 128K, Opus 5 с этого дня в «прежних».
+        //   // Чтение кэша $0.20 — 0.05 от входа; запись $5 на пять минут, $8 на час (с "cacheTtl": "1h").
+        //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ: {"type": "disabled"} — 400, поле без значения — адаптивное
+        //   // мышление на умолчании вендора, а оно у этой модели medium, а не high. Честно «выключено» у неё
+        //   // может значить только самый низкий уровень усилия — low.
+        //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
+        //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "currency": "USD" } }
         // ]
       }
     }
