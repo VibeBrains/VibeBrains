@@ -1,0 +1,406 @@
+{
+  "_comment": "Общие тестовые векторы детектора нейрослопа (slop/catalog.jsonc + правки проекта .vibe/slop.json). Читают тесты VibeIDE и VibeIDEA: один текст обязан давать в обоих продуктах одни и те же находки и один счёт. Не сид — в products.json адресован пустому списку продуктов. Кейс: text (или lines — строки, склеенные через \\n), необязательный slopJson — текст .vibe/slop.json проекта как есть. expect сверяет только названные поля: passed, score, minScore (счёт не ниже), passScore, blocking (id правил, не пропускающих текст), findings (все находки «ID:строка» в порядке текста — точный список), has / lacks (id среди находок есть / нет), matches (найденные куски правила, точный список), density (count, lines), deductions (severity, count, points), warnedAbout (id, названные в предупреждениях; [] — предупреждений нет вовсе). Кейсы перенесены из TextSlopTest.kt VibeIDEA и textSlop.test.ts VibeIDE 23.09.2026; английские тексты — фикстуры misbahsy/anti-ai-slop (MIT).",
+  "version": 1,
+  "cases": [
+    {
+      "name": "обычный русский текст проходит",
+      "lines": [
+        "# Как мы сократили адаптацию с девяти дней до двух",
+        "",
+        "В марте медианная адаптация нового сотрудника занимала девять рабочих дней. Мы считали её от принятия оффера до",
+        "первого влитого пул-реквеста. Сейчас она занимает два дня.",
+        "",
+        "Большую часть работы сделали три изменения.",
+        "",
+        "Ноутбуки теперь готовят заранее. Раньше отдел ИТ ждал даты выхода и тратил три дня на доставку и настройку. Теперь",
+        "ноутбук уезжает в ту неделю, когда подписан оффер.",
+        "",
+        "Сорок страниц инструкции по настройке заменил один скрипт. Он ставит инструменты, клонирует четыре нужных",
+        "репозитория и заполняет локальную базу. На всё уходит около одиннадцати минут.",
+        "",
+        "Каждый новый инженер получает первую задачу ещё до первого дня. Руководитель выбирает что-то маленькое и настоящее",
+        "из бэклога. Шестеро из последних восьми новичков влили эту задачу на второй день.",
+        "",
+        "Осталось согласование доступов. Безопасность выдаёт доступ к боевой среде вручную, и эта очередь всё ещё занимает",
+        "полтора дня. Этим мы сейчас и занимаемся."
+      ],
+      "expect": {
+        "passed": true,
+        "minScore": 95
+      }
+    },
+    {
+      "name": "обычный английский текст проходит",
+      "lines": [
+        "# How we cut onboarding from nine days to two",
+        "",
+        "Last March our median new-hire onboarding took nine working days. We measured it from offer acceptance to first merged pull request. Today it takes two.",
+        "",
+        "Three changes did most of the work.",
+        "",
+        "We pre-provisioned laptops. IT used to wait for the start date, which burned three days on shipping and setup. Now the laptop ships the week the offer is signed.",
+        "",
+        "We replaced the 40-page setup doc with a single script. The script installs the toolchain, clones the four repos a new engineer needs, and seeds a local database. It runs in about eleven minutes.",
+        "",
+        "We gave every new engineer a scoped first ticket before day one. Their manager picks something small and real from the backlog. Six of the last eight hires merged that ticket on day two.",
+        "",
+        "The remaining friction is access reviews. Security signs off on production credentials manually, and that queue still averages a day and a half. We are working on it."
+      ],
+      "expect": {
+        "passed": true,
+        "minScore": 95
+      }
+    },
+    {
+      "name": "набор русских примет не проходит, и каждая названа; строка с эмодзи и Заглавными — одна находка, более тяжёлая (F2)",
+      "lines": [
+        "# Раскрываем Потенциал Асинхронных Команд 🚀",
+        "",
+        "В современном мире удалённая работа — это не просто тренд, а фундаментальная смена парадигмы. Давайте разберёмся,",
+        "почему.",
+        "",
+        "Вот в чём дело: многие думают, что асинхронность — это про гибкость. Но это не так. Это не про гибкость — это про",
+        "глубокую концентрацию.",
+        "",
+        "Исследования показывают, что каждое переключение контекста стоит до 23 минут. Последствия огромны.",
+        "",
+        "Наша платформа выступает в качестве единого бесшовного хаба, который выводит командную работу на новый уровень.",
+        "Это меняет всё. Точка.",
+        "",
+        "Подводя итог: будущее уже здесь. И это только начало.",
+        "",
+        "Надеюсь, это поможет!"
+      ],
+      "expect": {
+        "passed": false,
+        "has": [
+          "F2",
+          "RU-W1",
+          "RU-W2",
+          "RU-W4",
+          "RU-W6",
+          "RU-S1",
+          "RU-S2",
+          "RU-S9",
+          "RU-S11",
+          "RU-S12",
+          "RU-S13",
+          "RU-S14"
+        ]
+      }
+    },
+    {
+      "name": "набор английских примет не проходит, и каждая названа",
+      "lines": [
+        "# Unlocking The Power Of Async Teams 🚀",
+        "",
+        "In today's fast-paced world, remote work isn't just a trend. It's a fundamental paradigm shift that is revolutionizing how we collaborate.",
+        "",
+        "Here's the thing: most people think async work is about flexibility. They're wrong. At its core, it's about leveraging deep focus to foster meaningful output.",
+        "",
+        "Studies show that context-switching costs knowledge workers up to 23 minutes per interruption. The implications are significant.",
+        "",
+        "## The Key Insight",
+        "",
+        "What nobody tells you: the tooling doesn't matter. The culture shifts first — and everything else follows.",
+        "",
+        "Our platform serves as a comprehensive hub that empowers teams to streamline their workflows seamlessly. It's a game-changer. Full stop.",
+        "",
+        "Think about it: you ship faster, you learn faster, you grow faster.",
+        "",
+        "In conclusion, the future of work isn't coming. It's already here."
+      ],
+      "expect": {
+        "passed": false,
+        "has": [
+          "F2",
+          "EN-W1",
+          "EN-W2",
+          "EN-S2",
+          "EN-S3",
+          "EN-S13",
+          "EN-W6",
+          "EN-F1"
+        ]
+      }
+    },
+    {
+      "name": "код, цитаты, ссылки, фронтматтер и строка под slop-ignore прозой не считаются; текст ссылки считается, адрес — нет",
+      "lines": [
+        "---",
+        "title: In today's fast-paced world",
+        "---",
+        "",
+        "# Real heading",
+        "",
+        "Normal prose here is fine and carries a specific fact about the build.",
+        "",
+        "```python",
+        "# This code delves into the robust tapestry, leveraging synergy",
+        "x = \"here's the thing\"",
+        "```",
+        "",
+        "Inline `utilize()` and `streamline_all()` are function names, not slop.",
+        "",
+        "> Here's the thing: quoted source material must not be flagged.",
+        "",
+        "See [the delve report](https://example.com/delve-tapestry-realm) for detail.",
+        "",
+        "Русская цитата «в современном мире, давайте разберёмся» чужая, и её не трогаем.",
+        "",
+        "This sentence leverages a robust paradigm. <!-- slop-ignore EN-W1 — the finance meaning -->",
+        "",
+        "In conclusion, this line should be flagged on the correct line number."
+      ],
+      "expect": {
+        "findings": [
+          "EN-W1:18",
+          "EN-S13:24"
+        ]
+      }
+    },
+    {
+      "name": "Каждое Слово С Заглавной в русском заголовке — примета",
+      "text": "# Как Настроить Сборку Проекта Быстро\n\nСервер принимает запрос и проверяет ключ. Ответ уходит за десять миллисекунд.",
+      "expect": {
+        "has": [
+          "F7"
+        ]
+      }
+    },
+    {
+      "name": "Title Case в английском заголовке — примета",
+      "text": "# How This Works Inside\n\nThe server takes the request and checks the key. The answer leaves in ten milliseconds.",
+      "expect": {
+        "has": [
+          "F7"
+        ]
+      }
+    },
+    {
+      "name": "заголовок в обычном регистре — не примета",
+      "text": "# Как настроить сборку проекта быстро\n\nСервер принимает запрос и проверяет ключ. Ответ уходит за десять миллисекунд.",
+      "expect": {
+        "lacks": [
+          "F7"
+        ]
+      }
+    },
+    {
+      "name": "длинное тире в русской прозе — грамматика",
+      "text": "Москва — столица России, и в ней живёт много людей.",
+      "expect": {
+        "lacks": [
+          "EN-F1"
+        ]
+      }
+    },
+    {
+      "name": "длинное тире в английской прозе — примета",
+      "text": "The build — which took hours — failed on the last step.",
+      "expect": {
+        "has": [
+          "EN-F1"
+        ]
+      }
+    },
+    {
+      "name": "шаблонное начало в начале предложения — находка",
+      "text": "Сервер поднят. Кроме того, база обновлена до новой версии.",
+      "expect": {
+        "has": [
+          "RU-W3"
+        ]
+      }
+    },
+    {
+      "name": "те же слова посреди предложения — не находка",
+      "text": "Сервер поднят и кроме того обновлена база до новой версии.",
+      "expect": {
+        "lacks": [
+          "RU-W3"
+        ]
+      }
+    },
+    {
+      "name": "приём один раз — не находка",
+      "text": "Мы взяли готовый пакет, а не свой. Он работает на всех трёх платформах и собирается за минуту.",
+      "expect": {
+        "lacks": [
+          "RU-D1"
+        ]
+      }
+    },
+    {
+      "name": "приём в привычке — одна находка с числом вхождений и строками",
+      "text": "Правка в настройках, а не в коде. Проверка в тесте, а не руками. Решение в журнале, а не в чате. Сборка в облаке, а не у себя.",
+      "expect": {
+        "density": {
+          "RU-D1": {
+            "count": 4,
+            "lines": [
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "вхождение, которое ловят два шаблона привычки, считается один раз",
+      "text": "Мы правим настройки, а не просто код. Тесты гоняем в облаке, а не просто руками. Решения пишем в журнал, а не просто в чат.",
+      "expect": {
+        "density": {
+          "RU-D1": {
+            "count": 3
+          }
+        }
+      }
+    },
+    {
+      "name": "невидимый символ находится на своей строке даже внутри кода",
+      "text": "Первая строка.\n```\nкод\u200bс пробелом нулевой ширины\n```\n",
+      "expect": {
+        "findings": [
+          "U1:3"
+        ],
+        "matches": {
+          "U1": [
+            "U+200B"
+          ]
+        }
+      }
+    },
+    {
+      "name": "арифметика: одна находка major — 100 − 15 = 85, и тяжелее minor не проходит при любом счёте",
+      "text": "Стоит отметить, что сборка занимает две минуты на ноутбуке разработчика.",
+      "expect": {
+        "score": 85,
+        "passed": false,
+        "blocking": [
+          "RU-W2"
+        ]
+      }
+    },
+    {
+      "name": "арифметика: четыре вхождения одного major — 15 + 3 × 5 = 30, ровно потолок правила 3 × 15",
+      "text": "Стоит отметить одно. Важно понимать другое. Следует отметить третье. Нельзя не отметить четвёртое.",
+      "expect": {
+        "deductions": {
+          "RU-W2": {
+            "severity": "major",
+            "count": 4,
+            "points": 30
+          }
+        }
+      }
+    },
+    {
+      "name": "основа со звёздочкой ловит формы слова",
+      "text": "Мы сделали бесшовную интеграцию с платёжной системой банка.",
+      "expect": {
+        "has": [
+          "RU-W1"
+        ]
+      }
+    },
+    {
+      "name": "фраза из списка находится в другой форме",
+      "text": "Интерфейс открывает новые возможности для команды.",
+      "expect": {
+        "has": [
+          "RU-W2"
+        ]
+      }
+    },
+    {
+      "name": "«ё» в списке ловит и «е»",
+      "text": "Разберем по полочкам, как это устроено внутри сервиса.",
+      "expect": {
+        "has": [
+          "RU-W2"
+        ]
+      }
+    },
+    {
+      "name": "проект выключает правило, разрешает свой термин, приносит своё правило и свой порог",
+      "text": "Наша бесшовная сборка стоит отметить отдельно. Синергия отделов важна для релиза.",
+      "slopJson": "{\"disable\":[\"RU-W2\"],\"allow\":[\"бесшовн*\"],\"rules\":[{\"id\":\"P1\",\"lang\":\"ru\",\"kind\":\"words\",\"severity\":\"minor\",\"name\":\"Запрещено в проекте\",\"fix\":\"Иначе.\",\"items\":[\"релиз*\"]}],\"passScore\":50}",
+      "expect": {
+        "warnedAbout": [],
+        "lacks": [
+          "RU-W2"
+        ],
+        "has": [
+          "P1",
+          "RU-W1"
+        ],
+        "matches": {
+          "RU-W1": [
+            "Синергия"
+          ]
+        },
+        "passScore": 50
+      }
+    },
+    {
+      "name": "файл правок проекта — JSONC: комментарии и висячие запятые",
+      "text": "Отчёт в разрезе отделов готов к пятнице.",
+      "slopJson": "{\n  // a comment is fine, this is JSONC\n  \"disable\": [\"F5\", \"RU-D1\"],\n  \"allow\": [\"экосистем*\"],\n  \"rules\": [ { \"id\": \"P1\", \"lang\": \"ru\", \"kind\": \"phrases\", \"severity\": \"minor\", \"name\": \"Своё\",\n               \"fix\": \"Иначе.\", \"items\": [\"в разрезе\"] } ],\n  \"passScore\": 85,\n}",
+      "expect": {
+        "warnedAbout": [],
+        "has": [
+          "P1"
+        ],
+        "passScore": 85
+      }
+    },
+    {
+      "name": "битое правило проекта отбрасывается с предупреждением, остальные работают",
+      "text": "Отчёт готов к пятнице.",
+      "slopJson": "{\"rules\":[{\"id\":\"BAD\",\"kind\":\"regex\",\"severity\":\"minor\",\"patterns\":[\"(unclosed\"]},{\"id\":\"NOKIND\",\"severity\":\"minor\",\"items\":[\"x\"]},{\"id\":\"OK\",\"kind\":\"words\",\"severity\":\"minor\",\"items\":[\"пятниц*\"]}]}",
+      "expect": {
+        "warnedAbout": [
+          "BAD",
+          "NOKIND"
+        ],
+        "has": [
+          "OK"
+        ]
+      }
+    },
+    {
+      "name": "регулярка проекта: \\b и \\w видят кириллицу, как в Java с UNICODE_CHARACTER_CLASS",
+      "text": "Выпуски идут по пятницам, а по-настоящему срочное — сразу.",
+      "slopJson": "{\"rules\":[{\"id\":\"P2\",\"lang\":\"ru\",\"kind\":\"regex\",\"severity\":\"minor\",\"name\":\"Своё\",\"patterns\":[\"\\\\bвыпуск\\\\w*\"]},{\"id\":\"P3\",\"lang\":\"ru\",\"kind\":\"regex\",\"severity\":\"minor\",\"name\":\"Своё\",\"patterns\":[\"\\\\bпо-[\\\\w-]+\"]}]}",
+      "expect": {
+        "warnedAbout": [],
+        "matches": {
+          "P2": [
+            "Выпуски"
+          ],
+          "P3": [
+            "по-настоящему"
+          ]
+        }
+      }
+    },
+    {
+      "name": "одна проблема — одна находка, по самому тяжёлому весу",
+      "text": "Тестирование является неотъемлемой частью процесса выпуска у любой команды.",
+      "expect": {
+        "findings": [
+          "RU-S7:1"
+        ]
+      }
+    },
+    {
+      "name": "переводы строк Windows читаются как обычные: фронтматтер не проза, строки считаются так же",
+      "text": "---\r\ntitle: Стоит отметить\r\n---\r\nСтоит отметить, что сборка занимает две минуты.\r\n",
+      "expect": {
+        "findings": [
+          "RU-W2:4"
+        ]
+      }
+    }
+  ]
+}
