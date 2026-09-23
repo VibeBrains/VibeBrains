@@ -19,8 +19,8 @@
       ]
     },
     "agents.json": {
-      "version": 8,
-      "sha256": "cb1c6f53f332419893b58bad1d78bb73586c4cdd197efcb21c5363525cce57c1",
+      "version": 9,
+      "sha256": "8c2b20e81540c57bb15244ef5e69a1d2a91e43fcb802d73596c75a31f944bbaa",
       "history": [
         "1c6e83b9e740a8a43075aa37469a34ee2fa44a62e9d0d1e20e44a3ac0b6b49bd",
         "5cc34476872d4b8a201cf804df1553f9b2040ab393f05d0b09f1de5db6d4ae36",
@@ -28,7 +28,8 @@
         "944b2db864d7d905e9a407d929cbe22954ffc72d02b04aabae8a5b501cdf0287",
         "9e06f283052199e4a082d8112f418c606f09fc381612a049bba6264417df9a79",
         "2a339f7907eede7880c1637963842ac0882fb0864b0dcf7705a19636710008ce",
-        "6ffe664001ca08097326228646510b07cdfee72478389bc5256f4768acbc5773"
+        "6ffe664001ca08097326228646510b07cdfee72478389bc5256f4768acbc5773",
+        "cb1c6f53f332419893b58bad1d78bb73586c4cdd197efcb21c5363525cce57c1"
       ]
     },
     "dataSources.json": {
@@ -77,10 +78,11 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 2,
-      "sha256": "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
+      "version": 3,
+      "sha256": "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c",
       "history": [
-        "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0"
+        "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
+        "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2"
       ]
     },
     "patrols.json": {
@@ -226,8 +228,8 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 10,
-      "sha256": "73237e4652fe479a6246952d578e81c6ccd9cbf0d03ce6b960b709108bdeee38",
+      "version": 11,
+      "sha256": "027a7c1dc053b1b200efdf5dbfb344c8c850ef02364b68a773e1d6321d50e2d7",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
@@ -236,7 +238,8 @@
         "a8c9a7ba5734fdce32b52408680e4eb09b506d03c88983cf85982ab30e07fa1a",
         "1d98aa8f3aec30923932674a0871a49d94d03b4ded9951ecd529c74390154c77",
         "12a8b5795e498dd494efaeddb2c8ca4f16e36df082c6ffc622d9cab491dce20b",
-        "9ffd49b5288fabcaf98af942f05bbab1bd9aaa14624a98bfc72a54181f40e118"
+        "9ffd49b5288fabcaf98af942f05bbab1bd9aaa14624a98bfc72a54181f40e118",
+        "73237e4652fe479a6246952d578e81c6ccd9cbf0d03ce6b960b709108bdeee38"
       ]
     },
     "providers/meta-muse.jsonc": {
@@ -282,8 +285,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 9,
-      "sha256": "99a559e674aa0796e802b2582eff1e529dd0dab4a81b82487fcd6e158ed289f9",
+      "version": 10,
+      "sha256": "7380abf8461eb7e43d38a652148b9615ced6e38f35276a0055899f7e407ae789",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -291,7 +294,8 @@
         "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc",
         "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a",
         "6714e84c41616c794abad2e4ccdf84aa9460eb1dc50565e37368412040bb58af",
-        "2e39aa351698b3aaf8a51fbed9687292c35f94658507107773f43fd1c6b6323b"
+        "2e39aa351698b3aaf8a51fbed9687292c35f94658507107773f43fd1c6b6323b",
+        "99a559e674aa0796e802b2582eff1e529dd0dab4a81b82487fcd6e158ed289f9"
       ]
     },
     "providers/opencode-go.jsonc": {
@@ -345,10 +349,11 @@
       ]
     },
     "providers/xiaomi-mimo.jsonc": {
-      "version": 2,
-      "sha256": "c4ce8120c23678ec0874a1a28c4662315767841b85d00dfb89cf9228455dfe18",
+      "version": 3,
+      "sha256": "9394f7f7171c15032993d0f894b5a1444719a016246f8055fb6dad42131af9ea",
       "history": [
-        "d1be4717ba3a5f70ccccb2148a97eaf63f1d59b9888a297181e185eb3b1e8b44"
+        "d1be4717ba3a5f70ccccb2148a97eaf63f1d59b9888a297181e185eb3b1e8b44",
+        "c4ce8120c23678ec0874a1a28c4662315767841b85d00dfb89cf9228455dfe18"
       ]
     },
     "providers/zai.jsonc": {
