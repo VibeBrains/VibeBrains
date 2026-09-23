@@ -737,9 +737,11 @@
       "history": []
     },
     "testVectors/textSlop.json": {
-      "version": 1,
-      "sha256": "d5b89d7cea79bffd25f94b19660d679dce93a98a375763da1b30fc84abcc2174",
-      "history": []
+      "version": 2,
+      "sha256": "6fad9643dd33aa8af5651500e2cdd3f05bbeb7a014bbcc80121b90d02cbcf99c",
+      "history": [
+        "d5b89d7cea79bffd25f94b19660d679dce93a98a375763da1b30fc84abcc2174"
+      ]
     }
   }
 }
