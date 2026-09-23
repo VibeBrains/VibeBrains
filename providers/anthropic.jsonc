@@ -30,7 +30,9 @@
         // больше токенов — старые бюджеты в токенах занижают счёт.
         // "static": [
         //   { "id": "claude-fable-5-1", "name": "Claude Fable 5.1", "default": true,
-        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" },
+        //     // При "cacheTtl": "1h" запись кэша стоит $20, а не $12.50: со ставкой пяти минут
+        //     // отчёт о расходе занизит счёт за каждую запись.
+        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 20, "currency": "USD" },
         //     "cacheTtl": "1h" },
         //   { "id": "claude-mythos-5-1", "name": "Claude Mythos 5.1 (по допуску)",
         //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" } },

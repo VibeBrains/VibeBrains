@@ -5,6 +5,10 @@
 // Для дешёвых маршрутов выбирайте полный id тира (gpt-5.6-terra / gpt-5.6-luna) — иначе
 // будете платить по флагманскому тарифу. Terra и Luna — кандидаты на рутину (коммиты,
 // переименования, короткие правки), Sol оставляйте на сложные задачи.
+//
+// КЭШ ПРОМПТА: Chat Completions принимает prompt_cache_key (параметр в официальном SDK,
+// completion_create_params.py, сверено 23.09.2026). "promptCacheKey": true ниже объявляет,
+// что endpoint поле принимает; ключ, постоянный в пределах разговора, подставляет клиент.
 {
   "version": 1,
   "providers": [
@@ -16,6 +20,7 @@
       "baseURL": "https://api.openai.com/v1",
       "auth": "bearer",
       "apiKeyEnv": "OPENAI_API_KEY",
+      "promptCacheKey": true, // клиент шлёт prompt_cache_key, постоянный в пределах разговора
       "order": 34, // сразу после DeepSeek (32–33)
       "models": {
         "fetch": true
