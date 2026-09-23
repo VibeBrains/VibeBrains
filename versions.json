@@ -91,8 +91,8 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 9,
-      "sha256": "ff2873125ebb340e5684f65b789ef5fa93d17586d54912b688b6737fe6af2099",
+      "version": 10,
+      "sha256": "69d6d334418dc477b9c2d898dd14c09ded82809537694c4feada46d95551766b",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
@@ -101,14 +101,16 @@
         "c65f5e319bcbf3fe10103b3c394f8e2dd1ef95d0dd3b08938bce6758cae9fb2f",
         "939815d0a2232d98263ea0a4504756ae1885c1b8dac3066bc937bf1f1473bb22",
         "34dbcb56d0bd0da330467d9418ee8d1046499413c972bf88e0e76f1d381bda4b",
-        "1417614a091a3bc8a5f2acb1b7f540825937950d829bf33726193f9de3f9871f"
+        "1417614a091a3bc8a5f2acb1b7f540825937950d829bf33726193f9de3f9871f",
+        "ff2873125ebb340e5684f65b789ef5fa93d17586d54912b688b6737fe6af2099"
       ]
     },
     "products.json": {
-      "version": 2,
-      "sha256": "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
+      "version": 3,
+      "sha256": "bfd4bf8559cb0d758ea584bc8ee5e22b5ddb677b8fd62a80f143fe128a52e8c9",
       "history": [
-        "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c"
+        "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
+        "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -506,9 +508,39 @@
       "sha256": "5c01624c617152b46e7a4b41a23c9a5fd5a9c8242c5b6cc7389930584428ac89",
       "history": []
     },
+    "skills/anti-slop/SKILL.md": {
+      "version": 1,
+      "sha256": "61882eff0b30957f94ed737ad4568da2e8d48a1a514951ca167470524c056825",
+      "history": []
+    },
+    "skills/anti-slop/evals/draft.md": {
+      "version": 1,
+      "sha256": "cc65f3a88e703844c7e28bbe479dfa3df96be9988e5b1c14dd5b974c6b480150",
+      "history": []
+    },
+    "skills/anti-slop/evals/evals.json": {
+      "version": 1,
+      "sha256": "8694bbf0f405efe0309475e34e4955512635031fc8eee4ef18b1ed406ebbaab2",
+      "history": []
+    },
+    "skills/anti-slop/evals/human-post.md": {
+      "version": 1,
+      "sha256": "b56f646126a3efb2431f314381cf024ffafe319a9830b43b18f49b71a814fa05",
+      "history": []
+    },
+    "skills/anti-slop/references/reviewer.md": {
+      "version": 1,
+      "sha256": "8f97e237ed937f1e1109b6f2e3f242a608a9f2512294d0d19442b1a6be3e4f77",
+      "history": []
+    },
+    "skills/anti-slop/references/voice.md": {
+      "version": 1,
+      "sha256": "22bfc0cec4c5631e1762854c2a87d54fd4c27b2b90e58e5e837e0d9b0cd0c043",
+      "history": []
+    },
     "skills/design-vocabulary/SKILL.md": {
-      "version": 9,
-      "sha256": "f3eeec54bb17f92fcc9a83d40544d019cfe0995724909c475125691b945c135e",
+      "version": 10,
+      "sha256": "84ea134a38eda0f2c408fb5809174f37d8b917738c3a7b728d61e7e3c34482f4",
       "history": [
         "8fa01867972ead00f56e95ae756440f2ca0bba0dbc4a09c51b3dddcddbf77a7f",
         "3a943b7046326b97328df00b7bf1716bfcd771b890d7f3823c73b69f6e093a10",
@@ -517,7 +549,8 @@
         "f9caf3e92cbc94d83982455aab18aef63f798e23f9f388fa198b5ed0ac184ee0",
         "2cd693ba1c86714c94311f00fd93c28c42101039f9661a5ebc64cf438ab6516a",
         "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750",
-        "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf"
+        "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf",
+        "f3eeec54bb17f92fcc9a83d40544d019cfe0995724909c475125691b945c135e"
       ]
     },
     "skills/example/SKILL.md": {
@@ -680,6 +713,16 @@
       "history": [
         "f4357bc19c1007a68287a0f5e14e5b529f340a5761a5abbdbf6671f82ae1f907"
       ]
+    },
+    "slop.json": {
+      "version": 1,
+      "sha256": "9c075f05e0ea7e58a4dfbb0433f07292905eac97591be89b082c06c0ff3c50c8",
+      "history": []
+    },
+    "slop/catalog.jsonc": {
+      "version": 1,
+      "sha256": "c0b4fa7001ca92f4408c4a0282635e1c9c42722ad4a1e87e95d94d41a38ffe9c",
+      "history": []
     },
     "testVectors/subscriptionQuota.json": {
       "version": 1,
