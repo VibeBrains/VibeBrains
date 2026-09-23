@@ -164,12 +164,13 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 5,
-      "sha256": "08995671af07fb3ee1bb58ad60cb24b492e8f309407ccf6d58f9bf3e0630130d",
+      "version": 6,
+      "sha256": "c4d6dc7fef961f25c20fab579ad6e52430b348fc8f7591d0bbec671ffb893c8d",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
-        "4be0f48def6887df02f53ba19ccf7be5a960a36b7b1fb889ba3e8b2ec43705a9"
+        "4be0f48def6887df02f53ba19ccf7be5a960a36b7b1fb889ba3e8b2ec43705a9",
+        "08995671af07fb3ee1bb58ad60cb24b492e8f309407ccf6d58f9bf3e0630130d"
       ]
     },
     "providers/arbr.jsonc": {
@@ -275,14 +276,15 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 7,
-      "sha256": "6714e84c41616c794abad2e4ccdf84aa9460eb1dc50565e37368412040bb58af",
+      "version": 8,
+      "sha256": "2e39aa351698b3aaf8a51fbed9687292c35f94658507107773f43fd1c6b6323b",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
         "626f3b90ae77da66bbee08f2964a9715b0bc1b87faa0dff2a9b1a71543e7153a",
         "f7b60960565292b6a0b1e34ce4a30690f9d23f70d2cee31adbbe40bf5c4090bc",
-        "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a"
+        "0a0c76d2154da8fe49071bb6edb0c798e6b48dce25dcba44aff0d072b953829a",
+        "6714e84c41616c794abad2e4ccdf84aa9460eb1dc50565e37368412040bb58af"
       ]
     },
     "providers/opencode-go.jsonc": {
@@ -328,10 +330,11 @@
       ]
     },
     "providers/xai.jsonc": {
-      "version": 2,
-      "sha256": "372cbe6d64d2b3b2729ab6f6669212a91063e16f102e4490c42726c376b24afc",
+      "version": 3,
+      "sha256": "81c6c6bcdc8dc3659e5a36f20f41bb82b0e98506aab02391a4dac2ef57079cd6",
       "history": [
-        "970943f6d449a2b3a2454c24623e04c12b68b8876afd5746b85fca42062a5ee1"
+        "970943f6d449a2b3a2454c24623e04c12b68b8876afd5746b85fca42062a5ee1",
+        "372cbe6d64d2b3b2729ab6f6669212a91063e16f102e4490c42726c376b24afc"
       ]
     },
     "providers/xiaomi-mimo.jsonc": {
