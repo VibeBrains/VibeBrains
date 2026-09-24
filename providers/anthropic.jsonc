@@ -44,6 +44,11 @@
         //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ: {"type": "disabled"} — 400, поле без значения — адаптивное
         //   // мышление на умолчании вендора, а оно у этой модели medium, а не high. Честно «выключено» у неё
         //   // может значить только самый низкий уровень усилия — low.
+        //   // УСИЛИЕ: low, medium (умолчание), high, xhigh, max. Без объявления ползунок шлёт low / medium / high.
+        //   // Верх до max открывает строка "reasoning": {"effort": ["low", "medium", "high", "xhigh", "max"]}:
+        //   // тогда положения — low / high / max, середина уходит с умолчания вендора на high, а для xhigh и
+        //   // max вендор советует max_tokens от 64K (platform.claude.com/docs/en/build-with-claude/effort,
+        //   // сверено 24.09.2026: xhigh — для задач дольше 30 минут с бюджетом в миллионы токенов).
         //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
         //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "currency": "USD" } }
         // ]

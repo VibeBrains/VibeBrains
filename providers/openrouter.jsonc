@@ -13,7 +13,12 @@
       "auth": "bearer",
       "apiKeyEnv": "OPENROUTER_API_KEY", // ключ: OPENROUTER_API_KEY=sk-or-... в .vibe/.env
       "order": 20,
-      "models": { "fetch": true }
+      "models": { "fetch": true },
+      // Рассуждение OpenRouter принимает одним объектом для всех моделей: "reasoning": {"effort": …},
+      // а выключается оно {"effort": "none"} (openrouter.ai/docs/use-cases/reasoning-tokens, сверено 24.09.2026).
+      // Поле reasoning_effort протокола OpenAI в его документации не упомянуто, поэтому провайдеру нужен свой
+      // диалект. VibeIDEA читает поле; VibeIDE говорит с OpenRouter встроенным кодом и поле пропускает.
+      "reasoningDialect": "openrouter"
     }
   ]
 }
