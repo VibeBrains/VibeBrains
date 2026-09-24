@@ -323,11 +323,12 @@
       ]
     },
     "providers/openrouter.jsonc": {
-      "version": 4,
-      "sha256": "dcb2e71c2a30e4cfc6b7dc3834f06941a45654645ff5b113e784fb49d16a516e",
+      "version": 5,
+      "sha256": "f92127ac1e16848897f99f209da5cfd7733f6fb3e6c3e6d82675c04e6f807c9a",
       "history": [
         "2160f2c3aab1a94aef44d58a7441871bc63c2521d22c3cfd3f4894c5e36a26ab",
-        "122e15b74574aee0043c024e8e49b7670178dfdeda66b37a4c76744bc726d6a6"
+        "122e15b74574aee0043c024e8e49b7670178dfdeda66b37a4c76744bc726d6a6",
+        "dcb2e71c2a30e4cfc6b7dc3834f06941a45654645ff5b113e784fb49d16a516e"
       ]
     },
     "providers/qwen.jsonc": {
