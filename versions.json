@@ -764,9 +764,11 @@
       ]
     },
     "terse/replies.md": {
-      "version": 1,
-      "sha256": "efbdfc57c68c5254a8e91ac8a7821ff84045facdfe15cc6d7999d569dfc8bc0d",
-      "history": []
+      "version": 2,
+      "sha256": "7a80c1a5ae03c5314153ea4cbf5d7714f936c38914f496eb0ee4ba887ec9dfe3",
+      "history": [
+        "efbdfc57c68c5254a8e91ac8a7821ff84045facdfe15cc6d7999d569dfc8bc0d"
+      ]
     },
     "testVectors/modelRoutes.json": {
       "version": 2,

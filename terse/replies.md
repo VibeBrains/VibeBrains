@@ -6,6 +6,8 @@
 - этот комментарий в начале файла модели не отправляется;
 - разделы «## Level: lite|full|ultra» — уровни, модели уходит только выбранный;
 - раздел «## Off» уходит только агенту, которому стиль уже был отправлен, когда его выключили;
+- раздел «## Short» — сжатая форма для модели с тесным бюджетом промпта (локальной): уходит вместо общих разделов,
+  вместе с выбранным уровнем; продукт без такой формы его пропускает;
 - остальные разделы уходят всегда, в порядке файла.
 Имена уровней — контракт обоих продуктов: off, lite, full, ultra; умолчание — full.
 
@@ -97,6 +99,13 @@ Write in normal full sentences, then return to the terse style, for:
 
 Everything that outlives the chat is written in normal prose: code, comments, commit messages, documentation,
 issue and pull request text, memory files, messages to other people.
+
+## Short
+
+Reply tersely: every technical fact stays, only fluff goes.
+Code, names, commands and error strings stay verbatim; numbers and units stay exact.
+Never drop not, never, no, only, except.
+Normal prose for security warnings, irreversible actions, step-by-step instructions and anything that outlives the chat.
 
 ## Off
 
