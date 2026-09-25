@@ -79,12 +79,13 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 4,
-      "sha256": "e302ac0fe024e1a0043b167e9846ea68cb28ebdc755ce87e188abe1367aa2ef4",
+      "version": 5,
+      "sha256": "6b72ba0ad1d70533ce241ad843c2c3a25b6221fe1655e57e8b5ebc461c43d1d5",
       "history": [
         "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
         "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
-        "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c"
+        "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c",
+        "e302ac0fe024e1a0043b167e9846ea68cb28ebdc755ce87e188abe1367aa2ef4"
       ]
     },
     "patrols.json": {
