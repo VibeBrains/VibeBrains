@@ -110,15 +110,16 @@
       ]
     },
     "products.json": {
-      "version": 7,
-      "sha256": "6813020be2c7c31ed2129f1456f667149a462774c9d82ec3fd35b0d827c6c3ee",
+      "version": 8,
+      "sha256": "ab8934c7426c35052cf3faeb4eff1f17969493d932ad896b96b47fa3c96b7faf",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
         "bfd4bf8559cb0d758ea584bc8ee5e22b5ddb677b8fd62a80f143fe128a52e8c9",
         "3134e8d79f0ff5ec0e1031fe7219d4e5f5405d3ba593f62bd8cdeb2838ab6d01",
         "5ba6af7e176d860d366948d6a1f3a709a37fb430ad28dd1e027775c880749d79",
-        "ccfdd01011f39ce2c45b3265c620fc95ca8d48569676ca09b9e7be74f330a046"
+        "ccfdd01011f39ce2c45b3265c620fc95ca8d48569676ca09b9e7be74f330a046",
+        "6813020be2c7c31ed2129f1456f667149a462774c9d82ec3fd35b0d827c6c3ee"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -753,6 +754,11 @@
       "history": [
         "c0b4fa7001ca92f4408c4a0282635e1c9c42722ad4a1e87e95d94d41a38ffe9c"
       ]
+    },
+    "terse/replies.md": {
+      "version": 1,
+      "sha256": "efbdfc57c68c5254a8e91ac8a7821ff84045facdfe15cc6d7999d569dfc8bc0d",
+      "history": []
     },
     "testVectors/modelRoutes.json": {
       "version": 1,
