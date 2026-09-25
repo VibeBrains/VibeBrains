@@ -1,0 +1,95 @@
+{
+  "_comment": "Общие тестовые векторы: какой адрес провайдера локальный, куда уходит ключ и каким запросом спрашивается каталог моделей. Читают тесты VibeIDE и VibeIDEA: одна запись providers.json обязана ходить к серверу в обоих продуктах одинаково. Не сид — в products.json адресован пустому списку продуктов. Правило описано в providers/README.md, раздел «Ключ, локальный адрес, каталог». Собрано 25.09.2026 после расхождений: ::1 не узнавался ни одним продуктом (хост приходит в скобках), 0.0.0.0 и LOCALHOST — одним из двух, адрес каталога и место ключа на anthropic различались.",
+  "version": 1,
+  "localAddress": [
+    { "baseURL": "http://localhost:11434/v1", "local": true },
+    { "baseURL": "http://LOCALHOST:1234/v1", "local": true },
+    { "baseURL": "http://127.0.0.1:8000/v1", "local": true },
+    { "baseURL": "http://[::1]:8000/v1", "local": true },
+    { "baseURL": "http://0.0.0.0:8000/v1", "local": true },
+    { "baseURL": "http://192.168.1.50:8000/v1", "local": false },
+    { "baseURL": "http://127.0.0.2:8000/v1", "local": false },
+    { "baseURL": "http://localhost.example.com/v1", "local": false },
+    { "baseURL": "https://api.openai.com/v1", "local": false },
+    { "baseURL": "not a url", "local": false }
+  ],
+  "placement": [
+    { "name": "auth нет — openai: Bearer", "wire": "openai", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "auth нет — openai-responses: Bearer", "wire": "openai-responses", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "auth нет — anthropic: родной x-api-key", "wire": "anthropic", "key": "k", "headers": { "x-api-key": "k" }, "query": {} },
+    { "name": "auth нет — gemini: родной x-goog-api-key", "wire": "gemini", "key": "k", "headers": { "x-goog-api-key": "k" }, "query": {} },
+    { "name": "bearer на anthropic — буквально", "auth": "bearer", "wire": "anthropic", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "bearer на gemini — буквально", "auth": "bearer", "wire": "gemini", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "bearer объектом", "auth": { "type": "bearer" }, "wire": "openai", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "header с именем", "auth": { "type": "header", "name": "api-key" }, "wire": "anthropic", "key": "k", "headers": { "api-key": "k" }, "query": {} },
+    { "name": "header без имени — openai: x-api-key", "auth": { "type": "header" }, "wire": "openai", "key": "k", "headers": { "x-api-key": "k" }, "query": {} },
+    { "name": "header без имени — anthropic: x-api-key", "auth": { "type": "header" }, "wire": "anthropic", "key": "k", "headers": { "x-api-key": "k" }, "query": {} },
+    { "name": "header без имени — gemini: x-goog-api-key", "auth": { "type": "header" }, "wire": "gemini", "key": "k", "headers": { "x-goog-api-key": "k" }, "query": {} },
+    { "name": "query с именем", "auth": { "type": "query", "name": "key" }, "wire": "gemini", "key": "k", "headers": {}, "query": { "key": "k" } },
+    { "name": "query без имени — key на любом проводе", "auth": { "type": "query" }, "wire": "openai", "key": "k", "headers": {}, "query": { "key": "k" } },
+    { "name": "none — ключ не уходит, даже если он есть", "auth": "none", "wire": "openai", "key": "k", "headers": {}, "query": {} },
+    { "name": "none объектом на anthropic", "auth": { "type": "none" }, "wire": "anthropic", "key": "k", "headers": {}, "query": {} },
+    { "name": "ключа нет — ничего, никакой заглушки", "wire": "openai", "key": null, "headers": {}, "query": {} },
+    { "name": "ключа нет при явном bearer — ничего", "auth": "bearer", "wire": "anthropic", "key": null, "headers": {}, "query": {} },
+    { "name": "незнакомое значение строкой — как bearer", "auth": "None", "wire": "openai", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} },
+    { "name": "незнакомый тип объекта — как bearer", "auth": { "type": "oauth" }, "wire": "anthropic", "key": "k", "headers": { "Authorization": "Bearer k" }, "query": {} }
+  ],
+  "catalog": [
+    {
+      "name": "локальный сервер без ключа: <baseURL>/models, ни заголовка ключа",
+      "provider": { "baseURL": "http://localhost:11434/v1" },
+      "key": null,
+      "url": "http://localhost:11434/v1/models",
+      "headers": {}
+    },
+    {
+      "name": "база без /v1 — путь дописывается как есть",
+      "provider": { "baseURL": "https://api.z.ai/api/coding/paas/v4/", "auth": "bearer" },
+      "key": "k",
+      "url": "https://api.z.ai/api/coding/paas/v4/models",
+      "headers": { "Authorization": "Bearer k" }
+    },
+    {
+      "name": "gemini с ключом параметром",
+      "provider": { "baseURL": "https://generativelanguage.googleapis.com/v1beta", "protocol": "gemini", "auth": { "type": "query", "name": "key" } },
+      "key": "k",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models?key=k",
+      "headers": {}
+    },
+    {
+      "name": "gemini без auth — родной заголовок",
+      "provider": { "baseURL": "https://generativelanguage.googleapis.com/v1beta", "protocol": "gemini" },
+      "key": "k",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models",
+      "headers": { "x-goog-api-key": "k" }
+    },
+    {
+      "name": "anthropic: ключ и заголовок версии",
+      "provider": { "baseURL": "https://api.minimax.io/anthropic/v1", "protocol": "anthropic", "auth": { "type": "header", "name": "x-api-key" } },
+      "key": "k",
+      "url": "https://api.minimax.io/anthropic/v1/models",
+      "headers": { "x-api-key": "k", "anthropic-version": "2023-06-01" }
+    },
+    {
+      "name": "fetch строкой — ровно этот адрес",
+      "provider": { "baseURL": "https://api.z.ai/api/coding/paas/v4", "models": { "fetch": "https://api.z.ai/api/paas/v4/models" } },
+      "key": "k",
+      "url": "https://api.z.ai/api/paas/v4/models",
+      "headers": { "Authorization": "Bearer k" }
+    },
+    {
+      "name": "headers и query файла идут и в каталог; query ключа — после query файла",
+      "provider": { "baseURL": "https://gw.example.com/v1", "headers": { "X-Team": "a" }, "query": { "api-version": "2025-01-01" }, "auth": { "type": "query", "name": "code" } },
+      "key": "k",
+      "url": "https://gw.example.com/v1/models?api-version=2025-01-01&code=k",
+      "headers": { "X-Team": "a" }
+    },
+    {
+      "name": "none — ключ не уходит и в каталог",
+      "provider": { "baseURL": "http://192.168.1.50:8000/v1", "auth": "none" },
+      "key": "k",
+      "url": "http://192.168.1.50:8000/v1/models",
+      "headers": {}
+    }
+  ]
+}

@@ -108,12 +108,13 @@
       ]
     },
     "products.json": {
-      "version": 4,
-      "sha256": "3134e8d79f0ff5ec0e1031fe7219d4e5f5405d3ba593f62bd8cdeb2838ab6d01",
+      "version": 5,
+      "sha256": "5ba6af7e176d860d366948d6a1f3a709a37fb430ad28dd1e027775c880749d79",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
-        "bfd4bf8559cb0d758ea584bc8ee5e22b5ddb677b8fd62a80f143fe128a52e8c9"
+        "bfd4bf8559cb0d758ea584bc8ee5e22b5ddb677b8fd62a80f143fe128a52e8c9",
+        "3134e8d79f0ff5ec0e1031fe7219d4e5f5405d3ba593f62bd8cdeb2838ab6d01"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -141,8 +142,8 @@
       ]
     },
     "providers/README.md": {
-      "version": 11,
-      "sha256": "52e233196dfde3c5b7172065c9a89cf8d2ed59a0bba40628e3b5f3acd9380758",
+      "version": 12,
+      "sha256": "89e034498d9b4c03dacf83d96389dc7a6d273227c43957f48e0c0eb79a6a1fe4",
       "history": [
         "541456bdca5484c2f83b77ea4608bcc5c3bbec1e3d99359cc6c464d0a805836d",
         "ef01bc2f85c2f6eac12247d00ba88a395467e50e021a92487e2c007b0a537c7e",
@@ -152,7 +153,8 @@
         "2cff98fda4e67f58d81aa1ee91a2ad86db057f3e7e475ac2db3ba670cfcf052b",
         "22a887d100dc59594eaacaf673dd7744978d19943b107f51588fda9cfc48a45b",
         "bd35e775003cb98c2cfc7aedaa5320850495f9a4b1e49e59ab2d8d74ee98fe4e",
-        "d1c16a66bb583d1a5fa00b27d0c3ae82fe4845257891d4c71fc8c721f8627445"
+        "d1c16a66bb583d1a5fa00b27d0c3ae82fe4845257891d4c71fc8c721f8627445",
+        "52e233196dfde3c5b7172065c9a89cf8d2ed59a0bba40628e3b5f3acd9380758"
       ]
     },
     "providers/_template-openai-compatible.jsonc": {
@@ -307,19 +309,21 @@
       ]
     },
     "providers/opencode-go.jsonc": {
-      "version": 5,
-      "sha256": "9c69f9642687549be2c1a543250cfc4ed816c2356a2f575ec2e377e06b51d167",
+      "version": 6,
+      "sha256": "aa524f257f289186646d9b9668c7fc1e3d4eb601cb1866c44ef1615f1056d443",
       "history": [
         "4450c9d3e49895c39db77ed6ee64fdaa648cf86b28819bded0a039b0c669efaf",
         "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd",
-        "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078"
+        "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078",
+        "9c69f9642687549be2c1a543250cfc4ed816c2356a2f575ec2e377e06b51d167"
       ]
     },
     "providers/opencode-zen.jsonc": {
-      "version": 3,
-      "sha256": "131c45a8cbcbbe0c7dcd370459a5c614c42422148e9b982ac476933b755b9589",
+      "version": 4,
+      "sha256": "a8e72f0aca55273ebca9266d1ca94aed38cb77003632959edc00be7a15a4bea1",
       "history": [
-        "44ddd697d4972419bdcab2bc7bddf6bdd8d03023cd2a3ed16b75d976b58093bc"
+        "44ddd697d4972419bdcab2bc7bddf6bdd8d03023cd2a3ed16b75d976b58093bc",
+        "131c45a8cbcbbe0c7dcd370459a5c614c42422148e9b982ac476933b755b9589"
       ]
     },
     "providers/openrouter.jsonc": {
@@ -736,6 +740,11 @@
       "history": [
         "c0b4fa7001ca92f4408c4a0282635e1c9c42722ad4a1e87e95d94d41a38ffe9c"
       ]
+    },
+    "testVectors/providerAuth.json": {
+      "version": 1,
+      "sha256": "3193b46dec5f96ac1f90a75459235e5b02050507601c504bef8883a00917db88",
+      "history": []
     },
     "testVectors/subscriptionQuota.json": {
       "version": 1,

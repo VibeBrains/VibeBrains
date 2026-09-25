@@ -11,7 +11,10 @@
       "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "openai",
       "baseURL": "https://opencode.ai/zen/go/v1",
-      "auth": "bearer",
+      // "auth" намеренно не указан: ключ уходит родным заголовком того протокола, которым говорит модель, —
+      // Bearer на /chat/completions и /responses, x-api-key на /v1/messages. Шлюз OpenCode читает ключ только так:
+      // на /v1/messages Bearer даёт «Missing API key», на /chat/completions x-api-key — тоже (проверено 25.09.2026).
+      // Явный "bearer" ушёл бы Bearer'ом на все протоколы — см. providers/README.md, «Ключ, локальный адрес, каталог».
       "apiKeyRef": "opencode", // один ключ на Go и Zen в защищённом хранилище
       "apiKeyEnv": "OPENCODE_API_KEY", // либо OPENCODE_API_KEY=... в .vibe/.env
       "order": 10,
