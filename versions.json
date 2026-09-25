@@ -79,11 +79,12 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 3,
-      "sha256": "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c",
+      "version": 4,
+      "sha256": "e302ac0fe024e1a0043b167e9846ea68cb28ebdc755ce87e188abe1367aa2ef4",
       "history": [
         "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
-        "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2"
+        "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
+        "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c"
       ]
     },
     "patrols.json": {
@@ -110,8 +111,8 @@
       ]
     },
     "products.json": {
-      "version": 8,
-      "sha256": "ab8934c7426c35052cf3faeb4eff1f17969493d932ad896b96b47fa3c96b7faf",
+      "version": 9,
+      "sha256": "385138868f5b715401039ede35e1ce7c1814b41796f93fe1dfd15e3ef050bf8e",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -119,7 +120,8 @@
         "3134e8d79f0ff5ec0e1031fe7219d4e5f5405d3ba593f62bd8cdeb2838ab6d01",
         "5ba6af7e176d860d366948d6a1f3a709a37fb430ad28dd1e027775c880749d79",
         "ccfdd01011f39ce2c45b3265c620fc95ca8d48569676ca09b9e7be74f330a046",
-        "6813020be2c7c31ed2129f1456f667149a462774c9d82ec3fd35b0d827c6c3ee"
+        "6813020be2c7c31ed2129f1456f667149a462774c9d82ec3fd35b0d827c6c3ee",
+        "ab8934c7426c35052cf3faeb4eff1f17969493d932ad896b96b47fa3c96b7faf"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -147,8 +149,8 @@
       ]
     },
     "providers/README.md": {
-      "version": 14,
-      "sha256": "fb141e8e39bca9f3617fce85d17583a5adc96c7a10bc17cd2c0dfc1eac876c05",
+      "version": 15,
+      "sha256": "0efc0ed08ad5f84199efbdc7c285873339768b294d48dfe2bd9836842b8afa3c",
       "history": [
         "541456bdca5484c2f83b77ea4608bcc5c3bbec1e3d99359cc6c464d0a805836d",
         "ef01bc2f85c2f6eac12247d00ba88a395467e50e021a92487e2c007b0a537c7e",
@@ -161,7 +163,8 @@
         "d1c16a66bb583d1a5fa00b27d0c3ae82fe4845257891d4c71fc8c721f8627445",
         "52e233196dfde3c5b7172065c9a89cf8d2ed59a0bba40628e3b5f3acd9380758",
         "89e034498d9b4c03dacf83d96389dc7a6d273227c43957f48e0c0eb79a6a1fe4",
-        "97103748b5236b55465cecdd395bb14c1f025cd7ef12c8f49e4dfee2ee791468"
+        "97103748b5236b55465cecdd395bb14c1f025cd7ef12c8f49e4dfee2ee791468",
+        "fb141e8e39bca9f3617fce85d17583a5adc96c7a10bc17cd2c0dfc1eac876c05"
       ]
     },
     "providers/_template-openai-compatible.jsonc": {
@@ -766,13 +769,20 @@
       "history": []
     },
     "testVectors/modelRoutes.json": {
-      "version": 1,
-      "sha256": "668c78f8be39b370deeae3375ea495050fd7913758f7402e110e5da6ea977cd5",
-      "history": []
+      "version": 2,
+      "sha256": "4df98cf67e676c5e5cca19cc3b08871e326acec63eb2c1854b5039b1eafda394",
+      "history": [
+        "668c78f8be39b370deeae3375ea495050fd7913758f7402e110e5da6ea977cd5"
+      ]
     },
     "testVectors/providerAuth.json": {
       "version": 1,
       "sha256": "3193b46dec5f96ac1f90a75459235e5b02050507601c504bef8883a00917db88",
+      "history": []
+    },
+    "testVectors/reasoningEcho.json": {
+      "version": 1,
+      "sha256": "a1cb80d93e7106ad8a4e12b0c677d52277763a94e87cec852abac15cdf2c784d",
       "history": []
     },
     "testVectors/subscriptionQuota.json": {

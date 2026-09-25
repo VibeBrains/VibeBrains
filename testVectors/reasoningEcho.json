@@ -1,0 +1,30 @@
+{
+  "_comment": "Общие тестовые векторы: какие модели требуют своё рассуждение обратно в истории и в какой форме. Читают тесты VibeIDE и VibeIDEA: один список на оба продукта, иначе он разъезжается молча. Не сид — в products.json адресован пустому списку. Поля кейса: model — id модели как в запросе (префикс роутера вида vendor/ допускается); openai — форма возврата на OpenAI-совместимом проводе: reasoning_content (полем) | think-tags (внутри content как <think>…</think>) | null (не возвращается); anthropic — какие блоки мышления уходят на Anthropic-совместимом проводе: all (все, рассуждение строкой — одним неподписанным блоком) | same-prefix (только подписанные блоки текущего хода с тем же system и tools — Claude) | none. Источники вендоров — в sources. Собрано 25.09.2026.",
+  "version": 1,
+  "sources": {
+    "kimi": "platform.kimi.ai/docs/guide/use-kimi-k2-thinking-model — называет kimi-k3, kimi-k2.7-code, kimi-k2.6; kimi-k2.5 не называет",
+    "kimi-code": "kimi.com/code/docs/en/kimi-code/error-reference.html — kimi-for-coding требует reasoning_content у ответа с вызовом инструмента",
+    "deepseek": "api-docs.deepseek.com/guides/thinking_mode — с tools рассуждение всех прошлых ходов возвращается",
+    "mimo": "mimo.mi.com/docs/en-US/quick-start/usage-guide/text-generation/deep-thinking — думают mimo-v2.6-*, mimo-v2.5-pro, mimo-v2.5; без возврата 400",
+    "minimax": "platform.minimax.io/docs/guides/text-m3-function-call — anthropic: весь content с блоками thinking; openai: content без изменений вместе с <think>",
+    "claude": "platform.claude.com/docs/en/build-with-claude/extended-thinking — блоки текущего хода с инструментами, без изменений, с подписью"
+  },
+  "cases": [
+    { "model": "kimi-k3", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "kimi-k2.7-code", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "kimi-k2.6", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "moonshotai/kimi-k2.6", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "kimi-for-coding", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "kimi-k2.5", "openai": null, "anthropic": "none" },
+    { "model": "deepseek-v4-pro", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "mimo-v2.6-pro", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "mimo-v2.5", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "MiniMax-M3", "openai": "think-tags", "anthropic": "all" },
+    { "model": "minimax-m2.7", "openai": "think-tags", "anthropic": "all" },
+    { "model": "MiniMax-M2.5", "openai": "think-tags", "anthropic": "all" },
+    { "model": "claude-opus-5-5", "openai": null, "anthropic": "same-prefix" },
+    { "model": "anthropic/claude-sonnet-5", "openai": null, "anthropic": "same-prefix" },
+    { "model": "gpt-6-sol", "openai": null, "anthropic": "none" },
+    { "model": "qwen3.8-max", "openai": null, "anthropic": "none" }
+  ]
+}

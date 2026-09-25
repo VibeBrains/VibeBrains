@@ -49,6 +49,9 @@
 //   ECHO_REASONING          — модель требует своё рассуждение обратно: в истории ответ
 //                             ассистента уходит вместе с ним — reasoning_content на проводе
 //                             OpenAI, блоками thinking на проводе Anthropic.
+//   REASONING_AS_THINK_TAGS — вместе с ECHO_REASONING: на проводе OpenAI рассуждение
+//                             возвращается внутри content тегами <think>…</think>, а не полем
+//                             reasoning_content (MiniMax: вендор требует content без изменений).
 //
 //  МЫШЛЕНИЕ (чем становится ползунок глубины рассуждения):
 //   ADAPTIVE_THINKING       — мышление задаётся адаптивным режимом и уровнем усилия; бюджет
