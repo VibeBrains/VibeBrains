@@ -51,6 +51,8 @@
     { "path": "testVectors/modelRoutes.json", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
-    { "path": "slop.json", "products": ["vibeidea", "vibeide"] }
+    { "path": "slop.json", "products": ["vibeidea", "vibeide"] },
+    // Сценарии `/workflow:<имя>` читает только VibeIDE; навык, по которому сценарий действует (skills/demo), — общий.
+    { "path": "workflows/demo.json", "products": ["vibeide"] }
   ]
 }

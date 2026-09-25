@@ -8,14 +8,15 @@
       "history": []
     },
     "README.md": {
-      "version": 6,
-      "sha256": "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
+      "version": 7,
+      "sha256": "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
         "3ab39f3dbd12fbe9cb3d752959f65a2d789a01dc7e983de294f1a9b9ecb4eae3",
         "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1",
-        "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c"
+        "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
+        "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df"
       ]
     },
     "agents.json": {
@@ -109,14 +110,15 @@
       ]
     },
     "products.json": {
-      "version": 6,
-      "sha256": "ccfdd01011f39ce2c45b3265c620fc95ca8d48569676ca09b9e7be74f330a046",
+      "version": 7,
+      "sha256": "6813020be2c7c31ed2129f1456f667149a462774c9d82ec3fd35b0d827c6c3ee",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
         "bfd4bf8559cb0d758ea584bc8ee5e22b5ddb677b8fd62a80f143fe128a52e8c9",
         "3134e8d79f0ff5ec0e1031fe7219d4e5f5405d3ba593f62bd8cdeb2838ab6d01",
-        "5ba6af7e176d860d366948d6a1f3a709a37fb430ad28dd1e027775c880749d79"
+        "5ba6af7e176d860d366948d6a1f3a709a37fb430ad28dd1e027775c880749d79",
+        "ccfdd01011f39ce2c45b3265c620fc95ca8d48569676ca09b9e7be74f330a046"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -557,6 +559,11 @@
       "sha256": "22bfc0cec4c5631e1762854c2a87d54fd4c27b2b90e58e5e837e0d9b0cd0c043",
       "history": []
     },
+    "skills/demo/SKILL.md": {
+      "version": 1,
+      "sha256": "6c15c84caa237b33946ed637b147ba8203b2b76555f2c0cb799cf60bf8b84170",
+      "history": []
+    },
     "skills/design-vocabulary/SKILL.md": {
       "version": 10,
       "sha256": "84ea134a38eda0f2c408fb5809174f37d8b917738c3a7b728d61e7e3c34482f4",
@@ -768,6 +775,11 @@
       "history": [
         "d5b89d7cea79bffd25f94b19660d679dce93a98a375763da1b30fc84abcc2174"
       ]
+    },
+    "workflows/demo.json": {
+      "version": 1,
+      "sha256": "19ead4c4a649a932c8dd2e3779207b774a211b2728e5f004cac680191eb936fb",
+      "history": []
     }
   }
 }
