@@ -1,0 +1,24 @@
+{
+  "_comment": "Общие тестовые векторы логических имён моделей (блок routes в файлах .vibe/providers). Читают тесты VibeIDE и VibeIDEA: одно имя обязано вести к одной модели в обоих продуктах. Не сид — в products.json адресован пустому списку продуктов. Слои — в порядке чтения, первый самый слабый: глобальные providers/*, глобальный providers.json, проектные providers/*, проектный providers.json. null — имя объявлено и запрещено, слой ниже его не вернёт. Цель — «провайдер/модель», делится по первой косой. Собрано 25.09.2026.",
+  "version": 1,
+  "layers": [
+    { "fast": "openai/gpt-6-luna", "vision": "google-gemini/gemini-3.8-flash", "smart": "anthropic/claude-opus-5", "cheap": "deepseek/deepseek-v4-flash" },
+    { "fast": "minimax/MiniMax-M3" },
+    { "vision": null },
+    { "smart": "anthropic/claude-opus-5-5", "router": "openrouter/anthropic/claude-sonnet-5" }
+  ],
+  "merged": {
+    "fast": "minimax/MiniMax-M3",
+    "vision": null,
+    "smart": "anthropic/claude-opus-5-5",
+    "cheap": "deepseek/deepseek-v4-flash",
+    "router": "openrouter/anthropic/claude-sonnet-5"
+  },
+  "resolve": [
+    { "reference": "@fast", "result": { "kind": "found", "provider": "minimax", "model": "MiniMax-M3" } },
+    { "reference": " @smart ", "result": { "kind": "found", "provider": "anthropic", "model": "claude-opus-5-5" } },
+    { "reference": "@router", "result": { "kind": "found", "provider": "openrouter", "model": "anthropic/claude-sonnet-5" } },
+    { "reference": "@vision", "result": { "kind": "disabled" } },
+    { "reference": "@missing", "result": { "kind": "unknown", "known": ["cheap", "fast", "router", "smart", "vision"] } }
+  ]
+}
