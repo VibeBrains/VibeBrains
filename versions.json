@@ -144,8 +144,8 @@
       ]
     },
     "providers/README.md": {
-      "version": 13,
-      "sha256": "97103748b5236b55465cecdd395bb14c1f025cd7ef12c8f49e4dfee2ee791468",
+      "version": 14,
+      "sha256": "fb141e8e39bca9f3617fce85d17583a5adc96c7a10bc17cd2c0dfc1eac876c05",
       "history": [
         "541456bdca5484c2f83b77ea4608bcc5c3bbec1e3d99359cc6c464d0a805836d",
         "ef01bc2f85c2f6eac12247d00ba88a395467e50e021a92487e2c007b0a537c7e",
@@ -157,7 +157,8 @@
         "bd35e775003cb98c2cfc7aedaa5320850495f9a4b1e49e59ab2d8d74ee98fe4e",
         "d1c16a66bb583d1a5fa00b27d0c3ae82fe4845257891d4c71fc8c721f8627445",
         "52e233196dfde3c5b7172065c9a89cf8d2ed59a0bba40628e3b5f3acd9380758",
-        "89e034498d9b4c03dacf83d96389dc7a6d273227c43957f48e0c0eb79a6a1fe4"
+        "89e034498d9b4c03dacf83d96389dc7a6d273227c43957f48e0c0eb79a6a1fe4",
+        "97103748b5236b55465cecdd395bb14c1f025cd7ef12c8f49e4dfee2ee791468"
       ]
     },
     "providers/_template-openai-compatible.jsonc": {
@@ -181,15 +182,16 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 8,
-      "sha256": "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9",
+      "version": 9,
+      "sha256": "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
         "4be0f48def6887df02f53ba19ccf7be5a960a36b7b1fb889ba3e8b2ec43705a9",
         "08995671af07fb3ee1bb58ad60cb24b492e8f309407ccf6d58f9bf3e0630130d",
         "c4d6dc7fef961f25c20fab579ad6e52430b348fc8f7591d0bbec671ffb893c8d",
-        "dd36af1ce6538fe314608af415141ac7e5caa9ab9cc36a44d7b5cff5768fa940"
+        "dd36af1ce6538fe314608af415141ac7e5caa9ab9cc36a44d7b5cff5768fa940",
+        "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9"
       ]
     },
     "providers/arbr.jsonc": {

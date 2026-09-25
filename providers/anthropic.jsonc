@@ -26,13 +26,14 @@
         // "cacheTtl": "1h" — часовой кэш: запись дороже ($20 против $12.50 за 1M),
         // но пауза длиннее пяти минут (ревью, ожидание CI) перестаёт стоить полного
         // перечитывания. Ставится осознанно, умолчание вендора — 5 минут.
+        // Цены записи две: "cacheWrite" — пять минут, "cacheWrite1h" — час; отчёт о расходе
+        // берёт ту, что соответствует "cacheTtl". Без "cacheWrite1h" — двойная цена входа (правило Anthropic).
         // Токенизатор у моделей 4.7+ новый: тот же текст даёт примерно на 30%
         // больше токенов — старые бюджеты в токенах занижают счёт.
         // "static": [
         //   { "id": "claude-fable-5-1", "name": "Claude Fable 5.1", "default": true,
-        //     // При "cacheTtl": "1h" запись кэша стоит $20, а не $12.50: со ставкой пяти минут
-        //     // отчёт о расходе занизит счёт за каждую запись.
-        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 20, "currency": "USD" },
+        //     // При "cacheTtl": "1h" запись кэша стоит $20, а не $12.50 — отчёт берёт "cacheWrite1h".
+        //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "cacheWrite1h": 20, "currency": "USD" },
         //     "cacheTtl": "1h" },
         //   { "id": "claude-mythos-5-1", "name": "Claude Mythos 5.1 (по допуску)",
         //     "cost": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite": 12.5, "currency": "USD" } },
@@ -50,7 +51,7 @@
         //   // max вендор советует max_tokens от 64K (platform.claude.com/docs/en/build-with-claude/effort,
         //   // сверено 24.09.2026: xhigh — для задач дольше 30 минут с бюджетом в миллионы токенов).
         //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
-        //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "currency": "USD" } }
+        //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "cacheWrite1h": 8, "currency": "USD" } }
         // ]
       }
     }
