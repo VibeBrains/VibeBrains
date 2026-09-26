@@ -213,8 +213,8 @@
       "history": []
     },
     "providers/deepseek.jsonc": {
-      "version": 13,
-      "sha256": "ac8573a93700a67dbce3473c568bd928fa77af0f9adb155f8e14ff763f7b96d3",
+      "version": 14,
+      "sha256": "55a737568c49d0353f041864c2fc4e3cf4d7466d4739cddbfa1a983f10c97962",
       "history": [
         "216294fb6db9bbc269b0ced46e59bb1938a226ce7bd7a1a264dbf3c6f96fd095",
         "b7d148952a7c8a9daf607124d4d09386bdeac7e5d0189838b4ced454a5c8c5a9",
@@ -226,7 +226,8 @@
         "b7b56f4485d8e1e0af258d4050823552727e8a1e4f6f542a596a362b3b0b8989",
         "d6826255c0edc294e4d538ec81d585bed5e5ab2393b96ac6288936ea350022ed",
         "f843d4bce86edc3763b3511743e47b0013105c3cd0e704df9715ab1c74a09f21",
-        "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079"
+        "e6e4ba0ed93cdd680897525a549396eb4bd4a430dbd4fd1328bf9ec6dbe92079",
+        "ac8573a93700a67dbce3473c568bd928fa77af0f9adb155f8e14ff763f7b96d3"
       ]
     },
     "providers/edge0.jsonc": {
@@ -250,8 +251,8 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 12,
-      "sha256": "6692bd5ecb5ad7aec01b5b5fa366bcfc56b4f75427f6b76e53eb8e9dea75e541",
+      "version": 13,
+      "sha256": "6f52a3f13782c41ce5ae9e238941b6bf2fe0d0f81b3f6795bd47f5a53c6c3ec5",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
@@ -262,7 +263,8 @@
         "12a8b5795e498dd494efaeddb2c8ca4f16e36df082c6ffc622d9cab491dce20b",
         "9ffd49b5288fabcaf98af942f05bbab1bd9aaa14624a98bfc72a54181f40e118",
         "73237e4652fe479a6246952d578e81c6ccd9cbf0d03ce6b960b709108bdeee38",
-        "027a7c1dc053b1b200efdf5dbfb344c8c850ef02364b68a773e1d6321d50e2d7"
+        "027a7c1dc053b1b200efdf5dbfb344c8c850ef02364b68a773e1d6321d50e2d7",
+        "6692bd5ecb5ad7aec01b5b5fa366bcfc56b4f75427f6b76e53eb8e9dea75e541"
       ]
     },
     "providers/meta-muse.jsonc": {
@@ -567,14 +569,18 @@
       "history": []
     },
     "skills/demo/SKILL.md": {
-      "version": 1,
-      "sha256": "6c15c84caa237b33946ed637b147ba8203b2b76555f2c0cb799cf60bf8b84170",
-      "history": []
+      "version": 2,
+      "sha256": "d59fd8741597a9f518fcd4096a4e3b894c2454b5a7a37dc2db23706d7110b9d2",
+      "history": [
+        "6c15c84caa237b33946ed637b147ba8203b2b76555f2c0cb799cf60bf8b84170"
+      ]
     },
     "skills/demo/evals/evals.json": {
-      "version": 1,
-      "sha256": "4cfafacad7e139fff0d393adfd48699f2136602ea560b8d007256a971ba13211",
-      "history": []
+      "version": 2,
+      "sha256": "aa61199fd914cf6ed9c2210cc55c11c5dd215a53322f82e3ad554af408986b83",
+      "history": [
+        "4cfafacad7e139fff0d393adfd48699f2136602ea560b8d007256a971ba13211"
+      ]
     },
     "skills/design-vocabulary/SKILL.md": {
       "version": 10,
