@@ -8,11 +8,19 @@
 // Ключ один на оба: MINIMAX_API_KEY в .vibe/.env или поле в настройках.
 //
 // ДВА РАЗНЫХ КЛЮЧА, ОДИН И ТОТ ЖЕ АДРЕС. У MiniMax подписка и поштучная оплата различаются
-// НЕ доменом, а префиксом ключа (platform.minimax.io/docs/token-plan/other-tools, 09.09.2026):
+// НЕ доменом, а префиксом ключа (platform.minimax.io/docs/m-plan/other-tools, сверено 30.09.2026):
 //   • sk-api-…  — pay-as-you-go, раздел Account / API Keys;
-//   • sk-cp-…   — Token Plan (подписка), раздел Billing / Token Plan.
-// Взаимозаменяемыми они не являются. Квота плана считается скользящими окнами (5 часов и
-// неделя), неиспользованное не переносится (platform.minimax.io/docs/token-plan/intro).
+//   • sk-cp-…   — подписка M Plan (прежде Token Plan), platform.minimax.io/console/plan.
+// Взаимозаменяемыми они не являются. Прежний Token Plan продлевается как был, перейти на M Plan можно
+// в любой момент (platform.minimax.io/docs/m-plan/faq).
+//
+// MiniMax-M3.1-Flash-Preview — ТОЛЬКО ПО ПОДПИСКЕ: «available only through M Plan and MiniMax Code for now»
+// (platform.minimax.io/docs/guides/models-intro, сверено 30.09.2026). С ключом sk-api-… её нет, а в образце
+// ответа списка моделей (GET /v1/models) её тоже нет — поэтому она вписана статичной записью на обоих
+// маршрутах, а не ждёт каталога. Окно 1M, картинки и видео на входе. Мышление НЕ ВЫКЛЮЧАЕТСЯ: "disabled" и
+// reasoning_effort "none" — 400. Уровни low, medium, high, xhigh, max, и без уровня вендор ставит max —
+// поэтому положение «выключено» шлёт low. Рассуждение приходит полем reasoning_content и уходит обратно им же.
+// Цены за токены нет: модель есть только в подписке.
 //
 // ДОМЕН ПРИВЯЗАН К АККАУНТУ, а не к вашему местоположению: международный — api.minimax.io,
 // материковый Китай — api.minimax.cn (так в официальной инструкции вендора для Claude Code;
@@ -39,7 +47,15 @@
       "apiKeyRef": "minimax", // общий ref: ключ из настроек достаётся и Anthropic-клону ниже
       "apiKeyEnv": "MINIMAX_API_KEY",
       "order": 30,
-      "models": { "fetch": true },
+      "models": {
+        "fetch": true,
+        // Модели подписки в каталоге вендора нет — см. шапку. С ключом поштучной оплаты запрос к ней вернёт ошибку.
+        "static": [
+          { "id": "MiniMax-M3.1-Flash-Preview", "name": "MiniMax M3.1 Flash Preview (M Plan)",
+            "contextWindow": 1000000, "vision": true,
+            "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] } }
+        ]
+      },
       // Остаток Token Plan — официальный запрос вендора (platform.minimax.io/docs/token-plan/faq). IDE задаёт его
       // только когда вы просите отчёт о расходе (/spend, «Расходы»), и показывает ответ вендора, а не свой подсчёт.
       // Смысл полей ответа вендор не документирует; IDE читает их так же, как его собственный CLI
@@ -89,6 +105,15 @@
             "default": true,
             "contextWindow": 1000000,
             "toolFormat": "anthropic"
+          },
+          {
+            // Только по подписке M Plan — см. шапку файла. Усилие на этом маршруте — output_config.effort.
+            "id": "MiniMax-M3.1-Flash-Preview",
+            "name": "MiniMax M3.1 Flash Preview (Anthropic, M Plan)",
+            "contextWindow": 1000000,
+            "vision": true,
+            "toolFormat": "anthropic",
+            "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] }
           }
 
           // ── Остальные модели маршрута ──────────────────────────────────────────

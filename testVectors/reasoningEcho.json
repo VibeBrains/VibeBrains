@@ -7,6 +7,7 @@
     "deepseek": "api-docs.deepseek.com/guides/thinking_mode — с tools рассуждение всех прошлых ходов возвращается",
     "mimo": "mimo.mi.com/docs/en-US/quick-start/usage-guide/text-generation/deep-thinking — думают mimo-v2.6-*, mimo-v2.5-pro, mimo-v2.5; без возврата 400",
     "minimax": "platform.minimax.io/docs/guides/text-m3-function-call — anthropic: весь content с блоками thinking; openai: content без изменений вместе с <think>",
+    "minimax-m3.1": "platform.minimax.io/docs/api-reference/text-openai-api (30.09.2026) — M3.1-Flash-Preview отдаёт рассуждение полем reasoning_content, «must also be preserved completely»; reasoning_split=false не поддерживается",
     "claude": "platform.claude.com/docs/en/build-with-claude/extended-thinking — блоки текущего хода с инструментами, без изменений, с подписью"
   },
   "cases": [
@@ -20,6 +21,7 @@
     { "model": "mimo-v2.6-pro", "openai": "reasoning_content", "anthropic": "all" },
     { "model": "mimo-v2.5", "openai": "reasoning_content", "anthropic": "all" },
     { "model": "MiniMax-M3", "openai": "think-tags", "anthropic": "all" },
+    { "model": "MiniMax-M3.1-Flash-Preview", "openai": "reasoning_content", "anthropic": "all" },
     { "model": "minimax-m2.7", "openai": "think-tags", "anthropic": "all" },
     { "model": "MiniMax-M2.5", "openai": "think-tags", "anthropic": "all" },
     { "model": "claude-opus-5-5", "openai": null, "anthropic": "same-prefix" },
