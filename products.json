@@ -51,6 +51,7 @@
     { "path": "testVectors/modelRoutes.json", "products": [] },
     // Общие векторы возврата рассуждения: какие модели требуют его обратно и в какой форме на каждом проводе. Читают тесты.
     { "path": "testVectors/reasoningEcho.json", "products": [] },
+    { "path": "testVectors/dsmlToolCalls.json", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
     { "path": "slop.json", "products": ["vibeidea", "vibeide"] },
