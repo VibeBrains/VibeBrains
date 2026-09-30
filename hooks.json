@@ -30,6 +30,27 @@
       "label": "публикация — только руками",
       "active": false
     },
+    // Сеть из терминала агента. Тоже детектор: python-сокет, `sh -c` и скрипт в файле он не увидит.
+    // Повод — агент, вышедший из песочницы через DNS: вопросы в именах хостов, ответы TXT-записями
+    // (alignment.openai.com/misalignment-reports, 25.09.2026). NCSC советует выпускать агента в сеть только
+    // по списку разрешённых адресов (ncsc.gov.uk/blogs/managing-the-cyber-risk-of-agentic-ai) — список
+    // держат права процесса и прокси, а хук называет попытку вслух.
+    {
+      "event": "preToolUse",
+      "command": "jq -e -r '(.params.command // \"\")' | grep -qiE '(^|[;&|(` ])(curl|wget|nc|ncat|socat|telnet|ftp|scp|sftp|nslookup|dig|drill|host|Invoke-WebRequest|iwr|Invoke-RestMethod|irm)( |$)|/dev/(tcp|udp)/' && exit 2 || exit 0",
+      "label": "сеть из терминала — только руками",
+      "active": false
+    },
+    // Запись только внутри проекта: абсолютный путь вне корня или выход через `..` — отказ.
+    // Имена инструментов записи у обеих IDE разные — перечислены все. Команды оболочки сюда не входят.
+    // Пути Windows (C:\…) хук не разбирает: он о форме пути, которую агент пишет чаще всего.
+    {
+      "event": "preToolUse",
+      "tools": ["edit_file", "rewrite_file", "create_file_or_folder", "delete_file_or_folder", "write_text_file"],
+      "command": "jq -e '.cwd as $c | (.params.path // .params.uri // \"\") as $p | ($p | test(\"(^|/)\\\\.\\\\.(/|$)\")) or (($p | startswith(\"/\")) and $p != $c and (($p | startswith($c + \"/\")) | not))' >/dev/null && exit 2 || exit 0",
+      "label": "запись только внутри проекта",
+      "active": false
+    },
     // preToolUse блокирует в точках, которыми владеет клиент: запрос разрешения и запись через fs/write.
     { "event": "preToolUse", "command": "node .vibe/hooks/no-migrations.js", "tools": ["write_text_file"], "label": "миграции только руками", "active": false },
     // postToolUse не отменяет сделанное — формулирует требование исправить.

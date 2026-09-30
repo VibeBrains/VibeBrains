@@ -62,10 +62,11 @@
       ]
     },
     "hooks.json": {
-      "version": 2,
-      "sha256": "71156e0a6dd69a235f661d69dbc18d30202c2092e421141315b83a23ff7597bb",
+      "version": 3,
+      "sha256": "c127af783beb90d374ed478fe2b0dde7649f68c56caa0dcc8e38f2a65fed2675",
       "history": [
-        "974f1918da89ad9caad0dbf05b0db41ea9f9be7ec106aec8720e98ef03592794"
+        "974f1918da89ad9caad0dbf05b0db41ea9f9be7ec106aec8720e98ef03592794",
+        "71156e0a6dd69a235f661d69dbc18d30202c2092e421141315b83a23ff7597bb"
       ]
     },
     "http-client.env.json": {
@@ -682,6 +683,16 @@
     "skills/screenshot-review/SKILL.md": {
       "version": 1,
       "sha256": "df022b51f1c2cc9f4d5f32425a4cf98cc5c8e7c79f7815f79ce5d7d3de5ad276",
+      "history": []
+    },
+    "skills/security-audit/SKILL.md": {
+      "version": 1,
+      "sha256": "0d2d132f5ff2bdc361f36ec33849deaef46353174995db5f3b5a4497327e120f",
+      "history": []
+    },
+    "skills/security-audit/evals/evals.json": {
+      "version": 1,
+      "sha256": "69814436162f4082a739dd495e5459bcf0cfbd5d2ab0a4ef2c11ac6e5d3c205a",
       "history": []
     },
     "skills/self-excuses/SKILL.md": {
