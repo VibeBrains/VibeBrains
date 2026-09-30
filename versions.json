@@ -79,15 +79,16 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 7,
-      "sha256": "2a030dc881a35991429b6f9d725802a5f1365c6d95b33c7ba356766587fb25a9",
+      "version": 8,
+      "sha256": "15f8312bb9beae374997ce208d38823d571bb78ea34b2c4d3184efd312f994cf",
       "history": [
         "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
         "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
         "e1d76661c319de56b549584b7c09a296906c5e13e2940d0b77cacf7df0e1d61c",
         "e302ac0fe024e1a0043b167e9846ea68cb28ebdc755ce87e188abe1367aa2ef4",
         "6b72ba0ad1d70533ce241ad843c2c3a25b6221fe1655e57e8b5ebc461c43d1d5",
-        "522cd1d162a9ed6fddc40987bbcee3e8fc7809ca926311747391572aa1d4925b"
+        "522cd1d162a9ed6fddc40987bbcee3e8fc7809ca926311747391572aa1d4925b",
+        "2a030dc881a35991429b6f9d725802a5f1365c6d95b33c7ba356766587fb25a9"
       ]
     },
     "patrols.json": {
@@ -192,8 +193,8 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 9,
-      "sha256": "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960",
+      "version": 10,
+      "sha256": "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
@@ -201,7 +202,8 @@
         "08995671af07fb3ee1bb58ad60cb24b492e8f309407ccf6d58f9bf3e0630130d",
         "c4d6dc7fef961f25c20fab579ad6e52430b348fc8f7591d0bbec671ffb893c8d",
         "dd36af1ce6538fe314608af415141ac7e5caa9ab9cc36a44d7b5cff5768fa940",
-        "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9"
+        "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9",
+        "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960"
       ]
     },
     "providers/arbr.jsonc": {
@@ -313,8 +315,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 11,
-      "sha256": "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1",
+      "version": 12,
+      "sha256": "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -324,7 +326,8 @@
         "6714e84c41616c794abad2e4ccdf84aa9460eb1dc50565e37368412040bb58af",
         "2e39aa351698b3aaf8a51fbed9687292c35f94658507107773f43fd1c6b6323b",
         "99a559e674aa0796e802b2582eff1e529dd0dab4a81b82487fcd6e158ed289f9",
-        "7380abf8461eb7e43d38a652148b9615ced6e38f35276a0055899f7e407ae789"
+        "7380abf8461eb7e43d38a652148b9615ced6e38f35276a0055899f7e407ae789",
+        "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1"
       ]
     },
     "providers/opencode-go.jsonc": {

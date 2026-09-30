@@ -51,7 +51,16 @@
         //   // max вендор советует max_tokens от 64K (platform.claude.com/docs/en/build-with-claude/effort,
         //   // сверено 24.09.2026: xhigh — для задач дольше 30 минут с бюджетом в миллионы токенов).
         //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
-        //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "cacheWrite1h": 8, "currency": "USD" } }
+        //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "cacheWrite1h": 8, "currency": "USD" } },
+        //   // Claude Sonnet 5.5 (выпуск 28.09.2026, anthropic.com/claude-sonnet-5-5, сверено 30.09.2026): $2 / $10,
+        //   // чтение кэша $0.20, запись на пять минут $2.50. Цену часовой записи и окно вендор на странице анонса не
+        //   // назвал: без "cacheWrite1h" отчёт считает часовую запись по двум входам, как Anthropic у других моделей.
+        //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ через {"type": "disabled"}: самый низкий режим — {"type": "between_tools"},
+        //   // модель не думает перед ответом и думает только между вызовами инструментов. Его и шлёт положение
+        //   // «выключено». Умолчание усилия на платформе — high, поэтому поле без значения — это high, а не «выкл».
+        //   // Принудительный вызов инструмента (tool_choice any/tool) — 400.
+        //   { "id": "claude-sonnet-5-5", "name": "Claude Sonnet 5.5",
+        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5, "currency": "USD" } }
         // ]
       }
     }
