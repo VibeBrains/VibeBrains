@@ -1,0 +1,810 @@
+{
+  "_comment": "Общие тестовые векторы: вызов инструмента, который модель написала текстом в ответе разметкой своего семейства, вместо поля tool_calls. Так бывает, когда сервер (vLLM, SGLang, Ollama, LM Studio, провайдер агрегатора) не разобрал разметку шаблона чата модели, или модель сбилась. Читают тесты VibeIDE и VibeIDEA: одна форма на оба продукта, иначе разборы разъедутся молча. Не сид — в products.json адресован пустому списку. Формы сверены 30.09.2026 с шаблонами чата и энкодерами вендоров и с грамматиками vLLM (vllm-project/vllm, коммит ed3f6d1a, vllm/parser/ и rust/src/parser/src/tool/). Форматы: dsml (DeepSeek V3.2/V4/V4.1, и с потерянными маркерами), invoke (<invoke name> без маркера), minimax-m2, minimax-m3, deepseek-v3 (V3/R1 и V3.1), hermes (Hermes, Qwen 2.5/3, Granite 3.1/4), qwen-xml (Qwen3-Coder, Qwen 3.5+, Seed-OSS), glm (4.5+), kimi-k2, kimi-k3, mistral, llama (<|python_tag|>), json (весь ответ — JSON вызовов), granite (3.x), harmony (gpt-oss), gemma (Gemma 4), pythonic (Llama 4). Правила: разметка читается, только когда запрос предлагал инструменты (tools — имя и JSON-схема параметров) и провод не принёс вызовов; в блоке кода и в `инлайн-коде` это текст; вызов инструмента, которого не предлагали, — текст; разметка, не называющая ни одного предложенного инструмента, — текст. Значения разметок без типа (qwen-xml, glm, minimax, gemma, dsml без атрибута string) типизируются по схеме, как у vLLM. Имя сверяется как есть, затем без префикса functions. и без пространства имён ns::. Поля кейса: text — весь ответ; format — формат, который открыл или прочитал разметку, null — разметки нет; outcome — calls (вызовы прочитаны), unparsed (разметка называет предложенный инструмент, но не читается), text (вызова нет); calls — вызовы по порядку; answer — текст ответа без разметки, обрезанный по краям (для calls), слова до разметки (для unparsed), весь текст как есть (для text).",
+  "version": 1,
+  "tools": {
+    "read_file": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      }
+    },
+    "git_state": {
+      "type": "object",
+      "properties": {
+        "what": {
+          "type": "string"
+        }
+      }
+    },
+    "search": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "exact": {
+          "type": "boolean"
+        }
+      }
+    },
+    "write": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array"
+        },
+        "meta": {
+          "type": "object"
+        }
+      }
+    },
+    "write_file": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "ide_state": {
+      "type": "object",
+      "properties": {}
+    },
+    "create_order": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "integer"
+        },
+        "shipping": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "zip": {
+              "type": "integer"
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sku": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "dsml: V3.2 canonical",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"read_file\">\n<｜DSML｜parameter name=\"path\" string=\"true\">src/main.kt</｜DSML｜parameter>\n<｜DSML｜parameter name=\"limit\" string=\"false\">40</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "src/main.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: two calls with typed values",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"search\">\n<｜DSML｜parameter name=\"query\" string=\"true\">ToolRound</｜DSML｜parameter>\n<｜DSML｜parameter name=\"exact\" string=\"false\">true</｜DSML｜parameter>\n</｜DSML｜invoke>\n<｜DSML｜invoke name=\"write\">\n<｜DSML｜parameter name=\"tags\" string=\"false\">[\"a\", \"b\"]</｜DSML｜parameter>\n<｜DSML｜parameter name=\"meta\" string=\"false\">{\"n\": 1}</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "search",
+          "arguments": {
+            "query": "ToolRound",
+            "exact": true
+          }
+        },
+        {
+          "name": "write",
+          "arguments": {
+            "tags": [
+              "a",
+              "b"
+            ],
+            "meta": {
+              "n": 1
+            }
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: V4 wraps calls in tool_calls",
+      "format": "dsml",
+      "text": "Смотрю ветку.\n\n<｜DSML｜tool_calls>\n<｜DSML｜invoke name=\"git_state\">\n<｜DSML｜parameter name=\"what\" string=\"true\">branch</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜tool_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": "Смотрю ветку."
+    },
+    {
+      "name": "dsml: V4.1 writes a space after the marker, and a namespace before the name",
+      "format": "dsml",
+      "text": "<｜DSML｜ calls>\n<｜DSML｜ invoke name=\"tools::search\">\n<｜DSML｜ parameter name=\"query\" string=\"true\">小柴胡 布洛芬</｜DSML｜ parameter>\n</｜DSML｜ invoke>\n</｜DSML｜ calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "search",
+          "arguments": {
+            "query": "小柴胡 布洛芬"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: markers lost, spaces left",
+      "format": "dsml",
+      "text": "< calls>\n< invoke name=\"git_state\">\n< parameter name=\"what\" string=\"true\">branch</ parameter>\n</ invoke>\n</ calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: a string value keeps its spaces and line breaks",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"write_file\">\n<｜DSML｜parameter name=\"content\" string=\"true\">line one\n  line two </｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "write_file",
+          "arguments": {
+            "content": "line one\n  line two "
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: a parameter without the string attribute is typed by the schema",
+      "format": "dsml",
+      "text": "<｜DSML｜tool_calls>\n<｜DSML｜invoke name=\"read_file\">\n<｜DSML｜parameter name=\"path\">a.kt</｜DSML｜parameter>\n<｜DSML｜parameter name=\"limit\">40</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜tool_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: a call without parameters",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"ide_state\">\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "dsml: cut off before the invoke closes",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"read_file\">\n<｜DSML｜parameter name=\"path\" string=\"true\">src/ma",
+      "outcome": "unparsed",
+      "calls": [],
+      "answer": ""
+    },
+    {
+      "name": "dsml: a non-string value that is not JSON",
+      "format": "dsml",
+      "text": "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"read_file\">\n<｜DSML｜parameter name=\"limit\" string=\"false\">forty</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+      "outcome": "unparsed",
+      "calls": [],
+      "answer": ""
+    },
+    {
+      "name": "plain prose about a tag is not a call",
+      "format": null,
+      "text": "Тег invoke в разметке DeepSeek называет инструмент, а a < b — просто сравнение.",
+      "outcome": "text",
+      "calls": [],
+      "answer": "Тег invoke в разметке DeepSeek называет инструмент, а a < b — просто сравнение."
+    },
+    {
+      "name": "invoke: V3.2 once the server stripped the DSML marker",
+      "format": "invoke",
+      "text": "Читаю.\n\n<function_calls>\n<invoke name=\"read_file\">\n<parameter name=\"path\" string=\"true\">a.kt</parameter>\n</invoke>\n</function_calls>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        }
+      ],
+      "answer": "Читаю."
+    },
+    {
+      "name": "minimax-m2: values typed by the schema",
+      "format": "minimax-m2",
+      "text": "Читаю файл.\n<minimax:tool_call>\n<invoke name=\"read_file\">\n<parameter name=\"path\">src/a.kt</parameter>\n<parameter name=\"limit\">40</parameter>\n</invoke>\n</minimax:tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "src/a.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": "Читаю файл."
+    },
+    {
+      "name": "minimax-m3: nested arguments as elements",
+      "format": "minimax-m3",
+      "text": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"create_order\">\n]<]minimax[>[<user_id>42]<]minimax[>[</user_id>\n]<]minimax[>[<shipping>\n]<]minimax[>[<city>Singapore]<]minimax[>[</city>\n]<]minimax[>[<zip>018956]<]minimax[>[</zip>\n]<]minimax[>[</shipping>\n]<]minimax[>[<items>\n]<]minimax[>[<item>\n]<]minimax[>[<sku>book-001]<]minimax[>[</sku>\n]<]minimax[>[<qty>2]<]minimax[>[</qty>\n]<]minimax[>[</item>\n]<]minimax[>[</items>\n]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "create_order",
+          "arguments": {
+            "user_id": 42,
+            "shipping": {
+              "city": "Singapore",
+              "zip": 18956
+            },
+            "items": [
+              {
+                "sku": "book-001",
+                "qty": 2
+              }
+            ]
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "deepseek-v3: V3 and R1, JSON in a fence after the type",
+      "format": "deepseek-v3",
+      "text": "<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>function<｜tool▁sep｜>read_file\n```json\n{\"path\": \"a.kt\", \"limit\": 10}\n```<｜tool▁call▁end｜><｜tool▁calls▁end｜>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt",
+            "limit": 10
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "deepseek-v3: V3.1, JSON right after the name, calls back to back",
+      "format": "deepseek-v3",
+      "text": "<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>git_state<｜tool▁sep｜>{\"what\": \"branch\"}<｜tool▁call▁end｜><｜tool▁call▁begin｜>ide_state<｜tool▁sep｜>{}<｜tool▁call▁end｜><｜tool▁calls▁end｜>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        },
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "hermes: Qwen 3, words before the call",
+      "format": "hermes",
+      "text": "Смотрю.\n<tool_call>\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"a.kt\", \"limit\": 10}}\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt",
+            "limit": 10
+          }
+        }
+      ],
+      "answer": "Смотрю."
+    },
+    {
+      "name": "hermes: two blocks",
+      "format": "hermes",
+      "text": "<tool_call>\n{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}\n</tool_call>\n<tool_call>\n{\"name\": \"ide_state\", \"arguments\": {}}\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        },
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "hermes: arguments as a JSON string",
+      "format": "hermes",
+      "text": "<tool_call>\n{\"name\": \"git_state\", \"arguments\": \"{\\\"what\\\": \\\"branch\\\"}\"}\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "hermes: no closing tag at the end of the answer",
+      "format": "hermes",
+      "text": "<tool_call>\n{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "hermes: Granite 3.1, a list inside the tag",
+      "format": "hermes",
+      "text": "<tool_call> [{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}]",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "hermes: cut off inside the JSON",
+      "format": "hermes",
+      "text": "<tool_call>\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"a",
+      "outcome": "unparsed",
+      "calls": [],
+      "answer": ""
+    },
+    {
+      "name": "hermes: a tool that was not offered is text",
+      "format": "hermes",
+      "text": "<tool_call>\n{\"name\": \"rm_rf\", \"arguments\": {\"path\": \"/\"}}\n</tool_call>",
+      "outcome": "text",
+      "calls": [],
+      "answer": "<tool_call>\n{\"name\": \"rm_rf\", \"arguments\": {\"path\": \"/\"}}\n</tool_call>"
+    },
+    {
+      "name": "hermes: markup naming no tool is text",
+      "format": "hermes",
+      "text": "Вызов пишется так: <tool_call> и JSON с именем и аргументами.",
+      "outcome": "text",
+      "calls": [],
+      "answer": "Вызов пишется так: <tool_call> и JSON с именем и аргументами."
+    },
+    {
+      "name": "markup in a code block is text",
+      "format": null,
+      "text": "Так выглядит вызов:\n\n```\n<tool_call>\n{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}\n</tool_call>\n```\n",
+      "outcome": "text",
+      "calls": [],
+      "answer": "Так выглядит вызов:\n\n```\n<tool_call>\n{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}\n</tool_call>\n```\n"
+    },
+    {
+      "name": "markup in inline code is text",
+      "format": null,
+      "text": "Тег `<tool_call>` открывает вызов read_file.",
+      "outcome": "text",
+      "calls": [],
+      "answer": "Тег `<tool_call>` открывает вызов read_file."
+    },
+    {
+      "name": "qwen-xml: Qwen3-Coder, values typed by the schema",
+      "format": "qwen-xml",
+      "text": "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc/a.kt\n</parameter>\n<parameter=limit>\n40\n</parameter>\n</function>\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "src/a.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "qwen-xml: a value keeps its own line breaks, not the wrapping ones",
+      "format": "qwen-xml",
+      "text": "<tool_call>\n<function=write_file>\n<parameter=content>\nline one\n  line two\n</parameter>\n</function>\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "write_file",
+          "arguments": {
+            "content": "line one\n  line two"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "qwen-xml: Seed-OSS, Python spelling of a boolean",
+      "format": "qwen-xml",
+      "text": "<seed:tool_call>\n<function=search>\n<parameter=query>ToolRound</parameter>\n<parameter=exact>True</parameter>\n</function>\n</seed:tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "search",
+          "arguments": {
+            "query": "ToolRound",
+            "exact": true
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "glm: 4.7, all on one line",
+      "format": "glm",
+      "text": "<tool_call>read_file<arg_key>path</arg_key><arg_value>src/a.kt</arg_value><arg_key>limit</arg_key><arg_value>40</arg_value></tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "src/a.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "glm: 4.5, a line per pair",
+      "format": "glm",
+      "text": "\n<tool_call>git_state\n<arg_key>what</arg_key>\n<arg_value>branch</arg_value>\n</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "glm: a call without arguments",
+      "format": "glm",
+      "text": "<tool_call>ide_state</tool_call>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "kimi-k2: functions.name:index",
+      "format": "kimi-k2",
+      "text": "<|tool_calls_section_begin|>\n<|tool_call_begin|>functions.read_file:0\n<|tool_call_argument_begin|>{\"path\": \"a.kt\"}<|tool_call_end|>\n<|tool_call_begin|>functions.git_state:1\n<|tool_call_argument_begin|>{\"what\": \"branch\"}<|tool_call_end|>\n<|tool_calls_section_end|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        },
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "kimi-k3: XTML, the type in an attribute",
+      "format": "kimi-k3",
+      "text": "<|open|>tools<|sep|><|open|>call tool=\"read_file\" index=\"1\"<|sep|><|open|>argument key=\"path\" type=\"string\"<|sep|>src/a.kt<|close|>argument<|sep|><|open|>argument key=\"limit\" type=\"number\"<|sep|>40<|close|>argument<|sep|><|close|>call<|sep|><|close|>tools<|sep|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "src/a.kt",
+            "limit": 40
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "kimi-k3: the response channel closes before the tools",
+      "format": "kimi-k3",
+      "text": "Читаю.<|close|>response<|sep|><|open|>tools<|sep|><|open|>call tool=\"git_state\" index=\"1\"<|sep|><|open|>argument key=\"what\" type=\"string\"<|sep|>branch<|close|>argument<|sep|><|close|>call<|sep|><|close|>tools<|sep|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": "Читаю."
+    },
+    {
+      "name": "mistral: v2, a JSON list",
+      "format": "mistral",
+      "text": "[TOOL_CALLS][{\"name\": \"read_file\", \"arguments\": {\"path\": \"a.kt\"}}]",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "mistral: v13, name[ARGS]{…} per call",
+      "format": "mistral",
+      "text": "[TOOL_CALLS]git_state[ARGS]{\"what\": \"branch\"}[TOOL_CALLS]ide_state[ARGS]{}",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        },
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "mistral: v11, with a call id",
+      "format": "mistral",
+      "text": "Проверю.[TOOL_CALLS]git_state[CALL_ID]a1b2c3d4e[ARGS]{\"what\": \"branch\"}",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": "Проверю."
+    },
+    {
+      "name": "llama: behind python_tag, parameters",
+      "format": "llama",
+      "text": "<|python_tag|>{\"name\": \"read_file\", \"parameters\": {\"path\": \"a.kt\"}}",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "json: the whole answer is a call",
+      "format": "json",
+      "text": "{\"name\": \"git_state\", \"parameters\": {\"what\": \"branch\"}}",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "json: a list of calls with its marker stripped",
+      "format": "json",
+      "text": "[{\"name\": \"git_state\", \"arguments\": {\"what\": \"branch\"}}, {\"name\": \"ide_state\", \"arguments\": {}}]",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        },
+        {
+          "name": "ide_state",
+          "arguments": {}
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "json: an answer that is JSON about something else",
+      "format": "json",
+      "text": "{\"name\": \"Боб\", \"age\": 3}",
+      "outcome": "text",
+      "calls": [],
+      "answer": "{\"name\": \"Боб\", \"age\": 3}"
+    },
+    {
+      "name": "json: JSON inside the answer is not a call",
+      "format": null,
+      "text": "Пример: {\"name\": \"git_state\", \"parameters\": {\"what\": \"branch\"}}",
+      "outcome": "text",
+      "calls": [],
+      "answer": "Пример: {\"name\": \"git_state\", \"parameters\": {\"what\": \"branch\"}}"
+    },
+    {
+      "name": "granite: 3.x, tool_call token and a list",
+      "format": "granite",
+      "text": "<|tool_call|>[{\"name\": \"read_file\", \"arguments\": {\"path\": \"a.kt\"}}]",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "harmony: recipient in the channel",
+      "format": "harmony",
+      "text": "<|channel|>commentary to=functions.read_file <|constrain|>json<|message|>{\"path\":\"a.kt\"}<|call|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "harmony: recipient in the role",
+      "format": "harmony",
+      "text": "<|start|>assistant to=functions.git_state<|channel|>commentary json<|message|>{\"what\":\"branch\"}<|call|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "gemma: unquoted keys, strings in quote tokens, bare values typed",
+      "format": "gemma",
+      "text": "<|tool_call>call:read_file{limit:40,path:<|\"|>src/a,b.kt<|\"|>}<tool_call|>",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 40,
+            "path": "src/a,b.kt"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "pythonic: Llama 4, a list of calls",
+      "format": "pythonic",
+      "text": "[read_file(path=\"a.kt\", limit=40), git_state(what='branch')]",
+      "outcome": "calls",
+      "calls": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "a.kt",
+            "limit": 40
+          }
+        },
+        {
+          "name": "git_state",
+          "arguments": {
+            "what": "branch"
+          }
+        }
+      ],
+      "answer": ""
+    },
+    {
+      "name": "a markdown link at the start is text",
+      "format": null,
+      "text": "[ссылка](https://example.com) ведёт на пример.",
+      "outcome": "text",
+      "calls": [],
+      "answer": "[ссылка](https://example.com) ведёт на пример."
+    }
+  ]
+}
