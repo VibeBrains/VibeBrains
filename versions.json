@@ -80,8 +80,8 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 8,
-      "sha256": "15f8312bb9beae374997ce208d38823d571bb78ea34b2c4d3184efd312f994cf",
+      "version": 9,
+      "sha256": "034d3bb5325a416d1940493e88d9175233a740b246d91510309a0dc60dffaacb",
       "history": [
         "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
         "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
@@ -89,7 +89,8 @@
         "e302ac0fe024e1a0043b167e9846ea68cb28ebdc755ce87e188abe1367aa2ef4",
         "6b72ba0ad1d70533ce241ad843c2c3a25b6221fe1655e57e8b5ebc461c43d1d5",
         "522cd1d162a9ed6fddc40987bbcee3e8fc7809ca926311747391572aa1d4925b",
-        "2a030dc881a35991429b6f9d725802a5f1365c6d95b33c7ba356766587fb25a9"
+        "2a030dc881a35991429b6f9d725802a5f1365c6d95b33c7ba356766587fb25a9",
+        "15f8312bb9beae374997ce208d38823d571bb78ea34b2c4d3184efd312f994cf"
       ]
     },
     "patrols.json": {
@@ -194,8 +195,8 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 10,
-      "sha256": "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f",
+      "version": 11,
+      "sha256": "1228fd473b1ab35c0882a412512720303b66f3850e601610bd741bb740b28c18",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
@@ -204,7 +205,8 @@
         "c4d6dc7fef961f25c20fab579ad6e52430b348fc8f7591d0bbec671ffb893c8d",
         "dd36af1ce6538fe314608af415141ac7e5caa9ab9cc36a44d7b5cff5768fa940",
         "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9",
-        "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960"
+        "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960",
+        "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f"
       ]
     },
     "providers/arbr.jsonc": {

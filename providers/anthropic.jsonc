@@ -52,15 +52,15 @@
         //   // сверено 24.09.2026: xhigh — для задач дольше 30 минут с бюджетом в миллионы токенов).
         //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
         //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "cacheWrite1h": 8, "currency": "USD" } },
-        //   // Claude Sonnet 5.5 (выпуск 28.09.2026, anthropic.com/claude-sonnet-5-5, сверено 30.09.2026): $2 / $10,
-        //   // чтение кэша $0.20, запись на пять минут $2.50. Цену часовой записи и окно вендор на странице анонса не
-        //   // назвал: без "cacheWrite1h" отчёт считает часовую запись по двум входам, как Anthropic у других моделей.
-        //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ через {"type": "disabled"}: самый низкий режим — {"type": "between_tools"},
-        //   // модель не думает перед ответом и думает только между вызовами инструментов. Его и шлёт положение
-        //   // «выключено». Умолчание усилия на платформе — high, поэтому поле без значения — это high, а не «выкл».
-        //   // Принудительный вызов инструмента (tool_choice any/tool) — 400.
-        //   { "id": "claude-sonnet-5-5", "name": "Claude Sonnet 5.5",
-        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5, "currency": "USD" } }
+        //   // Claude Sonnet 5.5 (выпуск 28.09.2026; platform.claude.com/docs/en/models/sonnet-5-5/overview и
+        //   // /whats-new-sonnet-5-5, сверено 30.09.2026): окно 1M, выход 128K, $2 / $10, чтение кэша $0.20, запись
+        //   // $2.50 на пять минут и $4 на час.
+        //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ через {"type": "disabled"} — это 400 со ссылкой на {"type": "between_tools"}:
+        //   // модель не думает перед ответом, только между вызовами инструментов. Его и шлёт положение «выключено»,
+        //   // вместе с усилием low: between_tools принимается при low, medium и high, а без усилия действует
+        //   // умолчание API — high. Принудительный вызов инструмента (tool_choice any/tool) — 400.
+        //   { "id": "claude-sonnet-5-5", "name": "Claude Sonnet 5.5", "contextWindow": 1000000, "maxOutputTokens": 128000,
+        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5, "cacheWrite1h": 4, "currency": "USD" } }
         // ]
       }
     }

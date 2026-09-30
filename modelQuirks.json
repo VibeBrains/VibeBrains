@@ -49,8 +49,9 @@
 //   NO_FORCED_TOOL_CHOICE   — принудительный выбор инструмента (tool_choice any или tool) —
 //                             400 на каждом запросе. Запрос не меняет: IDE tool_choice не шлёт,
 //                             а диагностика называет такое поле в extraBody.
-//   OFF_THINKING_BETWEEN_TOOLS — «выключено» — это thinking: {"type": "between_tools"}: модель не
-//                             думает перед ответом, только между вызовами инструментов (Claude Sonnet 5.5).
+//   OFF_THINKING_BETWEEN_TOOLS — «выключено» — это thinking: {"type": "between_tools"} с усилием low:
+//                             модель не думает перед ответом, только между вызовами инструментов
+//                             (Claude Sonnet 5.5; "disabled" у неё — 400).
 //   EFFORT_LOW_HIGH_MAX     — уровни усилия модели — low, high и max, без medium; незнакомое слово —
 //                             400 (Kimi K3 и Kimi Code). Середина ползунка шлёт high.
 //   TOOL_CALLS_IN_TEXT      — модель иногда пишет вызов инструмента текстом в ответе, своей разметкой
