@@ -100,6 +100,8 @@
         //   // входа, запись $2.50, сверх 272K входа — тот же порог. РАССУЖДЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ: "none" и "minimal"
         //   // вендор не принимает, «выключено» шлёт low. Инструменты — только на Responses: «Chat Completions
         //   // supports requests without tools», поэтому запись объявляет "protocol": "openai-responses".
+        //   // Срез знаний — 30.04.2026. Fast mode ("service_tier": "fast" в extraBody) стоит вдвое дороже Standard,
+        //   // Batch и Flex — вдвое дешевле; Ultrafast у 6.1 Sol нет, он только у Astra (сверено 01.10.2026).
         //   { "id": "gpt-6.1-sol", "name": "GPT-6.1 Sol", "protocol": "openai-responses",
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] },

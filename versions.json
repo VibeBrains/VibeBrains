@@ -327,8 +327,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 13,
-      "sha256": "7db11259ab138b2172981f0bb8dc0f5e00a388953a7c68305d8a63d10f3d7be7",
+      "version": 14,
+      "sha256": "12b9a255e87b15ad5e2ffc58773afcc9be158b67f891d4c76b07048ef56cc9fe",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -340,7 +340,8 @@
         "99a559e674aa0796e802b2582eff1e529dd0dab4a81b82487fcd6e158ed289f9",
         "7380abf8461eb7e43d38a652148b9615ced6e38f35276a0055899f7e407ae789",
         "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1",
-        "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8"
+        "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8",
+        "7db11259ab138b2172981f0bb8dc0f5e00a388953a7c68305d8a63d10f3d7be7"
       ]
     },
     "providers/opencode-go.jsonc": {
