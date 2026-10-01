@@ -43,6 +43,9 @@
 //   TOOLS_ONLY_ON_RESPONSES — инструменты модель вызывает только через Responses API: на
 //                             chat/completions прямой чат идёт без них. Чтобы включить,
 //                             объявите модели "protocol": "openai-responses" в providers.json.
+//   RESPONSES_ONLY          — модель отвечает только через Responses API: chat/completions отвергает
+//                             любой запрос. Там запрос не уходит, лента называет выход — объявить модели
+//                             "protocol": "openai-responses". Вшита для o1-pro, o3-pro, gpt-5-pro.
 //   TOOLS_NEED_NO_REASONING — на chat/completions инструменты принимаются только с выключенным
 //                             рассуждением: ход с инструментами идёт без него. На Responses —
 //                             и то и другое вместе.

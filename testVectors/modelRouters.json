@@ -1,0 +1,75 @@
+{
+  "_comment": "Общие тестовые векторы модель-роутеров (cloudflare/auto, openrouter/auto). Читают тесты VibeIDE и VibeIDEA. Не сид — в products.json адресован пустому списку продуктов. Роутер выбирает модель на каждый запрос, поэтому ответ другой модели — не подмена. Кто ответил: заголовок cf-aig-routed-model сильнее поля model в теле, где Cloudflare оставляет id роутера. Цена — по записи ответившей модели в каталоге того же провайдера; её нет — по записи роутера. Сравнение по хвосту id: префикс вендора и регистр не различают модели. Собрано 01.10.2026.",
+  "version": 1,
+  "cases": [
+    {
+      "asked": "cloudflare/auto",
+      "header": "anthropic/claude-sonnet-5-5",
+      "body": "cloudflare/auto",
+      "catalogue": [
+        "auto",
+        "claude-sonnet-5-5"
+      ],
+      "answered": "anthropic/claude-sonnet-5-5",
+      "substituted": false,
+      "billed": "claude-sonnet-5-5"
+    },
+    {
+      "asked": "openrouter/auto",
+      "header": null,
+      "body": "openai/gpt-6-luna",
+      "catalogue": [
+        "openrouter/auto"
+      ],
+      "answered": "openai/gpt-6-luna",
+      "substituted": false,
+      "billed": "openrouter/auto"
+    },
+    {
+      "asked": "auto",
+      "header": null,
+      "body": "OpenAI/GPT-6-Luna",
+      "catalogue": [
+        "auto",
+        "gpt-6-luna"
+      ],
+      "answered": "OpenAI/GPT-6-Luna",
+      "substituted": false,
+      "billed": "gpt-6-luna"
+    },
+    {
+      "asked": "auto",
+      "header": null,
+      "body": null,
+      "catalogue": [
+        "auto"
+      ],
+      "answered": null,
+      "substituted": false,
+      "billed": "auto"
+    },
+    {
+      "asked": "gpt-6-luna",
+      "header": "gpt-6-sol",
+      "body": "gpt-6-luna",
+      "catalogue": [
+        "gpt-6-luna",
+        "gpt-6-sol"
+      ],
+      "answered": "gpt-6-sol",
+      "substituted": true,
+      "billed": "gpt-6-luna"
+    },
+    {
+      "asked": "anthropic/claude-opus-5-5",
+      "header": null,
+      "body": "claude-opus-5-5",
+      "catalogue": [
+        "claude-opus-5-5"
+      ],
+      "answered": "claude-opus-5-5",
+      "substituted": false,
+      "billed": "claude-opus-5-5"
+    }
+  ]
+}

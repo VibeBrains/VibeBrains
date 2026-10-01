@@ -80,8 +80,8 @@
       "history": []
     },
     "modelQuirks.json": {
-      "version": 11,
-      "sha256": "4dd7e2c141aa28866573212b51dba31283d8411ae96c76737ef876b6c64b20d6",
+      "version": 12,
+      "sha256": "1ef50f4c2e14d5d67956232dd697386099f5b1711e482c3327f156279fc6d352",
       "history": [
         "e21e89177871304a21e1477bdb20563965e61ef0633c580cc015af8bc46866d0",
         "6b738867501b20c2d5b8d1535312b84fc994594535249cf2ecf770e53713c6a2",
@@ -92,7 +92,8 @@
         "2a030dc881a35991429b6f9d725802a5f1365c6d95b33c7ba356766587fb25a9",
         "15f8312bb9beae374997ce208d38823d571bb78ea34b2c4d3184efd312f994cf",
         "034d3bb5325a416d1940493e88d9175233a740b246d91510309a0dc60dffaacb",
-        "24738a850b3376d0126fd07d5e0449bc8aabe4ae0c1ec9c9d65e34038e843147"
+        "24738a850b3376d0126fd07d5e0449bc8aabe4ae0c1ec9c9d65e34038e843147",
+        "4dd7e2c141aa28866573212b51dba31283d8411ae96c76737ef876b6c64b20d6"
       ]
     },
     "patrols.json": {
@@ -101,8 +102,8 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 14,
-      "sha256": "e30736a24da4991e4d6d236dcdcdfdd8bfdf2fdb752f266d7c37a8c4566c7a9b",
+      "version": 15,
+      "sha256": "3d63a69870e818f2eb131cf98cadb2fa9b699eea1a9c051fb03732d0a66946bb",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
@@ -116,12 +117,13 @@
         "69d6d334418dc477b9c2d898dd14c09ded82809537694c4feada46d95551766b",
         "23fa80ac55ed7262f069319bae41550c160573f0da75f07cfb416c7ab6c8b5fb",
         "e6dfb5f0bb4dca932beacadbc13160bcc02c01ca9cbc299ed7a69cd62428183e",
-        "03743ac0b658ea1885c539e5841dacd01b31a6bb37291a99da8f5c25cd183971"
+        "03743ac0b658ea1885c539e5841dacd01b31a6bb37291a99da8f5c25cd183971",
+        "e30736a24da4991e4d6d236dcdcdfdd8bfdf2fdb752f266d7c37a8c4566c7a9b"
       ]
     },
     "products.json": {
-      "version": 13,
-      "sha256": "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656",
+      "version": 14,
+      "sha256": "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -134,7 +136,8 @@
         "385138868f5b715401039ede35e1ce7c1814b41796f93fe1dfd15e3ef050bf8e",
         "76ecada53df76f785b6d16324c73654bf6c4a1a7d8241a4a2e92461ad71492e8",
         "de91d782089ca93081219a8ea1d5cb7ff0bdca265d0b5600e54a99184975ba17",
-        "5f98bb748c7e8e112e9638ab03e6e7855c9c93fd0792c280769e37e31386f91e"
+        "5f98bb748c7e8e112e9638ab03e6e7855c9c93fd0792c280769e37e31386f91e",
+        "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -820,6 +823,11 @@
     "testVectors/chatgptPlan.json": {
       "version": 1,
       "sha256": "ad6d46ffd3cfa285eeaac9ba05dd8cc7ed2ab31c75c8dcefed676346fee6954c",
+      "history": []
+    },
+    "testVectors/modelRouters.json": {
+      "version": 1,
+      "sha256": "98d72593a77deda08725e8f9f54b54e2cec6b2e5a7d736d4f493e811ea63ebcb",
       "history": []
     },
     "testVectors/modelRoutes.json": {
