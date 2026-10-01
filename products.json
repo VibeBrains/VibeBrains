@@ -53,6 +53,8 @@
     { "path": "testVectors/reasoningEcho.json", "products": [] },
     // Общие векторы вызова инструмента текстом: разметка семейств моделей в ответе вместо tool_calls. Читают тесты.
     { "path": "testVectors/textToolCalls.json", "products": [] },
+    // Общие векторы маршрута плана ChatGPT: поля, которые он отвергает, и вид запроса после приведения. Читают тесты.
+    { "path": "testVectors/chatgptPlan.json", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
     { "path": "slop.json", "products": ["vibeidea", "vibeide"] },

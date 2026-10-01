@@ -1,0 +1,196 @@
+{
+  "_comment": "Общие тестовые векторы маршрута плана ChatGPT (Sign in with ChatGPT для открытых клиентов): какие поля тела запроса маршрут отвергает и как IDE приводит к ним запрос Responses. Читают тесты VibeIDE и VibeIDEA: один провайдер с \"auth\": \"chatgpt\" обязан уходить одинаково. Не сид — в products.json адресован пустому списку. Источник — developers.openai.com/siwc/token-sharing-open-source/preview-limitations и /models-and-inference, сверено 01.10.2026; превью вендора, список будет меняться — меняется здесь. Правила: поля refused снимаются и называются в removed; store всегда false, stream всегда true; функции-инструменты собираются в одно пространство имён \"vibe\" (type namespace, description — параметр продукта), прочие инструменты остаются как есть; вызов function_call из истории без поля namespace получает namespace \"vibe\". Каталог плана: массив models с полями slug, display_name, visibility; показывать только visibility == \"list\".",
+  "version": 1,
+  "refused": [
+    "background",
+    "conversation",
+    "max_output_tokens",
+    "max_tool_calls",
+    "metadata",
+    "moderation",
+    "multi_agent",
+    "previous_response_id",
+    "prompt",
+    "prompt_cache_retention",
+    "safety_identifier",
+    "temperature",
+    "top_logprobs",
+    "top_p",
+    "truncation",
+    "user"
+  ],
+  "cases": [
+    {
+      "name": "плоские функции и запрещённые поля",
+      "description": "IDE tools",
+      "body": {
+        "model": "gpt-6.1-sol",
+        "stream": false,
+        "store": true,
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "max_output_tokens": 4096,
+        "previous_response_id": "resp_1",
+        "instructions": "sys",
+        "input": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "read_file",
+            "description": "Read a file",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "shaped": {
+        "model": "gpt-6.1-sol",
+        "stream": true,
+        "store": false,
+        "instructions": "sys",
+        "input": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [
+          {
+            "type": "namespace",
+            "name": "vibe",
+            "description": "IDE tools",
+            "tools": [
+              {
+                "type": "function",
+                "name": "read_file",
+                "description": "Read a file",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "removed": [
+        "max_output_tokens",
+        "previous_response_id",
+        "temperature",
+        "top_p"
+      ]
+    },
+    {
+      "name": "вызов из истории получает пространство имён, вызов вендора остаётся",
+      "description": "IDE tools",
+      "body": {
+        "model": "m",
+        "input": [
+          {
+            "type": "function_call",
+            "call_id": "c1",
+            "name": "read_file",
+            "arguments": "{}"
+          },
+          {
+            "type": "function_call",
+            "call_id": "c2",
+            "name": "read_file",
+            "namespace": "vibe",
+            "arguments": "{}"
+          },
+          {
+            "type": "function_call_output",
+            "call_id": "c1",
+            "output": "ok"
+          }
+        ]
+      },
+      "shaped": {
+        "model": "m",
+        "stream": true,
+        "store": false,
+        "input": [
+          {
+            "type": "function_call",
+            "call_id": "c1",
+            "name": "read_file",
+            "arguments": "{}",
+            "namespace": "vibe"
+          },
+          {
+            "type": "function_call",
+            "call_id": "c2",
+            "name": "read_file",
+            "namespace": "vibe",
+            "arguments": "{}"
+          },
+          {
+            "type": "function_call_output",
+            "call_id": "c1",
+            "output": "ok"
+          }
+        ]
+      },
+      "removed": []
+    },
+    {
+      "name": "без инструментов — только поток и хранение",
+      "description": "IDE tools",
+      "body": {
+        "model": "m",
+        "input": []
+      },
+      "shaped": {
+        "model": "m",
+        "stream": true,
+        "store": false,
+        "input": []
+      },
+      "removed": []
+    }
+  ],
+  "catalog": [
+    {
+      "name": "показываются только модели для списка",
+      "answer": {
+        "models": [
+          {
+            "slug": "gpt-6.1-sol",
+            "display_name": "GPT-6.1 Sol",
+            "visibility": "list"
+          },
+          {
+            "slug": "internal-x",
+            "display_name": "X",
+            "visibility": "hide"
+          },
+          {
+            "slug": "gpt-6-luna",
+            "display_name": "GPT-6 Luna",
+            "visibility": "list"
+          }
+        ]
+      },
+      "models": [
+        "gpt-6.1-sol",
+        "gpt-6-luna"
+      ]
+    }
+  ]
+}
