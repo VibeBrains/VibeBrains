@@ -100,8 +100,8 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 13,
-      "sha256": "03743ac0b658ea1885c539e5841dacd01b31a6bb37291a99da8f5c25cd183971",
+      "version": 14,
+      "sha256": "e30736a24da4991e4d6d236dcdcdfdd8bfdf2fdb752f266d7c37a8c4566c7a9b",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
@@ -114,7 +114,8 @@
         "ff2873125ebb340e5684f65b789ef5fa93d17586d54912b688b6737fe6af2099",
         "69d6d334418dc477b9c2d898dd14c09ded82809537694c4feada46d95551766b",
         "23fa80ac55ed7262f069319bae41550c160573f0da75f07cfb416c7ab6c8b5fb",
-        "e6dfb5f0bb4dca932beacadbc13160bcc02c01ca9cbc299ed7a69cd62428183e"
+        "e6dfb5f0bb4dca932beacadbc13160bcc02c01ca9cbc299ed7a69cd62428183e",
+        "03743ac0b658ea1885c539e5841dacd01b31a6bb37291a99da8f5c25cd183971"
       ]
     },
     "products.json": {
@@ -221,6 +222,11 @@
       "sha256": "4ffdfa09c1093ee39a8ff1726094086b6d91c9c38164e00cc5f7a6352734cf1e",
       "history": []
     },
+    "providers/cloudflare-ai-gateway.jsonc": {
+      "version": 1,
+      "sha256": "cfd41d1214746fd644b08da72fdd7bf61fb973dd0baf230a23359f1331de6fe8",
+      "history": []
+    },
     "providers/deepseek.jsonc": {
       "version": 14,
       "sha256": "55a737568c49d0353f041864c2fc4e3cf4d7466d4739cddbfa1a983f10c97962",
@@ -321,8 +327,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 12,
-      "sha256": "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8",
+      "version": 13,
+      "sha256": "7db11259ab138b2172981f0bb8dc0f5e00a388953a7c68305d8a63d10f3d7be7",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -333,7 +339,8 @@
         "2e39aa351698b3aaf8a51fbed9687292c35f94658507107773f43fd1c6b6323b",
         "99a559e674aa0796e802b2582eff1e529dd0dab4a81b82487fcd6e158ed289f9",
         "7380abf8461eb7e43d38a652148b9615ced6e38f35276a0055899f7e407ae789",
-        "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1"
+        "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1",
+        "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8"
       ]
     },
     "providers/opencode-go.jsonc": {

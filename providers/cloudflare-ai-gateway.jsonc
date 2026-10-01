@@ -1,0 +1,38 @@
+// Cloudflare AI Gateway — Auto Router: модель "cloudflare/auto" сама выбирает модель под задачу
+// из набора Anthropic, OpenAI и xAI (developers.cloudflare.com/ai-gateway/features/auto-router, сверено 01.10.2026).
+// ОБРАЗЕЦ, выключен: в адресе стоят ваши ID аккаунта и шлюза — подставьте их и поставьте "active": true.
+//
+// ПОДВОДНЫЕ КАМНИ:
+//   • Ключ — API-токен Cloudflare в заголовке cf-aig-authorization, и вендор ждёт его со словом Bearer.
+//     Поле "auth" кладёт в заголовок ключ как есть, поэтому в .vibe/.env пишите значение целиком:
+//     CLOUDFLARE_AIG_TOKEN=Bearer <токен>
+//   • Протокол — openai-responses: Auto Router может выбрать GPT-6, а та вызывает инструменты только через Responses.
+//     Вендор пишет, что поддерживает и Chat Completions, и Responses, но пример даёт только для
+//     /compat/chat/completions — путь /compat/responses не проверен. Не заработает — поставьте "protocol": "openai".
+//   • Ответившую модель вендор называет заголовком cf-aig-routed-model. Модель меняется от запроса к запросу —
+//     это работа роутера, а не подмена; цену продукт считает по ответившей модели, если знает её цену.
+//   • Сузить выбор: заголовки cf-aig-allowed-models и cf-aig-allowed-providers (через запятую, * — шаблон),
+//     например "headers": { "cf-aig-allowed-providers": "anthropic,openai" }.
+//   • Каталога моделей у шлюза нет — модель задаётся вручную, поэтому "fetch": false.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "cloudflare-ai-gateway",
+      "name": "Cloudflare AI Gateway",
+      "active": false, // образец: подставьте <ACCOUNT_ID> и <GATEWAY_ID>, затем true
+      "protocol": "openai-responses",
+      // База без /chat/completions и /responses: их дописывает клиент.
+      "baseURL": "https://gateway.ai.cloudflare.com/v1/<ACCOUNT_ID>/<GATEWAY_ID>/compat",
+      "auth": { "type": "header", "name": "cf-aig-authorization" },
+      "apiKeyEnv": "CLOUDFLARE_AIG_TOKEN", // значение — «Bearer <токен>», см. шапку
+      "order": 90,
+      "models": {
+        "fetch": false,
+        "static": [
+          { "id": "cloudflare/auto", "name": "Cloudflare Auto Router", "default": true }
+        ]
+      }
+    }
+  ]
+}

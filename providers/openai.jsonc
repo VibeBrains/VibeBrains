@@ -101,7 +101,7 @@
         //   // вендор не принимает, «выключено» шлёт low. Инструменты — только на Responses: «Chat Completions
         //   // supports requests without tools», поэтому запись объявляет "protocol": "openai-responses".
         //   { "id": "gpt-6.1-sol", "name": "GPT-6.1 Sol", "protocol": "openai-responses",
-        //     "contextWindow": 1050000, "maxOutputTokens": 128000,
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] },
         //     "cost": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5, "currency": "USD",
         //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } }
