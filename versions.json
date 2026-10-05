@@ -495,12 +495,13 @@
       ]
     },
     "rules/release.mdc": {
-      "version": 4,
-      "sha256": "f83945c8173f93074a91c3a4227667f2875cc1f10c4abdea7695bdaa14074b90",
+      "version": 5,
+      "sha256": "535d37fd2eb1b58c1ed29ffaf2237c75f215cbdc30390e08f223d6908279394b",
       "history": [
         "b6c0667330841a496f4222cbe59e2a0fd75620742a2683b2c80bf89b9b0e6280",
         "de2631c3d2e3c570d23a8ccda45344cfd50be0e0b010d2c42cd0e05971aa2b23",
-        "d70d6150c902056714ab0447e8a142d7b2f89d395a5bd040be21fbb2eaca888e"
+        "d70d6150c902056714ab0447e8a142d7b2f89d395a5bd040be21fbb2eaca888e",
+        "f83945c8173f93074a91c3a4227667f2875cc1f10c4abdea7695bdaa14074b90"
       ]
     },
     "rules/review-php.mdc": {
