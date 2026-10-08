@@ -1,0 +1,120 @@
+{
+  "_comment": "Общие тестовые векторы сверки «просили → ответила» (ModelEcho). Читают тесты VibeIDE и VibeIDEA. Не сид — в products.json адресован пустому списку продуктов. Подмена — только другая модель: датированная сборка того же алиаса, префикс агрегатора, регистр и плавающий алиас (~ в начале, -latest или :latest в конце) — та же модель. Хвост-слово (gpt-4o-mini) — другая модель. Пустой ответ или пустой запрос — не подмена. Роутеры — в modelRouters.json. Собрано 08.10.2026 из тестов обоих продуктов.",
+  "version": 1,
+  "cases": [
+    {
+      "asked": "gpt-4o",
+      "answered": "gpt-4o-2024-08-06",
+      "substituted": false,
+      "why": "алиас разрешён в датированную сборку"
+    },
+    {
+      "asked": "openai/gpt-4o",
+      "answered": "gpt-4o",
+      "substituted": false,
+      "why": "префикс агрегатора"
+    },
+    {
+      "asked": "gpt-4o",
+      "answered": "openai/gpt-4o",
+      "substituted": false,
+      "why": "префикс агрегатора в ответе"
+    },
+    {
+      "asked": "claude-opus-5",
+      "answered": "Claude-Opus-5",
+      "substituted": false,
+      "why": "регистр"
+    },
+    {
+      "asked": "qwen3-max",
+      "answered": "qwen3-max@2026-01-01",
+      "substituted": false,
+      "why": "сборка через @"
+    },
+    {
+      "asked": "kimi-k2",
+      "answered": "kimi-k2-0905-preview",
+      "substituted": false,
+      "why": "сборка начинается с цифр"
+    },
+    {
+      "asked": "gemini-3.8-flash",
+      "answered": "gemini-3.8-flash-002",
+      "substituted": false,
+      "why": "номер сборки"
+    },
+    {
+      "asked": "~openai/gpt-5-latest",
+      "answered": "gpt-5-2026-08-01",
+      "substituted": false,
+      "why": "плавающий алиас: ~ и -latest снимаются"
+    },
+    {
+      "asked": "openai/gpt-5-latest",
+      "answered": "openai/gpt-5",
+      "substituted": false,
+      "why": "хвост -latest"
+    },
+    {
+      "asked": "claude-opus-5:latest",
+      "answered": "claude-opus-5-20260801",
+      "substituted": false,
+      "why": "хвост :latest"
+    },
+    {
+      "asked": "claude-opus-5",
+      "answered": "claude-haiku-4-5",
+      "substituted": true,
+      "why": "другая модель"
+    },
+    {
+      "asked": "gpt-4o",
+      "answered": "gpt-4o-mini",
+      "substituted": true,
+      "why": "хвост-слово — другая модель"
+    },
+    {
+      "asked": "gpt-4o",
+      "answered": "gpt-4o-mini-2024-07-18",
+      "substituted": true,
+      "why": "хвост-слово перед сборкой"
+    },
+    {
+      "asked": "openai/gpt-4o",
+      "answered": "anthropic/claude-opus-5",
+      "substituted": true,
+      "why": "другой вендор"
+    },
+    {
+      "asked": "~openai/gpt-5-latest",
+      "answered": "gpt-5-mini-2026-08-01",
+      "substituted": true,
+      "why": "за алиасом другая модель"
+    },
+    {
+      "asked": "openai/gpt-5-latest",
+      "answered": "claude-opus-5",
+      "substituted": true,
+      "why": "за алиасом другой вендор"
+    },
+    {
+      "asked": "gpt-4o",
+      "answered": null,
+      "substituted": false,
+      "why": "провод не назвал модель — не обвинение"
+    },
+    {
+      "asked": "gpt-4o",
+      "answered": "   ",
+      "substituted": false,
+      "why": "пустое имя — не обвинение"
+    },
+    {
+      "asked": "",
+      "answered": "gpt-4o",
+      "substituted": false,
+      "why": "не знаем, что просили"
+    }
+  ]
+}

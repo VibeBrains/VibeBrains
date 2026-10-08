@@ -124,8 +124,8 @@
       ]
     },
     "products.json": {
-      "version": 14,
-      "sha256": "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85",
+      "version": 15,
+      "sha256": "d16dc48d2b660a4f83b077e0e3463abb37807fafa026b75da60d40b1a67ad2be",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -139,7 +139,8 @@
         "76ecada53df76f785b6d16324c73654bf6c4a1a7d8241a4a2e92461ad71492e8",
         "de91d782089ca93081219a8ea1d5cb7ff0bdca265d0b5600e54a99184975ba17",
         "5f98bb748c7e8e112e9638ab03e6e7855c9c93fd0792c280769e37e31386f91e",
-        "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656"
+        "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656",
+        "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -827,6 +828,11 @@
     "testVectors/chatgptPlan.json": {
       "version": 1,
       "sha256": "ad6d46ffd3cfa285eeaac9ba05dd8cc7ed2ab31c75c8dcefed676346fee6954c",
+      "history": []
+    },
+    "testVectors/modelEcho.json": {
+      "version": 1,
+      "sha256": "dec2b67ed4cc6578f1279cc56832befe517bb9a8dbd47f79da7ed924483a1fa4",
       "history": []
     },
     "testVectors/modelRouters.json": {
