@@ -49,9 +49,11 @@
 //   TOOLS_NEED_NO_REASONING — на chat/completions инструменты принимаются только с выключенным
 //                             рассуждением: ход с инструментами идёт без него. На Responses —
 //                             и то и другое вместе.
-//   NO_FORCED_TOOL_CHOICE   — принудительный выбор инструмента (tool_choice any или tool) —
-//                             400 на каждом запросе. Запрос не меняет: IDE tool_choice не шлёт,
-//                             а диагностика называет такое поле в extraBody.
+//   NO_FORCED_TOOL_CHOICE   — принудительный выбор инструмента — 400: на проводе Anthropic это
+//                             tool_choice any или tool, на проводе OpenAI — "required" или
+//                             {"type": "function"}. Запрос не меняет: IDE tool_choice не шлёт,
+//                             а диагностика называет такое поле в extraBody. Вшита для Claude
+//                             Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1 и для DeepSeek.
 //   OFF_THINKING_BETWEEN_TOOLS — «выключено» — это thinking: {"type": "between_tools"} с усилием low:
 //                             модель не думает перед ответом, только между вызовами инструментов
 //                             (Claude Sonnet 5.5; "disabled" у неё — 400).

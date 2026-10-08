@@ -2,6 +2,9 @@
 // Claude в VibeIDEA прежде всего живёт как ACP-агент (Claude Code) — с инструментами,
 // сессиями и режимами; этот провайдер — для прямого чата с API, если есть свой ключ.
 // Ключ: ANTHROPIC_API_KEY=<ключ> в .vibe/.env (взять: console.anthropic.com).
+// Подписка Max даёт и ключ: с 07.10.2026 в Max 5x входит $100 в месяц на API, в Max 20x — $200, у Team — по
+// местам. Это обычный ключ Console, он работает здесь как любой другой, но расход идёт деньгами по ценам ниже,
+// а не лимитами подписки. Pro кредитов не получает (support.claude.com/en/articles/17154008, сверено 08.10.2026).
 {
   "version": 1,
   "providers": [
@@ -53,14 +56,25 @@
         //   { "id": "claude-opus-5-5", "name": "Claude Opus 5.5",
         //     "cost": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite": 5, "cacheWrite1h": 8, "currency": "USD" } },
         //   // Claude Sonnet 5.5 (выпуск 28.09.2026; platform.claude.com/docs/en/models/sonnet-5-5/overview и
-        //   // /whats-new-sonnet-5-5, сверено 30.09.2026): окно 1M, выход 128K, $2 / $10, чтение кэша $0.20, запись
-        //   // $2.50 на пять минут и $4 на час.
+        //   // /whats-new-sonnet-5-5, сверено 30.09.2026): окно 1M, выход 128K, $2 / $10, запись $2.50 на пять минут
+        //   // и $4 на час. Чтение кэша с 07.10.2026 — $0.10, 0.05 от входа (было $0.20; /about-claude/pricing,
+        //   // сверено 08.10.2026).
         //   // МЫШЛЕНИЕ НЕ ВЫКЛЮЧАЕТСЯ через {"type": "disabled"} — это 400 со ссылкой на {"type": "between_tools"}:
         //   // модель не думает перед ответом, только между вызовами инструментов. Его и шлёт положение «выключено»,
         //   // вместе с усилием low: between_tools принимается при low, medium и high, а без усилия действует
         //   // умолчание API — high. Принудительный вызов инструмента (tool_choice any/tool) — 400.
         //   { "id": "claude-sonnet-5-5", "name": "Claude Sonnet 5.5", "contextWindow": 1000000, "maxOutputTokens": 128000,
-        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite": 2.5, "cacheWrite1h": 4, "currency": "USD" } }
+        //     "cost": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5, "cacheWrite1h": 4, "currency": "USD" } },
+        //   // Claude Haiku 5.5 (выпуск 07.10.2026; platform.claude.com/docs/en/models/haiku-5-5/overview и
+        //   // /migration-guide, сверено 08.10.2026): окно 1M, выход 128K, мышление адаптивное и включено по умолчанию,
+        //   // умолчание усилия — medium. ЦЕНА ЗАВИСИТ ОТ ДЛИНЫ ПРОМПТА: до 100 000 токенов $0.10 / $0.50, кэш $0.01,
+        //   // запись $0.125 и $0.20; длиннее — всё ровно впятеро дороже, это и есть блок "longContext".
+        //   // Положение «выключено» шлёт {"type": "disabled"}: модель принимает его при усилии до high, а выше
+        //   // ползунок не поднимается. temperature, top_p и top_k — 400 на любом запросе. Принудительный вызов
+        //   // инструмента принимается, но ответ тогда начинается с вызова, без мышления.
+        //   { "id": "claude-haiku-5-5", "name": "Claude Haiku 5.5", "contextWindow": 1000000, "maxOutputTokens": 128000,
+        //     "cost": { "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite": 0.125, "cacheWrite1h": 0.2, "currency": "USD",
+        //       "longContext": { "overInputTokens": 100000, "input": 5, "cache": 5, "output": 5 } } }
         // ]
       }
     }
