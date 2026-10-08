@@ -60,6 +60,9 @@
 //   EFFORT_BY_UPDATE        — на проводе Responses уровень посреди разговора меняется элементом
 //                             configuration_update, а запрос держит уровень первого ответа этой модели:
 //                             так кэш промпта не сгорает от ползунка (GPT-6). Вшита для ^gpt-6.
+//   EFFORT_BY_SYSTEM_MESSAGE — то же на собственном API Anthropic: новый уровень уходит системным
+//                             сообщением с output_config.effort, только при адаптивном мышлении.
+//                             Вшита для Claude Fable 5.1, Mythos 5.1, Opus 5, 5.5, Sonnet 5.5, Haiku 5.5.
 //   EFFORT_LOW_HIGH_MAX     — уровни усилия модели — low, high и max, без medium; незнакомое слово —
 //                             400 (Kimi K3 и Kimi Code). Середина ползунка шлёт high.
 //   INLINE_TOOL_ADDITIONS   — модель принимает системные сообщения посреди разговора: инструменты,
