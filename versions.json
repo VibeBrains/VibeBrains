@@ -831,9 +831,11 @@
       "history": []
     },
     "testVectors/modelEcho.json": {
-      "version": 1,
-      "sha256": "dec2b67ed4cc6578f1279cc56832befe517bb9a8dbd47f79da7ed924483a1fa4",
-      "history": []
+      "version": 2,
+      "sha256": "d4cde93a0c567e90088780d182f2af05bf5ba370b3e6893c4c4dc98fdb289f78",
+      "history": [
+        "dec2b67ed4cc6578f1279cc56832befe517bb9a8dbd47f79da7ed924483a1fa4"
+      ]
     },
     "testVectors/modelRouters.json": {
       "version": 1,

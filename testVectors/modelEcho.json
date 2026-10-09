@@ -1,120 +1,139 @@
 {
-  "_comment": "Общие тестовые векторы сверки «просили → ответила» (ModelEcho). Читают тесты VibeIDE и VibeIDEA. Не сид — в products.json адресован пустому списку продуктов. Подмена — только другая модель: датированная сборка того же алиаса, префикс агрегатора, регистр и плавающий алиас (~ в начале, -latest или :latest в конце) — та же модель. Хвост-слово (gpt-4o-mini) — другая модель. Пустой ответ или пустой запрос — не подмена. Роутеры — в modelRouters.json. Собрано 08.10.2026 из тестов обоих продуктов.",
+  "_comment": "Общие тестовые векторы сверки «просили → ответила» (ModelEcho). Читают тесты VibeIDE и VibeIDEA. Не сид — в products.json адресован пустому списку продуктов. Подмена — только другая модель: датированная сборка того же алиаса, префикс агрегатора, регистр и плавающий алиас (~ в начале, -latest или :latest в конце) — та же модель. Хвост-слово (gpt-4o-mini) — другая модель. Пустой ответ или пустой запрос — не подмена. Роутеры — в modelRouters.json. Собрано 08.10.2026 из тестов обоих продуктов. Поле quirkModel — по какому id искать причуды модели: по ответившей сборке, если ответила та же модель (правило, записанное для датированной сборки, работает и за плавающим алиасом), иначе по запрошенному id.",
   "version": 1,
   "cases": [
     {
       "asked": "gpt-4o",
       "answered": "gpt-4o-2024-08-06",
       "substituted": false,
-      "why": "алиас разрешён в датированную сборку"
+      "why": "алиас разрешён в датированную сборку",
+      "quirkModel": "gpt-4o-2024-08-06"
     },
     {
       "asked": "openai/gpt-4o",
       "answered": "gpt-4o",
       "substituted": false,
-      "why": "префикс агрегатора"
+      "why": "префикс агрегатора",
+      "quirkModel": "gpt-4o"
     },
     {
       "asked": "gpt-4o",
       "answered": "openai/gpt-4o",
       "substituted": false,
-      "why": "префикс агрегатора в ответе"
+      "why": "префикс агрегатора в ответе",
+      "quirkModel": "openai/gpt-4o"
     },
     {
       "asked": "claude-opus-5",
       "answered": "Claude-Opus-5",
       "substituted": false,
-      "why": "регистр"
+      "why": "регистр",
+      "quirkModel": "Claude-Opus-5"
     },
     {
       "asked": "qwen3-max",
       "answered": "qwen3-max@2026-01-01",
       "substituted": false,
-      "why": "сборка через @"
+      "why": "сборка через @",
+      "quirkModel": "qwen3-max@2026-01-01"
     },
     {
       "asked": "kimi-k2",
       "answered": "kimi-k2-0905-preview",
       "substituted": false,
-      "why": "сборка начинается с цифр"
+      "why": "сборка начинается с цифр",
+      "quirkModel": "kimi-k2-0905-preview"
     },
     {
       "asked": "gemini-3.8-flash",
       "answered": "gemini-3.8-flash-002",
       "substituted": false,
-      "why": "номер сборки"
+      "why": "номер сборки",
+      "quirkModel": "gemini-3.8-flash-002"
     },
     {
       "asked": "~openai/gpt-5-latest",
       "answered": "gpt-5-2026-08-01",
       "substituted": false,
-      "why": "плавающий алиас: ~ и -latest снимаются"
+      "why": "плавающий алиас: ~ и -latest снимаются",
+      "quirkModel": "gpt-5-2026-08-01"
     },
     {
       "asked": "openai/gpt-5-latest",
       "answered": "openai/gpt-5",
       "substituted": false,
-      "why": "хвост -latest"
+      "why": "хвост -latest",
+      "quirkModel": "openai/gpt-5"
     },
     {
       "asked": "claude-opus-5:latest",
       "answered": "claude-opus-5-20260801",
       "substituted": false,
-      "why": "хвост :latest"
+      "why": "хвост :latest",
+      "quirkModel": "claude-opus-5-20260801"
     },
     {
       "asked": "claude-opus-5",
       "answered": "claude-haiku-4-5",
       "substituted": true,
-      "why": "другая модель"
+      "why": "другая модель",
+      "quirkModel": "claude-opus-5"
     },
     {
       "asked": "gpt-4o",
       "answered": "gpt-4o-mini",
       "substituted": true,
-      "why": "хвост-слово — другая модель"
+      "why": "хвост-слово — другая модель",
+      "quirkModel": "gpt-4o"
     },
     {
       "asked": "gpt-4o",
       "answered": "gpt-4o-mini-2024-07-18",
       "substituted": true,
-      "why": "хвост-слово перед сборкой"
+      "why": "хвост-слово перед сборкой",
+      "quirkModel": "gpt-4o"
     },
     {
       "asked": "openai/gpt-4o",
       "answered": "anthropic/claude-opus-5",
       "substituted": true,
-      "why": "другой вендор"
+      "why": "другой вендор",
+      "quirkModel": "openai/gpt-4o"
     },
     {
       "asked": "~openai/gpt-5-latest",
       "answered": "gpt-5-mini-2026-08-01",
       "substituted": true,
-      "why": "за алиасом другая модель"
+      "why": "за алиасом другая модель",
+      "quirkModel": "~openai/gpt-5-latest"
     },
     {
       "asked": "openai/gpt-5-latest",
       "answered": "claude-opus-5",
       "substituted": true,
-      "why": "за алиасом другой вендор"
+      "why": "за алиасом другой вендор",
+      "quirkModel": "openai/gpt-5-latest"
     },
     {
       "asked": "gpt-4o",
       "answered": null,
       "substituted": false,
-      "why": "провод не назвал модель — не обвинение"
+      "why": "провод не назвал модель — не обвинение",
+      "quirkModel": "gpt-4o"
     },
     {
       "asked": "gpt-4o",
       "answered": "   ",
       "substituted": false,
-      "why": "пустое имя — не обвинение"
+      "why": "пустое имя — не обвинение",
+      "quirkModel": "gpt-4o"
     },
     {
       "asked": "",
       "answered": "gpt-4o",
       "substituted": false,
-      "why": "не знаем, что просили"
+      "why": "не знаем, что просили",
+      "quirkModel": "gpt-4o"
     }
   ]
 }
