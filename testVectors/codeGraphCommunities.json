@@ -1,0 +1,294 @@
+{
+  "_comment": "Общие тестовые векторы деления проекта на подсистемы (граф проекта: communities.ts + codeGraphAnalysis.ts у VibeIDE, Communities + ProjectGraphAnalysis у VibeIDEA). Читают тесты обоих продуктов. Не сид — в products.json адресован пустому списку продуктов. Случай: files — пути файлов проекта (имена и порядок не значимы), links — связи «файл импортирует файл» с признаком происхождения. provenance бывает только extracted (прочитано в исходнике, вес 1) и ambiguous (догадка по имени, вес 0.25); inferred в векторах нет, потому что продукты взвешивают его по-разному. Ждём: subsystems — разбиение на группы из двух файлов и больше, как МНОЖЕСТВО множеств путей (номера подсистем не сравниваются), у каждой подпись label; isolated — файлы без единой связи, одиночка подсистемой не бывает. Подпись: самая глубокая папка, в которой лежит не меньше половины файлов группы (ровно половина тоже годится), отсчитанная от общей папки всех файлов проекта, из неё последние две папки; если папки нет или она совпала с общей — имя самого связанного файла группы; если две группы получили одну подпись — к обеим через « · » добавляется имя их самого связанного файла. Одна пара файлов — одна связь, сколько бы импортов между ними ни было; догадка тянет в четыре раза слабее факта и сама склеить далёкие группы не должна. Результат не зависит от порядка files и links. Графы подобраны с однозначной структурой (плотные группы, соединённые одиночными мостами или звёзды с одним явным хабом), чтобы любой честный Leiden дал то же разбиение. Собрано 10.10.2026 и прогнано кодом обоих продуктов (communities.ts и codeGraphAnalysis.ts у VibeIDE, Communities и ProjectGraphAnalysis у VibeIDEA); новый случай добавляется сюда, а не в тест одной стороны.",
+  "version": 1,
+  "cases": [
+    {
+      "why": "две плотные группы по пять файлов, соединённые одним мостом, делятся по мосту; файл без связей остаётся одиночкой",
+      "files": [
+        "web/app.ts",
+        "web/router.ts",
+        "web/store.ts",
+        "web/view.ts",
+        "web/theme.ts",
+        "api/server.ts",
+        "api/routes.ts",
+        "api/db.ts",
+        "api/auth.ts",
+        "api/log.ts",
+        "README.md"
+      ],
+      "links": [
+        { "from": "web/app.ts", "to": "web/router.ts", "provenance": "extracted" },
+        { "from": "web/app.ts", "to": "web/store.ts", "provenance": "extracted" },
+        { "from": "web/app.ts", "to": "web/view.ts", "provenance": "extracted" },
+        { "from": "web/app.ts", "to": "web/theme.ts", "provenance": "extracted" },
+        { "from": "web/router.ts", "to": "web/store.ts", "provenance": "extracted" },
+        { "from": "web/router.ts", "to": "web/view.ts", "provenance": "extracted" },
+        { "from": "web/router.ts", "to": "web/theme.ts", "provenance": "extracted" },
+        { "from": "web/store.ts", "to": "web/view.ts", "provenance": "extracted" },
+        { "from": "web/store.ts", "to": "web/theme.ts", "provenance": "extracted" },
+        { "from": "web/view.ts", "to": "web/theme.ts", "provenance": "extracted" },
+        { "from": "api/server.ts", "to": "api/routes.ts", "provenance": "extracted" },
+        { "from": "api/server.ts", "to": "api/db.ts", "provenance": "extracted" },
+        { "from": "api/server.ts", "to": "api/auth.ts", "provenance": "extracted" },
+        { "from": "api/server.ts", "to": "api/log.ts", "provenance": "extracted" },
+        { "from": "api/routes.ts", "to": "api/db.ts", "provenance": "extracted" },
+        { "from": "api/routes.ts", "to": "api/auth.ts", "provenance": "extracted" },
+        { "from": "api/routes.ts", "to": "api/log.ts", "provenance": "extracted" },
+        { "from": "api/db.ts", "to": "api/auth.ts", "provenance": "extracted" },
+        { "from": "api/db.ts", "to": "api/log.ts", "provenance": "extracted" },
+        { "from": "api/auth.ts", "to": "api/log.ts", "provenance": "extracted" },
+        { "from": "web/store.ts", "to": "api/routes.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "web", "files": ["web/app.ts", "web/router.ts", "web/store.ts", "web/view.ts", "web/theme.ts"] },
+        { "label": "api", "files": ["api/server.ts", "api/routes.ts", "api/db.ts", "api/auth.ts", "api/log.ts"] }
+      ],
+      "isolated": ["README.md"]
+    },
+    {
+      "why": "две группы по четыре файла, склеенные только догадками (все 16 пар), остаются двумя: догадка весит четверть факта",
+      "files": [
+        "core/a.ts",
+        "core/b.ts",
+        "core/c.ts",
+        "core/d.ts",
+        "core/shell/w.ts",
+        "core/shell/x.ts",
+        "core/shell/y.ts",
+        "core/shell/z.ts",
+        "README.md"
+      ],
+      "links": [
+        { "from": "core/a.ts", "to": "core/b.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/c.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/c.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/shell/x.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/shell/x.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/shell/y.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/shell/w.ts", "provenance": "ambiguous" },
+        { "from": "core/a.ts", "to": "core/shell/x.ts", "provenance": "ambiguous" },
+        { "from": "core/a.ts", "to": "core/shell/y.ts", "provenance": "ambiguous" },
+        { "from": "core/a.ts", "to": "core/shell/z.ts", "provenance": "ambiguous" },
+        { "from": "core/b.ts", "to": "core/shell/w.ts", "provenance": "ambiguous" },
+        { "from": "core/b.ts", "to": "core/shell/x.ts", "provenance": "ambiguous" },
+        { "from": "core/b.ts", "to": "core/shell/y.ts", "provenance": "ambiguous" },
+        { "from": "core/b.ts", "to": "core/shell/z.ts", "provenance": "ambiguous" },
+        { "from": "core/c.ts", "to": "core/shell/w.ts", "provenance": "ambiguous" },
+        { "from": "core/c.ts", "to": "core/shell/x.ts", "provenance": "ambiguous" },
+        { "from": "core/c.ts", "to": "core/shell/y.ts", "provenance": "ambiguous" },
+        { "from": "core/c.ts", "to": "core/shell/z.ts", "provenance": "ambiguous" },
+        { "from": "core/d.ts", "to": "core/shell/w.ts", "provenance": "ambiguous" },
+        { "from": "core/d.ts", "to": "core/shell/x.ts", "provenance": "ambiguous" },
+        { "from": "core/d.ts", "to": "core/shell/y.ts", "provenance": "ambiguous" },
+        { "from": "core/d.ts", "to": "core/shell/z.ts", "provenance": "ambiguous" }
+      ],
+      "subsystems": [
+        { "label": "core", "files": ["core/a.ts", "core/b.ts", "core/c.ts", "core/d.ts"] },
+        { "label": "core/shell", "files": ["core/shell/w.ts", "core/shell/x.ts", "core/shell/y.ts", "core/shell/z.ts"] }
+      ],
+      "isolated": ["README.md"]
+    },
+    {
+      "why": "те же связи, но прочитанные в исходнике, сливают группы в одну; ровно половина файлов в самой глубокой папке — ещё «не меньше половины»",
+      "files": [
+        "core/a.ts",
+        "core/b.ts",
+        "core/c.ts",
+        "core/d.ts",
+        "core/shell/w.ts",
+        "core/shell/x.ts",
+        "core/shell/y.ts",
+        "core/shell/z.ts",
+        "README.md"
+      ],
+      "links": [
+        { "from": "core/a.ts", "to": "core/b.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/c.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/c.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/d.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/shell/w.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/shell/x.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/shell/x.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/shell/y.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/shell/w.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/a.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/shell/w.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/b.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/shell/w.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/c.ts", "to": "core/shell/z.ts", "provenance": "extracted" },
+        { "from": "core/d.ts", "to": "core/shell/w.ts", "provenance": "extracted" },
+        { "from": "core/d.ts", "to": "core/shell/x.ts", "provenance": "extracted" },
+        { "from": "core/d.ts", "to": "core/shell/y.ts", "provenance": "extracted" },
+        { "from": "core/d.ts", "to": "core/shell/z.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "core/shell", "files": ["core/a.ts", "core/b.ts", "core/c.ts", "core/d.ts", "core/shell/w.ts", "core/shell/x.ts", "core/shell/y.ts", "core/shell/z.ts"] }
+      ],
+      "isolated": ["README.md"]
+    },
+    {
+      "why": "подпись — последние две папки той, где лежит группа, а не имя файла и не вся цепочка папок",
+      "files": [
+        "packages/billing/src/invoice.ts",
+        "packages/billing/src/tax.ts",
+        "packages/billing/src/pay.ts",
+        "packages/billing/src/refund.ts",
+        "packages/billing/src/ledger.ts",
+        "packages/search/lib/index.ts",
+        "packages/search/lib/query.ts",
+        "packages/search/lib/rank.ts",
+        "packages/search/lib/tokens.ts",
+        "packages/search/lib/cache.ts",
+        "tools/release.sh"
+      ],
+      "links": [
+        { "from": "packages/billing/src/invoice.ts", "to": "packages/billing/src/tax.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/invoice.ts", "to": "packages/billing/src/pay.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/invoice.ts", "to": "packages/billing/src/refund.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/invoice.ts", "to": "packages/billing/src/ledger.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/tax.ts", "to": "packages/billing/src/pay.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/tax.ts", "to": "packages/billing/src/refund.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/tax.ts", "to": "packages/billing/src/ledger.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/pay.ts", "to": "packages/billing/src/refund.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/pay.ts", "to": "packages/billing/src/ledger.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/refund.ts", "to": "packages/billing/src/ledger.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/index.ts", "to": "packages/search/lib/query.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/index.ts", "to": "packages/search/lib/rank.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/index.ts", "to": "packages/search/lib/tokens.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/index.ts", "to": "packages/search/lib/cache.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/query.ts", "to": "packages/search/lib/rank.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/query.ts", "to": "packages/search/lib/tokens.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/query.ts", "to": "packages/search/lib/cache.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/rank.ts", "to": "packages/search/lib/tokens.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/rank.ts", "to": "packages/search/lib/cache.ts", "provenance": "extracted" },
+        { "from": "packages/search/lib/tokens.ts", "to": "packages/search/lib/cache.ts", "provenance": "extracted" },
+        { "from": "packages/billing/src/ledger.ts", "to": "packages/search/lib/index.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "billing/src", "files": ["packages/billing/src/invoice.ts", "packages/billing/src/tax.ts", "packages/billing/src/pay.ts", "packages/billing/src/refund.ts", "packages/billing/src/ledger.ts"] },
+        { "label": "search/lib", "files": ["packages/search/lib/index.ts", "packages/search/lib/query.ts", "packages/search/lib/rank.ts", "packages/search/lib/tokens.ts", "packages/search/lib/cache.ts"] }
+      ],
+      "isolated": ["tools/release.sh"]
+    },
+    {
+      "why": "один чужой файл из общей папки, которого импортируют все, входит в группу, но не тянет подпись к корню проекта",
+      "files": [
+        "src/orders/cart.ts",
+        "src/orders/checkout.ts",
+        "src/orders/invoice.ts",
+        "src/orders/status.ts",
+        "src/orders/totals.ts",
+        "src/orders/history.ts",
+        "src/shared/uri.ts",
+        "tools/other.ts"
+      ],
+      "links": [
+        { "from": "src/orders/cart.ts", "to": "src/orders/checkout.ts", "provenance": "extracted" },
+        { "from": "src/orders/cart.ts", "to": "src/orders/invoice.ts", "provenance": "extracted" },
+        { "from": "src/orders/cart.ts", "to": "src/orders/status.ts", "provenance": "extracted" },
+        { "from": "src/orders/cart.ts", "to": "src/orders/totals.ts", "provenance": "extracted" },
+        { "from": "src/orders/cart.ts", "to": "src/orders/history.ts", "provenance": "extracted" },
+        { "from": "src/orders/checkout.ts", "to": "src/orders/invoice.ts", "provenance": "extracted" },
+        { "from": "src/orders/checkout.ts", "to": "src/orders/status.ts", "provenance": "extracted" },
+        { "from": "src/orders/checkout.ts", "to": "src/orders/totals.ts", "provenance": "extracted" },
+        { "from": "src/orders/checkout.ts", "to": "src/orders/history.ts", "provenance": "extracted" },
+        { "from": "src/orders/invoice.ts", "to": "src/orders/status.ts", "provenance": "extracted" },
+        { "from": "src/orders/invoice.ts", "to": "src/orders/totals.ts", "provenance": "extracted" },
+        { "from": "src/orders/invoice.ts", "to": "src/orders/history.ts", "provenance": "extracted" },
+        { "from": "src/orders/status.ts", "to": "src/orders/totals.ts", "provenance": "extracted" },
+        { "from": "src/orders/status.ts", "to": "src/orders/history.ts", "provenance": "extracted" },
+        { "from": "src/orders/totals.ts", "to": "src/orders/history.ts", "provenance": "extracted" },
+        { "from": "src/orders/cart.ts", "to": "src/shared/uri.ts", "provenance": "extracted" },
+        { "from": "src/orders/checkout.ts", "to": "src/shared/uri.ts", "provenance": "extracted" },
+        { "from": "src/orders/invoice.ts", "to": "src/shared/uri.ts", "provenance": "extracted" },
+        { "from": "src/orders/status.ts", "to": "src/shared/uri.ts", "provenance": "extracted" },
+        { "from": "src/orders/totals.ts", "to": "src/shared/uri.ts", "provenance": "extracted" },
+        { "from": "src/orders/history.ts", "to": "src/shared/uri.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "src/orders", "files": ["src/orders/cart.ts", "src/orders/checkout.ts", "src/orders/invoice.ts", "src/orders/status.ts", "src/orders/totals.ts", "src/orders/history.ts", "src/shared/uri.ts"] }
+      ],
+      "isolated": ["tools/other.ts"]
+    },
+    {
+      "why": "две группы в одной папке получили бы одну подпись — их различает имя самого связанного файла",
+      "files": [
+        "src/lib/core.ts",
+        "src/lib/render.ts",
+        "src/lib/a1.ts",
+        "src/lib/a2.ts",
+        "src/lib/a3.ts",
+        "src/lib/a4.ts",
+        "src/lib/b1.ts",
+        "src/lib/b2.ts",
+        "src/lib/b3.ts",
+        "src/lib/b4.ts",
+        "README.md"
+      ],
+      "links": [
+        { "from": "src/lib/core.ts", "to": "src/lib/a1.ts", "provenance": "extracted" },
+        { "from": "src/lib/core.ts", "to": "src/lib/a2.ts", "provenance": "extracted" },
+        { "from": "src/lib/core.ts", "to": "src/lib/a3.ts", "provenance": "extracted" },
+        { "from": "src/lib/core.ts", "to": "src/lib/a4.ts", "provenance": "extracted" },
+        { "from": "src/lib/render.ts", "to": "src/lib/b1.ts", "provenance": "extracted" },
+        { "from": "src/lib/render.ts", "to": "src/lib/b2.ts", "provenance": "extracted" },
+        { "from": "src/lib/render.ts", "to": "src/lib/b3.ts", "provenance": "extracted" },
+        { "from": "src/lib/render.ts", "to": "src/lib/b4.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "src/lib · core.ts", "files": ["src/lib/core.ts", "src/lib/a1.ts", "src/lib/a2.ts", "src/lib/a3.ts", "src/lib/a4.ts"] },
+        { "label": "src/lib · render.ts", "files": ["src/lib/render.ts", "src/lib/b1.ts", "src/lib/b2.ts", "src/lib/b3.ts", "src/lib/b4.ts"] }
+      ],
+      "isolated": ["README.md"]
+    },
+    {
+      "why": "у группы нет общей папки (файлы лежат в корне проекта): её называет самый связанный файл",
+      "files": [
+        "main.ts",
+        "util.ts",
+        "log.ts",
+        "config.ts",
+        "env.ts",
+        "docs/guide.md"
+      ],
+      "links": [
+        { "from": "main.ts", "to": "util.ts", "provenance": "extracted" },
+        { "from": "main.ts", "to": "log.ts", "provenance": "extracted" },
+        { "from": "main.ts", "to": "config.ts", "provenance": "extracted" },
+        { "from": "main.ts", "to": "env.ts", "provenance": "extracted" }
+      ],
+      "subsystems": [
+        { "label": "main.ts", "files": ["main.ts", "util.ts", "log.ts", "config.ts", "env.ts"] }
+      ],
+      "isolated": ["docs/guide.md"]
+    },
+    {
+      "why": "проект без единой связи: подсистем нет, каждый файл одинокий",
+      "files": [
+        "a.ts",
+        "b.ts",
+        "c.ts"
+      ],
+      "links": [],
+      "subsystems": [],
+      "isolated": ["a.ts", "b.ts", "c.ts"]
+    }
+  ]
+}
