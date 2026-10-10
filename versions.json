@@ -831,10 +831,11 @@
       "history": []
     },
     "testVectors/modelEcho.json": {
-      "version": 2,
-      "sha256": "d4cde93a0c567e90088780d182f2af05bf5ba370b3e6893c4c4dc98fdb289f78",
+      "version": 3,
+      "sha256": "74a15f190fc8dbfae22ba94bb4fd22d95ae98877cc87d68eb2076551d77ac19f",
       "history": [
-        "dec2b67ed4cc6578f1279cc56832befe517bb9a8dbd47f79da7ed924483a1fa4"
+        "dec2b67ed4cc6578f1279cc56832befe517bb9a8dbd47f79da7ed924483a1fa4",
+        "d4cde93a0c567e90088780d182f2af05bf5ba370b3e6893c4c4dc98fdb289f78"
       ]
     },
     "testVectors/modelRouters.json": {
