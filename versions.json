@@ -124,8 +124,8 @@
       ]
     },
     "products.json": {
-      "version": 15,
-      "sha256": "d16dc48d2b660a4f83b077e0e3463abb37807fafa026b75da60d40b1a67ad2be",
+      "version": 16,
+      "sha256": "b35a4249b4b7f4d1fdd75d729f75083cf7f7882bcc6a66936a01ada0a12f9be7",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -140,7 +140,8 @@
         "de91d782089ca93081219a8ea1d5cb7ff0bdca265d0b5600e54a99184975ba17",
         "5f98bb748c7e8e112e9638ab03e6e7855c9c93fd0792c280769e37e31386f91e",
         "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656",
-        "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85"
+        "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85",
+        "d16dc48d2b660a4f83b077e0e3463abb37807fafa026b75da60d40b1a67ad2be"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -828,6 +829,11 @@
     "testVectors/chatgptPlan.json": {
       "version": 1,
       "sha256": "ad6d46ffd3cfa285eeaac9ba05dd8cc7ed2ab31c75c8dcefed676346fee6954c",
+      "history": []
+    },
+    "testVectors/diffNavigation.json": {
+      "version": 1,
+      "sha256": "3c54110a761c96f8e1efcab41275834b4471978835e910bc03d3a4c87faf0fd3",
       "history": []
     },
     "testVectors/modelEcho.json": {

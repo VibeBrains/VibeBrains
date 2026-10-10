@@ -61,6 +61,8 @@
     // Общие векторы модель-роутеров: кто ответил (заголовок сильнее тела), не подмена, по какой записи цена. Читают тесты.
     { "path": "testVectors/modelRouters.json", "products": [] },
     { "path": "testVectors/modelEcho.json", "products": [] },
+    // Общие векторы перехода после решения правки: какая из оставшихся становится текущей. Читают тесты.
+    { "path": "testVectors/diffNavigation.json", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
     { "path": "slop.json", "products": ["vibeidea", "vibeide"] },
