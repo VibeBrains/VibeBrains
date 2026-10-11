@@ -606,6 +606,26 @@
       "sha256": "22bfc0cec4c5631e1762854c2a87d54fd4c27b2b90e58e5e837e0d9b0cd0c043",
       "history": []
     },
+    "skills/codebase-design/DEEPENING.md": {
+      "version": 1,
+      "sha256": "2516297f9b05f263d8daf83edf9035ef9a180cbc68dd0556d4e893827e1ddb24",
+      "history": []
+    },
+    "skills/codebase-design/DESIGN-IT-TWICE.md": {
+      "version": 1,
+      "sha256": "a4c5368bdff548d8a3fd7ff01ccb828630c94d627f241101c8959f3767a5374c",
+      "history": []
+    },
+    "skills/codebase-design/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/codebase-design/SKILL.md": {
+      "version": 1,
+      "sha256": "86684f734040f01cdf371fd78a0d56a5cad0b249dc8c8619611a647a49d18c7e",
+      "history": []
+    },
     "skills/demo/SKILL.md": {
       "version": 2,
       "sha256": "d59fd8741597a9f518fcd4096a4e3b894c2454b5a7a37dc2db23706d7110b9d2",
@@ -635,6 +655,21 @@
         "f3eeec54bb17f92fcc9a83d40544d019cfe0995724909c475125691b945c135e"
       ]
     },
+    "skills/diagnosing-bugs/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/diagnosing-bugs/SKILL.md": {
+      "version": 1,
+      "sha256": "ec5375990d055cb127555bf51c75e2901ff8259af6bc0b9253b09df32e2de1b8",
+      "history": []
+    },
+    "skills/diagnosing-bugs/scripts/hitl-loop.template.sh": {
+      "version": 1,
+      "sha256": "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503",
+      "history": []
+    },
     "skills/example/SKILL.md": {
       "version": 3,
       "sha256": "e69efccaf4ee5934b42838b7b31be068828f4660f49127154453772381cc5f22",
@@ -654,8 +689,20 @@
       "history": []
     },
     "skills/grill/SKILL.md": {
+      "version": 2,
+      "sha256": "b4d387cba683cf36bab4b3061085af7539cface8bd087ad98f8d97bbf5c93cb4",
+      "history": [
+        "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9"
+      ]
+    },
+    "skills/grilling/LICENSE": {
       "version": 1,
-      "sha256": "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9",
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/grilling/SKILL.md": {
+      "version": 1,
+      "sha256": "cf1ae4d87ed4383d369fa024296381c33ca9993e3d2550c245500df027d984a8",
       "history": []
     },
     "skills/implement-specs/SKILL.md": {
@@ -694,6 +741,16 @@
     "skills/resolve-merge-conflicts/scripts/extract_conflict_context.py": {
       "version": 1,
       "sha256": "b4e203fdae62cb928028178cb1684230847d3a12e93e803e4c040c34751cce87",
+      "history": []
+    },
+    "skills/retro/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/retro/SKILL.md": {
+      "version": 1,
+      "sha256": "66436c486e165a5d1e1b450e72de2cdff78c5f91728dab45c98a1625eb2d6e10",
       "history": []
     },
     "skills/review-pr/SKILL.md": {
@@ -746,9 +803,39 @@
         "3fdd6ec6ab9266c311624ed09f10bdd05bdd4e56e76da227db3526e74ca0ab20"
       ]
     },
+    "skills/tdd/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/tdd/SKILL.md": {
+      "version": 1,
+      "sha256": "a36c30999dcf79409f4600df8d9e85a23b156b76cec2e88f726cc76a1637bad5",
+      "history": []
+    },
+    "skills/tdd/mocking.md": {
+      "version": 1,
+      "sha256": "0346dd789000a056dd46ff610c884840a71dcad94b0236320a1125444fde9222",
+      "history": []
+    },
+    "skills/tdd/tests.md": {
+      "version": 1,
+      "sha256": "fd0d774f7396d7b0ca0888fa4726b34fe331d9900b84d1ce834146b494a3a514",
+      "history": []
+    },
     "skills/teach/SKILL.md": {
       "version": 1,
       "sha256": "6f19ad23f40f46b1f2b732706b9b6d40fb88d95c5403ba8eaedf96da981ab22a",
+      "history": []
+    },
+    "skills/to-questionnaire/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/to-questionnaire/SKILL.md": {
+      "version": 1,
+      "sha256": "1024f69b8977e0557058bdea5e51c86cfd498581bc2d1d70d0b6a33813b71157",
       "history": []
     },
     "skills/triage-failing-test/SKILL.md": {
@@ -767,6 +854,31 @@
     "skills/update-skill/references/best-practices.md": {
       "version": 1,
       "sha256": "5303b204821eb5f6492e570bd16fa33fef0c4f36ef82b2b7d051e12b3ce5235c",
+      "history": []
+    },
+    "skills/wait-what/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/wait-what/SKILL.md": {
+      "version": 1,
+      "sha256": "56085c8a230eda9c40cefb534d2d60e59ee19ef22344ceb6de37a91dea191d37",
+      "history": []
+    },
+    "skills/wizard/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/wizard/SKILL.md": {
+      "version": 1,
+      "sha256": "9056aa326870a173cdc9ec181c64fed1f61db3b6f6ab821a30d3f49f155e1319",
+      "history": []
+    },
+    "skills/wizard/template.sh": {
+      "version": 1,
+      "sha256": "7c70da7da1b0cab497c469411aa92b5650d43ef24e6b88728eb3a19a63ee8be7",
       "history": []
     },
     "skills/write-product-spec/SKILL.md": {
@@ -805,6 +917,21 @@
       "history": [
         "f4357bc19c1007a68287a0f5e14e5b529f340a5761a5abbdbf6671f82ae1f907"
       ]
+    },
+    "skills/writing-for-agents/LICENSE": {
+      "version": 1,
+      "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+      "history": []
+    },
+    "skills/writing-for-agents/SKILL-MECHANICS.md": {
+      "version": 1,
+      "sha256": "d2d897a99c5058739ef672f363931126f2738ecbc05a4f620a942b8c5acc25b8",
+      "history": []
+    },
+    "skills/writing-for-agents/SKILL.md": {
+      "version": 1,
+      "sha256": "ae9388e0aa0392868ffec29eabded0338b9d8783b6c69f963f69d798ca125f98",
+      "history": []
     },
     "slop.json": {
       "version": 2,
