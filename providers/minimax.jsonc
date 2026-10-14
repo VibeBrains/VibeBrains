@@ -53,7 +53,14 @@
         "static": [
           { "id": "MiniMax-M3.1-Flash-Preview", "name": "MiniMax M3.1 Flash Preview (M Plan)",
             "contextWindow": 1000000, "vision": true,
-            "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] } }
+            "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] } },
+          // MiniMax-Text-01 — НЕ ПОДТВЕРЖДЕНА ВЕНДОРОМ (14.10.2026): ни в models-intro, ни в pricing-paygo, ни в
+          // справочнике API её нет, ни как действующей, ни как снятой — запись может перестать работать без предупреждения.
+          // Зачем она здесь: не думающая модель с окном ~1M (по данным агрегаторов), годится для массового рерайта и
+          // длинных текстов. По подписке лимитом, судя по отзыву пользователя, не считается: ~140 тыс. текстов за ~23 часа
+          // на тарифе $11, тогда как M3 упиралась в лимит через 2–3 тыс. Поле reasoning не задано намеренно — думать нечему.
+          // Только на этом маршруте: Anthropic-совместимый эндпоинт её не принимает — см. запись ниже у minimax-anthropic.
+          { "id": "MiniMax-Text-01", "name": "MiniMax Text-01 (1M, без мышления)", "contextWindow": 1000000 }
         ]
       },
       // Остаток Token Plan — официальный запрос вендора (platform.minimax.io/docs/token-plan/faq). IDE задаёт его
@@ -114,6 +121,14 @@
             "vision": true,
             "toolFormat": "anthropic",
             "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] }
+          },
+          {
+            // static сливается с родительским minimax по id, поэтому MiniMax-Text-01 пришла бы сюда по наследству. Список
+            // моделей Anthropic-эндпоинта у вендора закрытый — девять id, Text-01 среди них нет
+            // (platform.minimax.io/docs/api-reference/text-anthropic-api, сверено 14.10.2026), для остальных вендор отсылает
+            // к обычному интерфейсу. Запись выключает унаследованную модель на этом маршруте; она живёт на минимаксе выше.
+            "id": "MiniMax-Text-01",
+            "active": false
           }
 
           // ── Остальные модели маршрута ──────────────────────────────────────────
@@ -121,6 +136,11 @@
           // справочника вендора (platform.minimax.io/docs/api-reference/text-anthropic-api,
           // сверено 19.09.2026). Окно у всей линейки M2.x — 204 800 токенов.
           // Модели с суффиксом `-highspeed` — быстрый вариант той же модели у вендора.
+          // M2.5 и M2.7 уходят: с 19.10.2026 они закрыты для новых пользователей, 18.11.2026 выключаются. На подписке
+          // (M Plan, Token Plan) с 19.10.2026 запросы к ним сами перенаправляются на M3.1-Flash-Preview под прежним
+          // именем модели; при поштучной оплате они работают до 18.11.2026, потом запросы падают
+          // (platform.minimax.io/docs/guides/models-intro, сверено 14.10.2026).
+          // M2.1 вендор держит в разделе Legacy: в списке ухода его нет, цена у него пока есть (pricing-paygo, сверено 14.10.2026).
           // Раскомментируйте нужные вместе с ведущей запятой.
           // ,{ "id": "MiniMax-M2.7", "name": "MiniMax M2.7 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
           // ,{ "id": "MiniMax-M2.7-highspeed", "name": "MiniMax M2.7 highspeed (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
