@@ -528,10 +528,11 @@
       "history": []
     },
     "rules/roadmap-autopilot.mdc": {
-      "version": 2,
-      "sha256": "702df9a15848cf09d77eab52e727bccd05242edc0a28d24bdde294057406b8dd",
+      "version": 3,
+      "sha256": "ede07df7e4900a00c9c993315d3aee17632293d9546cb830a9c3003faeb40912",
       "history": [
-        "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640"
+        "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640",
+        "702df9a15848cf09d77eab52e727bccd05242edc0a28d24bdde294057406b8dd"
       ]
     },
     "rules/roadmap.mdc": {
@@ -633,6 +634,11 @@
       "sha256": "86684f734040f01cdf371fd78a0d56a5cad0b249dc8c8619611a647a49d18c7e",
       "history": []
     },
+    "skills/codebase-design/evals/evals.json": {
+      "version": 1,
+      "sha256": "2379d066db35c41b2168c1a0ddbfc84a7563dc9129d89b98e0a0f08cef88ed4e",
+      "history": []
+    },
     "skills/demo/SKILL.md": {
       "version": 2,
       "sha256": "d59fd8741597a9f518fcd4096a4e3b894c2454b5a7a37dc2db23706d7110b9d2",
@@ -670,6 +676,11 @@
     "skills/diagnosing-bugs/SKILL.md": {
       "version": 1,
       "sha256": "ec5375990d055cb127555bf51c75e2901ff8259af6bc0b9253b09df32e2de1b8",
+      "history": []
+    },
+    "skills/diagnosing-bugs/evals/evals.json": {
+      "version": 1,
+      "sha256": "f8930091244885d4fe0f19b00f75435355cf4a99e9794058465818a9cbb5d7e2",
       "history": []
     },
     "skills/diagnosing-bugs/scripts/hitl-loop.template.sh": {
@@ -712,6 +723,11 @@
       "sha256": "cf1ae4d87ed4383d369fa024296381c33ca9993e3d2550c245500df027d984a8",
       "history": []
     },
+    "skills/grilling/evals/evals.json": {
+      "version": 1,
+      "sha256": "f2027eaff007fcf707c8184a912de001c6cfd1b8e3d5e0990386e23f79174896",
+      "history": []
+    },
     "skills/implement-specs/SKILL.md": {
       "version": 5,
       "sha256": "51dfca2d954458c1fd70db5acd3ff4798fefa505021ed91637bffa719d03fd12",
@@ -730,6 +746,11 @@
     "skills/na-paltsah/SKILL.md": {
       "version": 1,
       "sha256": "5b91a232e4a058ad4104d5e2092415be3e1a0f16a1108d95c013a81697707900",
+      "history": []
+    },
+    "skills/na-paltsah/evals/evals.json": {
+      "version": 1,
+      "sha256": "9aa40aa13e21512dd36b7ec7a2a8afc38c1409f8d1b720ee4bddceda204f8c54",
       "history": []
     },
     "skills/na-paltsah/examples/nginx.md": {
@@ -770,6 +791,11 @@
       "sha256": "66436c486e165a5d1e1b450e72de2cdff78c5f91728dab45c98a1625eb2d6e10",
       "history": []
     },
+    "skills/retro/evals/evals.json": {
+      "version": 1,
+      "sha256": "ad81dcc9f9bc7243bee68dce90b5f0b0bb9ca35b5562936a62ecd60acec47f04",
+      "history": []
+    },
     "skills/review-pr/SKILL.md": {
       "version": 3,
       "sha256": "966cbc7d3799d868af5c1cf8f265f9b1f0fb80222df5c17d8c92a72eae6aaf21",
@@ -789,6 +815,11 @@
     "skills/save-tokens/SKILL.md": {
       "version": 1,
       "sha256": "e015805cad86527392dd42909a45bb51321948e643f428b635bf9519f3c30890",
+      "history": []
+    },
+    "skills/save-tokens/evals/evals.json": {
+      "version": 1,
+      "sha256": "e114ee878e65840074e00c20a7c4d9e8cca8c89e07755050322b52d9833231d0",
       "history": []
     },
     "skills/screenshot-review/SKILL.md": {
@@ -835,6 +866,11 @@
       "sha256": "a36c30999dcf79409f4600df8d9e85a23b156b76cec2e88f726cc76a1637bad5",
       "history": []
     },
+    "skills/tdd/evals/evals.json": {
+      "version": 1,
+      "sha256": "d599e3ccf18f18a281c2387a8b25647c2b78139d95018d0fbf24d6e086de50a2",
+      "history": []
+    },
     "skills/tdd/mocking.md": {
       "version": 1,
       "sha256": "0346dd789000a056dd46ff610c884840a71dcad94b0236320a1125444fde9222",
@@ -858,6 +894,11 @@
     "skills/to-questionnaire/SKILL.md": {
       "version": 1,
       "sha256": "1024f69b8977e0557058bdea5e51c86cfd498581bc2d1d70d0b6a33813b71157",
+      "history": []
+    },
+    "skills/to-questionnaire/evals/evals.json": {
+      "version": 1,
+      "sha256": "1f8d71f8f3fbd2f85900ea8c1925edd162893fea0cd145b13b488a6f23e014a8",
       "history": []
     },
     "skills/triage-failing-test/SKILL.md": {
@@ -888,6 +929,11 @@
       "sha256": "56085c8a230eda9c40cefb534d2d60e59ee19ef22344ceb6de37a91dea191d37",
       "history": []
     },
+    "skills/wait-what/evals/evals.json": {
+      "version": 1,
+      "sha256": "8d9592d3ab1cd895b6f840ca2a47c37aaf604a612914fae7ef5b53bbd8eda530",
+      "history": []
+    },
     "skills/wizard/LICENSE": {
       "version": 1,
       "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
@@ -896,6 +942,11 @@
     "skills/wizard/SKILL.md": {
       "version": 1,
       "sha256": "9056aa326870a173cdc9ec181c64fed1f61db3b6f6ab821a30d3f49f155e1319",
+      "history": []
+    },
+    "skills/wizard/evals/evals.json": {
+      "version": 1,
+      "sha256": "bdd61808d5d92be34a542e973ba10bf2c7f9373a0dd61b1a9afc51447308af1d",
       "history": []
     },
     "skills/wizard/template.sh": {
@@ -953,6 +1004,11 @@
     "skills/writing-for-agents/SKILL.md": {
       "version": 1,
       "sha256": "ae9388e0aa0392868ffec29eabded0338b9d8783b6c69f963f69d798ca125f98",
+      "history": []
+    },
+    "skills/writing-for-agents/evals/evals.json": {
+      "version": 1,
+      "sha256": "98d9985e4192b608d966a9e2e8110edfc1b6f5b1957195da22e4c01efb06239c",
       "history": []
     },
     "slop.json": {

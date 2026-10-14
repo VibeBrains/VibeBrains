@@ -1,7 +1,8 @@
 ---
 description: Автопилот roadmap — автономный прогон docs/roadmap.md, пока оператор AFK. Максимум честно закрытых пунктов за ответ; вопросы не останавливают работу — некритичные решения агент принимает сам и логирует. Активация: триггер-фразы или /skill:roadmap-autopilot.
 globs:
-alwaysApply: true
+triggers: "ночной прогон", "автопилот", "roadmap night", "автономный роадмап", "закрывай роадмап", "пока сплю", "пока я сплю", "прогон AFK", "не получилось — иди дальше", "skip on failure", "/skill:roadmap-autopilot"
+alwaysApply: false
 ---
 
 # Roadmap Autopilot
