@@ -65,6 +65,9 @@
     { "path": "testVectors/diffNavigation.json", "products": [] },
     // Общие векторы деления проекта на подсистемы (граф проекта): какие файлы собираются в группу и как группа называется. Читают тесты.
     { "path": "testVectors/codeGraphCommunities.json", "products": [] },
+    // Общие векторы файла MCP-серверов семейства (~/.vibe/mcp.json и <проект>/.vibe/mcp.json): какие серверы и какие жалобы
+    // даёт один и тот же текст, как слой проекта ложится на общий файл. Читают тесты обоих продуктов, в проекты не засевается.
+    { "path": "testVectors/mcpServersFile.json", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
     { "path": "slop.json", "products": ["vibeidea", "vibeide"] },
