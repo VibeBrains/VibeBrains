@@ -124,8 +124,8 @@
       ]
     },
     "products.json": {
-      "version": 17,
-      "sha256": "75caa65bbda63cd9f248311d3013f0ac4fbec9c83a1679d74a871c244a415a62",
+      "version": 18,
+      "sha256": "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -142,7 +142,8 @@
         "198300c043c809aab479a80650f66333df093d09f84ba4c508b8a56a313b6656",
         "2bd714ad5179c2c37e5717653a2fac57f9d1101591b6687d6221531c21096f85",
         "d16dc48d2b660a4f83b077e0e3463abb37807fafa026b75da60d40b1a67ad2be",
-        "b35a4249b4b7f4d1fdd75d729f75083cf7f7882bcc6a66936a01ada0a12f9be7"
+        "b35a4249b4b7f4d1fdd75d729f75083cf7f7882bcc6a66936a01ada0a12f9be7",
+        "75caa65bbda63cd9f248311d3013f0ac4fbec9c83a1679d74a871c244a415a62"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -1096,6 +1097,11 @@
     "testVectors/textToolCalls.json": {
       "version": 1,
       "sha256": "ab40f230328923e78dd82f62fd24d749acf904e09e04cc2dc127bcf281288d26",
+      "history": []
+    },
+    "voice/sttModels.jsonc": {
+      "version": 1,
+      "sha256": "877f49a20026aee683bb424259a7094ed600d44367239629828ae96e8f7dd690",
       "history": []
     },
     "workflows/demo.json": {

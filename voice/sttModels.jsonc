@@ -1,0 +1,106 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  voice/sttModels.jsonc — каталог моделей локального распознавания речи (sherpa-onnx).
+//
+//  СЛУЖЕБНЫЙ файл набора: продукты читают его ИЗ СБОРКИ, в проекты он не засевается
+//  (products.json адресует его никому). Адреса, размеры и SHA256 живут здесь, а не константами
+//  в коде каждого продукта: копия списка расходится молча, а модель с чужой суммой не скачается
+//  вовсе — человек увидит «архив повреждён» вместо диктовки.
+//
+//  КАК УСТРОЕНО:
+//   • "archives" — что качается. Каждый архив — zip с одним каталогом верхнего уровня "dir"
+//     (имя каталога апстрима sherpa-onnx). Распаковывается в <каталог моделей>/<dir>/.
+//     "files" — файлы внутри "dir", без которых архив не считается установленным.
+//     "sizeBytes" — размер zip: из него согласие на скачивание и проценты загрузки.
+//     "sha256" — сумма zip; архив с другой суммой не распаковывается.
+//   • "profiles" — что из скачанного собирается в диктовку на языке:
+//     "streaming" печатает черновой текст во время речи и сам находит конец фразы;
+//     "final" (необязательный) перекодирует каждую законченную фразу заново, точнее черновика.
+//     Виды моделей: "tone-ctc" и "transducer" — стриминговые, "nemo-ctc" — для итогового прохода.
+//     Поля модели — имена файлов внутри каталога ее архива.
+//   • "batch" — модели для разбора готовой записи (VibeIDE, /watch); диктовке не нужны.
+//   • Язык выбирается по коду из настроек: "ru…" → ru, остальное → en; «авто» — ru.
+//
+//  Зеркало — релиз stt-models-v1 репозитория VibeBrains/VibeIDE: архивы апстрима (tar.bz2 из
+//  k2-fsa/sherpa-onnx, тег asr-models) перепакованы в zip, HuggingFace из России нестабилен.
+//  Лицензии — у каждого архива; текст едет внутри архива там, где апстрим его кладет.
+//  Новая модель: архив на зеркало, строка сюда, `node bump.mjs`, тесты обоих продуктов.
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  "version": 1,
+  "sampleRate": 16000,
+  "archives": [
+    {
+      "id": "t-one-ru",
+      "dir": "sherpa-onnx-streaming-t-one-russian-2025-09-08",
+      "url": "https://github.com/VibeBrains/VibeIDE/releases/download/stt-models-v1/t-one-ru-2025-09-08.zip",
+      "sha256": "3411fec69cae2d29b85361cbbdd7c7a07f055e7b809b9ab053fd4c45c818084d",
+      "sizeBytes": 132331875,
+      "files": ["model.onnx", "tokens.txt"],
+      "license": "Apache-2.0",
+      "source": "https://github.com/voicekit-team/T-one"
+    },
+    {
+      "id": "gigaam-v3-ctc-ru",
+      "dir": "sherpa-onnx-nemo-ctc-giga-am-v3-russian-2025-12-16",
+      "url": "https://github.com/VibeBrains/VibeIDE/releases/download/stt-models-v1/gigaam-v3-ctc-ru-2025-12-16.zip",
+      "sha256": "b2c2a657af9db8eb9dc18905da592d4cc6bcf7cf159021fa963885e4726243b0",
+      "sizeBytes": 159055125,
+      "files": ["model.int8.onnx", "tokens.txt"],
+      "license": "MIT",
+      "source": "https://github.com/salute-developers/GigaAM"
+    },
+    {
+      "id": "nemo-fc-transducer-en",
+      "dir": "sherpa-onnx-nemo-streaming-fast-conformer-transducer-en-480ms-int8",
+      "url": "https://github.com/VibeBrains/VibeIDE/releases/download/stt-models-v1/nemo-fc-transducer-en-480ms-int8.zip",
+      "sha256": "38c0df01d967860d82347107b0ae728643938f63c8cc7a1ec63cf8100ee278ad",
+      "sizeBytes": 102645672,
+      "files": ["encoder.int8.onnx", "decoder.int8.onnx", "joiner.int8.onnx", "tokens.txt"],
+      "license": "CC-BY-4.0",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models"
+    },
+    // Лицензия двух архивов ниже в зеркале не записана, а внутри архивов ее текста нет — поле
+    // пустое намеренно, чтобы не выдавать догадку за факт. Уточнить по карточке модели NVIDIA.
+    {
+      "id": "nemo-ctc-en-small",
+      "dir": "sherpa-onnx-nemo-ctc-en-conformer-small",
+      "url": "https://github.com/VibeBrains/VibeIDE/releases/download/stt-models-v1/nemo-ctc-en-conformer-small-int8.zip",
+      "sha256": "5dc7ae725d71a07e476c92451b19591be28c2e1997a69fddab2f0a6ba6a1d0dc",
+      "sizeBytes": 18964108,
+      "files": ["model.int8.onnx", "tokens.txt"],
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models"
+    },
+    {
+      "id": "nemo-ctc-en-medium",
+      "dir": "sherpa-onnx-nemo-ctc-en-conformer-medium",
+      "url": "https://github.com/VibeBrains/VibeIDE/releases/download/stt-models-v1/nemo-ctc-en-conformer-medium-int8.zip",
+      "sha256": "8dc08cccde490ab7c01acf7d6baf541dc32a85dd8749b1f4e918f2411ef6ded6",
+      "sizeBytes": 38077941,
+      "files": ["model.int8.onnx", "tokens.txt"],
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models"
+    }
+  ],
+  "profiles": {
+    // Русский — два прохода: T-one печатает черновик, GigaAM перекодирует фразу (WER ~8 против ~13).
+    // Обе модели дают строчные буквы без пунктуации: так устроены открытые экспорты.
+    "ru": {
+      "streaming": { "kind": "tone-ctc", "archive": "t-one-ru", "model": "model.onnx", "tokens": "tokens.txt" },
+      "final": { "kind": "nemo-ctc", "archive": "gigaam-v3-ctc-ru", "model": "model.int8.onnx", "tokens": "tokens.txt" }
+    },
+    "en": {
+      "streaming": {
+        "kind": "transducer",
+        "archive": "nemo-fc-transducer-en",
+        "encoder": "encoder.int8.onnx",
+        "decoder": "decoder.int8.onnx",
+        "joiner": "joiner.int8.onnx",
+        "tokens": "tokens.txt"
+      }
+    }
+  },
+  "batch": {
+    "ru": { "kind": "nemo-ctc", "archive": "gigaam-v3-ctc-ru", "model": "model.int8.onnx", "tokens": "tokens.txt" },
+    "en-small": { "kind": "nemo-ctc", "archive": "nemo-ctc-en-small", "model": "model.int8.onnx", "tokens": "tokens.txt" },
+    "en-medium": { "kind": "nemo-ctc", "archive": "nemo-ctc-en-medium", "model": "model.int8.onnx", "tokens": "tokens.txt" }
+  }
+}
