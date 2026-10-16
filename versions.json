@@ -467,13 +467,14 @@
       "history": []
     },
     "rules/clean-rules.mdc": {
-      "version": 5,
-      "sha256": "06715aaccfcd8cddd6f9d003637cbf5f243085ecac54de174296d1b92f06571a",
+      "version": 6,
+      "sha256": "a5214f4eb6a813c65f8b354d354961f3cf478a773b837e99f52c7aa3f4f9f4dd",
       "history": [
         "bd459a3233045ec34c6bc553ede775728a9bd75992c83261cc7b1db5a9e285ce",
         "ca1a55531ec3590e5328803162772b7061dbec8c28bd5184a2a012a7a06c0eaf",
         "e21f07fc89fc8425066bcc097c1ea8d8fb2d7e3b2a42ca2b2fa39bfbdb0c1971",
-        "2f4dc671993c46e68c96e2b01415af7f887cb585d067431edecd7a611f7f640f"
+        "2f4dc671993c46e68c96e2b01415af7f887cb585d067431edecd7a611f7f640f",
+        "06715aaccfcd8cddd6f9d003637cbf5f243085ecac54de174296d1b92f06571a"
       ]
     },
     "rules/dev-engine.mdc": {
@@ -506,21 +507,23 @@
       ]
     },
     "rules/providers-json.mdc": {
-      "version": 2,
-      "sha256": "27d6f78a0e342cbf276994440da83b5f00b250bdf8afa33f91b93095b41d1379",
+      "version": 3,
+      "sha256": "8bff2c014acbaf2c367de5f434b50b3baac85a27684e6b943faf4d0429112b8c",
       "history": [
-        "66ae3b57d337d6842d6d1c58bc37880a9afe33665d7cdc9b8e2c5ad101da3af3"
+        "66ae3b57d337d6842d6d1c58bc37880a9afe33665d7cdc9b8e2c5ad101da3af3",
+        "27d6f78a0e342cbf276994440da83b5f00b250bdf8afa33f91b93095b41d1379"
       ]
     },
     "rules/release.mdc": {
-      "version": 6,
-      "sha256": "822d5ce8a14753c8e9ac4f93789e63119b77520a3d8e173ecfc33c63a73b6699",
+      "version": 7,
+      "sha256": "7fcb11e90ce68ee59bf1062e49e58d495d9aa8bf3de023c3e976f445a9bf1fa8",
       "history": [
         "b6c0667330841a496f4222cbe59e2a0fd75620742a2683b2c80bf89b9b0e6280",
         "de2631c3d2e3c570d23a8ccda45344cfd50be0e0b010d2c42cd0e05971aa2b23",
         "d70d6150c902056714ab0447e8a142d7b2f89d395a5bd040be21fbb2eaca888e",
         "f83945c8173f93074a91c3a4227667f2875cc1f10c4abdea7695bdaa14074b90",
-        "535d37fd2eb1b58c1ed29ffaf2237c75f215cbdc30390e08f223d6908279394b"
+        "535d37fd2eb1b58c1ed29ffaf2237c75f215cbdc30390e08f223d6908279394b",
+        "822d5ce8a14753c8e9ac4f93789e63119b77520a3d8e173ecfc33c63a73b6699"
       ]
     },
     "rules/review-php.mdc": {
@@ -564,10 +567,11 @@
       "history": []
     },
     "rules/spec-first.mdc": {
-      "version": 2,
-      "sha256": "254fcb2b71705940ed8f74eb5635f660dbc714eea74bd3f50c2290f675a74184",
+      "version": 3,
+      "sha256": "ac547e0fba6aaaeddddef71ffccb0eacde18170801975130ab86a7f16993c57a",
       "history": [
-        "35fc757d7dffbe89994108c2ffa91b60149bb8914fdb2f1dbb26862e5ca2bccc"
+        "35fc757d7dffbe89994108c2ffa91b60149bb8914fdb2f1dbb26862e5ca2bccc",
+        "254fcb2b71705940ed8f74eb5635f660dbc714eea74bd3f50c2290f675a74184"
       ]
     },
     "rules/ui-kit.mdc": {
