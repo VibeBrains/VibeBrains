@@ -8,15 +8,16 @@
       "history": []
     },
     "README.md": {
-      "version": 7,
-      "sha256": "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd",
+      "version": 8,
+      "sha256": "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
         "3ab39f3dbd12fbe9cb3d752959f65a2d789a01dc7e983de294f1a9b9ecb4eae3",
         "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1",
         "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
-        "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df"
+        "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
+        "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd"
       ]
     },
     "agents.json": {
@@ -32,6 +33,11 @@
         "6ffe664001ca08097326228646510b07cdfee72478389bc5256f4768acbc5773",
         "cb1c6f53f332419893b58bad1d78bb73586c4cdd197efcb21c5363525cce57c1"
       ]
+    },
+    "checkpointSpec.md": {
+      "version": 1,
+      "sha256": "c751ac7339c2b86c46f17aac8f3559d0b9151b86e231c55319c75893509a3a7f",
+      "history": []
     },
     "dataSources.json": {
       "version": 1,
@@ -124,8 +130,8 @@
       ]
     },
     "products.json": {
-      "version": 19,
-      "sha256": "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d",
+      "version": 20,
+      "sha256": "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -144,7 +150,8 @@
         "d16dc48d2b660a4f83b077e0e3463abb37807fafa026b75da60d40b1a67ad2be",
         "b35a4249b4b7f4d1fdd75d729f75083cf7f7882bcc6a66936a01ada0a12f9be7",
         "75caa65bbda63cd9f248311d3013f0ac4fbec9c83a1679d74a871c244a415a62",
-        "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc"
+        "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc",
+        "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -1051,6 +1058,11 @@
     "testVectors/chatgptPlan.json": {
       "version": 1,
       "sha256": "ad6d46ffd3cfa285eeaac9ba05dd8cc7ed2ab31c75c8dcefed676346fee6954c",
+      "history": []
+    },
+    "testVectors/checkpoint.json": {
+      "version": 1,
+      "sha256": "e93b84e0b8b38e01285dfef44e646d26d1c602c3d3fb20d21a5f900dcee6eb34",
       "history": []
     },
     "testVectors/codeGraphCommunities.json": {

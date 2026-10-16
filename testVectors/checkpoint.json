@@ -1,0 +1,388 @@
+{
+  "_comment": "Общие тестовые векторы чекпоинта агентского хода: снимок рабочей папки в git, сообщение коммита-снимка, уборка ссылок, откат, предупреждение о командах. Читают тесты VibeIDE и VibeIDEA: один снимок обязан читаться в обоих продуктах одинаково, и каждый продукт обязан прочесть снимок, сделанный другим. Не сид — в products.json адресован пустому списку продуктов. Описание контракта — checkpointSpec.md рядом с README набора. Каждый раздел — отдельная чистая функция, гита в векторах нет: вход и выход описаны ключами раздела. commitMessage: поля хода → текст сообщения (expected — строка целиком, без завершающего перевода строки). parseMessage: текст сообщения → известные поля (expected содержит ТОЛЬКО найденные ключи; turnIndex — число; неизвестные ключи читатель молча пропускает). parsePinned: вывод for-each-ref → ссылки с временем в миллисекундах. staleRefs: ссылки с временем, живое множество, now → какие снять (expected — id в порядке входа); порог возраста — pruneMinAgeMs. reuse: дерево нового снимка и дерево предыдущего (null — предыдущего нет или он нечитаем) → переиспользовать ли предыдущий. restorePlan: файлы снимка, файлы папки, игнорируемые git → что вернётся и что будет удалено (оба списка отсортированы по кодовым единицам UTF-16, без повторов). coverage: есть ли снимок, изменит ли что-нибудь откат (null — неизвестно), имена вызванных инструментов отрезка → что показать человеку; список имён командных инструментов — shellToolNames. Время снимка в сообщение не входит — это дата коммиттера. Собрано 16.10.2026 из workspaceSnapshotPolicy.ts и checkpointCoverage.ts VibeIDE плюс поля agent и label, новый случай добавляется сюда, а не в тест одной стороны.",
+  "version": 1,
+  "pruneMinAgeMs": 3600000,
+  "shellToolNames": ["run_command", "run_persistent_command", "run_nl_command"],
+  "commitMessage": [
+    {
+      "name": "все поля: инструмент в скобках, метка и агент в теле",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 7, "toolName": "edit_file", "threadId": "thread-42", "agent": "builtin", "label": "Правка конфигурации" },
+      "expected": "VibeIDE checkpoint: ход 7 (edit_file)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 7\ntoolName: edit_file\nthreadId: thread-42\nagent: builtin\nlabel: Правка конфигурации"
+    },
+    {
+      "name": "инструмента нет: в скобках слово agent, строки toolName в теле нет",
+      "product": "VibeIDEA",
+      "tree": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d",
+      "meta": { "turnIndex": 3, "threadId": "thread-42", "agent": "acp-gemini" },
+      "expected": "VibeIDEA checkpoint: ход 3 (agent)\n\ntree: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d\nturnIndex: 3\nthreadId: thread-42\nagent: acp-gemini"
+    },
+    {
+      "name": "ход 0 — это ход, а не отсутствие хода",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 0, "threadId": "thread-1" },
+      "expected": "VibeIDE checkpoint: ход 0 (agent)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 0\nthreadId: thread-1"
+    },
+    {
+      "name": "номера хода нет: первая строка без хода, в теле только дерево",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": {},
+      "expected": "VibeIDE checkpoint snapshot\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d"
+    },
+    {
+      "name": "номера хода нет, но есть тред и агент: первая строка прежняя",
+      "product": "VibeIDEA",
+      "tree": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d",
+      "meta": { "threadId": "thread-9", "agent": "builtin" },
+      "expected": "VibeIDEA checkpoint snapshot\n\ntree: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d\nthreadId: thread-9\nagent: builtin"
+    },
+    {
+      "name": "метка в несколько строк сводится к одной: пробельные серии — один пробел",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 2, "label": "Первая\n  вторая\r\nтретья  " },
+      "expected": "VibeIDE checkpoint: ход 2 (agent)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 2\nlabel: Первая вторая третья"
+    },
+    {
+      "name": "метка с чужой строкой ключа не подделывает ключ: перевод строки в значении гасится",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 5, "label": "шаг\ntree: 0000000000000000000000000000000000000000" },
+      "expected": "VibeIDE checkpoint: ход 5 (agent)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 5\nlabel: шаг tree: 0000000000000000000000000000000000000000"
+    },
+    {
+      "name": "пустые и пробельные значения опущены: строк toolName и label нет",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 4, "toolName": "", "label": "   ", "agent": "builtin" },
+      "expected": "VibeIDE checkpoint: ход 4 (agent)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 4\nagent: builtin"
+    },
+    {
+      "name": "двоеточие внутри значения остаётся значением",
+      "product": "VibeIDE",
+      "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "meta": { "turnIndex": 6, "toolName": "run_command", "label": "Сборка: шаг 2 из 3" },
+      "expected": "VibeIDE checkpoint: ход 6 (run_command)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 6\ntoolName: run_command\nlabel: Сборка: шаг 2 из 3"
+    }
+  ],
+  "parseMessage": [
+    {
+      "name": "полное сообщение читается в те же поля, из которых собрано",
+      "message": "VibeIDE checkpoint: ход 7 (edit_file)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: 7\ntoolName: edit_file\nthreadId: thread-42\nagent: builtin\nlabel: Правка конфигурации",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "turnIndex": 7, "toolName": "edit_file", "threadId": "thread-42", "agent": "builtin", "label": "Правка конфигурации" }
+    },
+    {
+      "name": "необязательных нет: в результате только найденное",
+      "message": "VibeIDEA checkpoint: ход 3 (agent)\n\ntree: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d\nturnIndex: 3\nthreadId: thread-42",
+      "expected": { "tree": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", "turnIndex": 3, "threadId": "thread-42" }
+    },
+    {
+      "name": "неизвестные ключи пропущены, порядок строк не важен",
+      "message": "VibeIDE checkpoint: ход 1 (agent)\n\nagent: builtin\nmodel: model-x\nturnIndex: 1\ncost: 0.12\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "turnIndex": 1, "agent": "builtin" }
+    },
+    {
+      "name": "прежняя запись «ключ значение» без двоеточия читается для известных ключей",
+      "message": "VibeIDE checkpoint: ход 4 (edit_file)\n\ntree 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex 4\ntoolName edit_file\nthreadId thread-7",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "turnIndex": 4, "toolName": "edit_file", "threadId": "thread-7" }
+    },
+    {
+      "name": "прежняя запись для неизвестного ключа не читается как поле",
+      "message": "VibeIDE checkpoint snapshot\n\ntree 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nmodel model-x",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d" }
+    },
+    {
+      "name": "одна первая строка без тела: полей нет",
+      "message": "VibeIDE checkpoint snapshot",
+      "expected": {}
+    },
+    {
+      "name": "первая строка не разбирается, даже если похожа на поле",
+      "message": "turnIndex: 99\n\nthreadId: thread-1",
+      "expected": { "threadId": "thread-1" }
+    },
+    {
+      "name": "завершающий перевод строки и CRLF не попадают в значения",
+      "message": "VibeIDE checkpoint: ход 2 (agent)\r\n\r\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\r\nturnIndex: 2\r\nlabel: Метка\r\n",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "turnIndex": 2, "label": "Метка" }
+    },
+    {
+      "name": "turnIndex не целое неотрицательное: поле отсутствует, остальное читается",
+      "message": "VibeIDE checkpoint snapshot\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nturnIndex: abc\nthreadId: thread-1",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "threadId": "thread-1" }
+    },
+    {
+      "name": "turnIndex отрицательный или дробный: поля нет",
+      "message": "VibeIDE checkpoint snapshot\n\nturnIndex: -1\n\nturnIndex: 2.5",
+      "expected": {}
+    },
+    {
+      "name": "ключ повторён: побеждает первое значение",
+      "message": "VibeIDE checkpoint: ход 1 (agent)\n\nthreadId: thread-1\nthreadId: thread-2\nlabel: первая\nlabel: вторая",
+      "expected": { "threadId": "thread-1", "label": "первая" }
+    },
+    {
+      "name": "двоеточие в значении метки не делит строку заново",
+      "message": "VibeIDE checkpoint: ход 6 (agent)\n\nturnIndex: 6\nlabel: Сборка: шаг 2 из 3",
+      "expected": { "turnIndex": 6, "label": "Сборка: шаг 2 из 3" }
+    },
+    {
+      "name": "чужой ключ внутри значения метки остаётся значением",
+      "message": "VibeIDE checkpoint: ход 5 (agent)\n\ntree: 9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\nlabel: шаг tree: 0000000000000000000000000000000000000000",
+      "expected": { "tree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d", "label": "шаг tree: 0000000000000000000000000000000000000000" }
+    },
+    {
+      "name": "ключ с пустым значением — поля нет",
+      "message": "VibeIDE checkpoint: ход 1 (agent)\n\nlabel:\nthreadId: \nagent: builtin",
+      "expected": { "agent": "builtin" }
+    }
+  ],
+  "parsePinned": [
+    {
+      "name": "строки for-each-ref читаются в id и время в миллисекундах",
+      "stdout": "refs/vibe/checkpoints/a1b2c3d4e5f60718293a4b5c6d7e8f9012345678 1790992800\nrefs/vibe/checkpoints/b2c3d4e5f60718293a4b5c6d7e8f901234567890 1790999700\n",
+      "expected": [
+        { "id": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "committedAtMs": 1790992800000 },
+        { "id": "b2c3d4e5f60718293a4b5c6d7e8f901234567890", "committedAtMs": 1790999700000 }
+      ]
+    },
+    {
+      "name": "чужие пространства имён, пустой id, нечисловое время и пустые строки пропущены",
+      "stdout": "refs/vibe/pipelines/run1/step1 1790992800\nrefs/heads/main 1790992800\nrefs/vibe/checkpoints/ 1790992800\nrefs/vibe/checkpoints/c3d4e5f60718293a4b5c6d7e8f90123456789012 soon\nrefs/vibe/checkpoints/d4e5f60718293a4b5c6d7e8f9012345678901234\n\n",
+      "expected": []
+    },
+    {
+      "name": "CRLF в выводе не портит id и время",
+      "stdout": "refs/vibe/checkpoints/e5f60718293a4b5c6d7e8f901234567890123456 1790992800\r\n",
+      "expected": [
+        { "id": "e5f60718293a4b5c6d7e8f901234567890123456", "committedAtMs": 1790992800000 }
+      ]
+    }
+  ],
+  "staleRefs": [
+    {
+      "name": "ссылок нет — снимать нечего",
+      "nowMs": 1791000000000,
+      "pinned": [],
+      "live": [],
+      "expected": []
+    },
+    {
+      "name": "старая и не живая снимается",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "committedAtMs": 1790992800000 }],
+      "live": [],
+      "expected": ["a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"]
+    },
+    {
+      "name": "старая, но на неё ссылается тред — остаётся",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "committedAtMs": 1790740800000 }],
+      "live": ["a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"],
+      "expected": []
+    },
+    {
+      "name": "свежая и не живая остаётся: другое окно могло не успеть записать тред",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "b2c3d4e5f60718293a4b5c6d7e8f901234567890", "committedAtMs": 1790999700000 }],
+      "live": [],
+      "expected": []
+    },
+    {
+      "name": "возраст ровно час — снимается",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "c3d4e5f60718293a4b5c6d7e8f90123456789012", "committedAtMs": 1790996400000 }],
+      "live": [],
+      "expected": ["c3d4e5f60718293a4b5c6d7e8f90123456789012"]
+    },
+    {
+      "name": "на миллисекунду моложе часа — остаётся",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "c3d4e5f60718293a4b5c6d7e8f90123456789012", "committedAtMs": 1790996400001 }],
+      "live": [],
+      "expected": []
+    },
+    {
+      "name": "время коммита в будущем (часы разошлись) — остаётся",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "d4e5f60718293a4b5c6d7e8f9012345678901234", "committedAtMs": 1791000600000 }],
+      "live": [],
+      "expected": []
+    },
+    {
+      "name": "смесь: снимаются только старые не живые, порядок входа сохранён",
+      "nowMs": 1791000000000,
+      "pinned": [
+        { "id": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "committedAtMs": 1790992800000 },
+        { "id": "b2c3d4e5f60718293a4b5c6d7e8f901234567890", "committedAtMs": 1790999700000 },
+        { "id": "c3d4e5f60718293a4b5c6d7e8f90123456789012", "committedAtMs": 1790740800000 },
+        { "id": "d4e5f60718293a4b5c6d7e8f9012345678901234", "committedAtMs": 1790740800000 },
+        { "id": "e5f60718293a4b5c6d7e8f901234567890123456", "committedAtMs": 1790996400000 }
+      ],
+      "live": ["c3d4e5f60718293a4b5c6d7e8f90123456789012"],
+      "expected": [
+        "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+        "d4e5f60718293a4b5c6d7e8f9012345678901234",
+        "e5f60718293a4b5c6d7e8f901234567890123456"
+      ]
+    },
+    {
+      "name": "живое множество с чужими id ничего не меняет",
+      "nowMs": 1791000000000,
+      "pinned": [{ "id": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", "committedAtMs": 1790992800000 }],
+      "live": ["ffffffffffffffffffffffffffffffffffffffff"],
+      "expected": ["a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"]
+    }
+  ],
+  "reuse": [
+    {
+      "name": "дерево то же — предыдущий снимок переиспользуется",
+      "newTree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "previousTree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "expected": true
+    },
+    {
+      "name": "дерево другое — пишется новый снимок",
+      "newTree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "previousTree": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d",
+      "expected": false
+    },
+    {
+      "name": "предыдущего снимка нет — пишется новый",
+      "newTree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "previousTree": null,
+      "expected": false
+    },
+    {
+      "name": "пробелы и перевод строки вокруг sha не мешают сравнению",
+      "newTree": "9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d\n",
+      "previousTree": "  9f2c7e1d4a6b8035c1e7f90a2b4d6c8e0f1a3b5d",
+      "expected": true
+    },
+    {
+      "name": "новое дерево пустое — переиспользовать нечего",
+      "newTree": "",
+      "previousTree": "",
+      "expected": false
+    }
+  ],
+  "restorePlan": [
+    {
+      "name": "папка совпадает со снимком: вернуть всё, удалять нечего",
+      "snapshotPaths": ["README.md", "src/main.ts"],
+      "workingPaths": ["README.md", "src/main.ts"],
+      "ignoredPaths": [],
+      "expected": { "restore": ["README.md", "src/main.ts"], "delete": [] }
+    },
+    {
+      "name": "файл создан после снимка: он в списке удаления",
+      "snapshotPaths": ["README.md", "src/main.ts"],
+      "workingPaths": ["README.md", "src/main.ts", "src/generated.ts"],
+      "ignoredPaths": [],
+      "expected": { "restore": ["README.md", "src/main.ts"], "delete": ["src/generated.ts"] }
+    },
+    {
+      "name": "игнорируемое git не удаляется, даже если его нет в снимке",
+      "snapshotPaths": ["package.json", "src/main.ts"],
+      "workingPaths": ["package.json", "src/main.ts", "node_modules/left-pad/index.js", "dist/bundle.js", "notes.txt"],
+      "ignoredPaths": ["node_modules/left-pad/index.js", "dist/bundle.js"],
+      "expected": { "restore": ["package.json", "src/main.ts"], "delete": ["notes.txt"] }
+    },
+    {
+      "name": "файл удалён из папки после снимка: он в списке возврата, не в списке удаления",
+      "snapshotPaths": ["a.txt", "b.txt"],
+      "workingPaths": ["a.txt"],
+      "ignoredPaths": [],
+      "expected": { "restore": ["a.txt", "b.txt"], "delete": [] }
+    },
+    {
+      "name": "снимок пуст: возвращать нечего, удаляется всё не игнорируемое",
+      "snapshotPaths": [],
+      "workingPaths": ["a.txt", "dir/b.txt", ".cache/x"],
+      "ignoredPaths": [".cache/x"],
+      "expected": { "restore": [], "delete": ["a.txt", "dir/b.txt"] }
+    },
+    {
+      "name": "пути с пробелами и не ASCII сравниваются как есть",
+      "snapshotPaths": ["docs/план работ.md", "ф.txt"],
+      "workingPaths": ["docs/план работ.md", "ф.txt", "ф2.txt", "docs/новый файл.md"],
+      "ignoredPaths": [],
+      "expected": { "restore": ["docs/план работ.md", "ф.txt"], "delete": ["docs/новый файл.md", "ф2.txt"] }
+    },
+    {
+      "name": "порядок — по кодовым единицам UTF-16: точка раньше косой черты",
+      "snapshotPaths": ["b.txt", "a/b.txt", "a.txt"],
+      "workingPaths": ["z.txt", "a/z.txt", "a.txt"],
+      "ignoredPaths": [],
+      "expected": { "restore": ["a.txt", "a/b.txt", "b.txt"], "delete": ["a/z.txt", "z.txt"] }
+    }
+  ],
+  "coverage": [
+    {
+      "name": "снимок есть и откат что-то изменит: предложить вернуть папку",
+      "hasSnapshot": true,
+      "wouldChangeAnything": true,
+      "toolNames": ["read_file", "edit_file"],
+      "expected": { "kind": "restorable" }
+    },
+    {
+      "name": "снимок есть, менять нечего: молчать, откат полный",
+      "hasSnapshot": true,
+      "wouldChangeAnything": false,
+      "toolNames": ["edit_file"],
+      "expected": { "kind": "complete" }
+    },
+    {
+      "name": "снимок есть, изменит ли откат — неизвестно: молчать",
+      "hasSnapshot": true,
+      "wouldChangeAnything": null,
+      "toolNames": [],
+      "expected": { "kind": "complete" }
+    },
+    {
+      "name": "снимок есть и команды были: команды покрыты снимком, предупреждения нет",
+      "hasSnapshot": true,
+      "wouldChangeAnything": false,
+      "toolNames": ["run_command", "run_command"],
+      "expected": { "kind": "complete" }
+    },
+    {
+      "name": "снимка нет, в отрезке были команды: предупредить, назвав число",
+      "hasSnapshot": false,
+      "wouldChangeAnything": null,
+      "toolNames": ["read_file", "run_command", "edit_file", "run_command"],
+      "expected": { "kind": "uncovered", "shellCallCount": 2 }
+    },
+    {
+      "name": "снимка нет, считаются все три командных инструмента",
+      "hasSnapshot": false,
+      "wouldChangeAnything": null,
+      "toolNames": ["run_command", "run_persistent_command", "run_nl_command", "read_file"],
+      "expected": { "kind": "uncovered", "shellCallCount": 3 }
+    },
+    {
+      "name": "снимка нет и команд не было: правки чата покрыты его собственным слежением, молчать",
+      "hasSnapshot": false,
+      "wouldChangeAnything": null,
+      "toolNames": ["read_file", "edit_file", "search"],
+      "expected": { "kind": "complete" }
+    },
+    {
+      "name": "снимка нет, отрезок пуст: молчать",
+      "hasSnapshot": false,
+      "wouldChangeAnything": null,
+      "toolNames": [],
+      "expected": { "kind": "complete" }
+    },
+    {
+      "name": "имя инструмента сравнивается точно: другой регистр и приставка — не команда",
+      "hasSnapshot": false,
+      "wouldChangeAnything": null,
+      "toolNames": ["Run_Command", "run_command_help", "run_command"],
+      "expected": { "kind": "uncovered", "shellCallCount": 1 }
+    }
+  ]
+}
