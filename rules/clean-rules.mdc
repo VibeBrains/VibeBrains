@@ -19,7 +19,7 @@ alwaysApply: false
 | `verification.mdc` | Достоверность: проверка API/версий/фактов, перечитывание перед правкой |
 | `knowledge.mdc` | Процесс ведения базы знаний (не сами знания — они в `docs/knowledge/`) |
 | `roadmap.mdc` | Работа с планом проекта `docs/roadmap.md` |
-| `versioning.mdc` | Версия сборки, пайплайн `package`, папка `builds/` |
+| `versioning.mdc` | Версия сборки: следовать порядку проекта, нет порядка — не поднимать и спросить |
 | `release.mdc` | Оформление GitHub Release |
 | `nginx.mdc` | Конфиги Nginx на сервере |
 | `script-save.mdc` | Утилитарные скрипты: размещение bin//scripts/, дубль-чек, регистрация в knowledge |
