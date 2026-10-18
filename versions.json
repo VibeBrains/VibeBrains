@@ -662,6 +662,36 @@
       "sha256": "2379d066db35c41b2168c1a0ddbfc84a7563dc9129d89b98e0a0f08cef88ed4e",
       "history": []
     },
+    "skills/concept-brief/SKILL.md": {
+      "version": 1,
+      "sha256": "d0f06dc0c3b8711b2d20120a53f2d0cb2bd58ac84cb5b01e4dbb81c2cff5bdc4",
+      "history": []
+    },
+    "skills/concept-brief/assets/build.py": {
+      "version": 1,
+      "sha256": "064b9424e71a974c52142e405cb8f2f96d4c7057cf79b716cf507d34057a138b",
+      "history": []
+    },
+    "skills/concept-brief/assets/exampleBody.part": {
+      "version": 1,
+      "sha256": "6372d5ff370e929d4ec72b47884ad01f10e8e4b15bbd090e3f42a9bf6e08df4a",
+      "history": []
+    },
+    "skills/concept-brief/assets/head.part": {
+      "version": 1,
+      "sha256": "f05758cc027340432de00798f90fe8d86f49ff34666ee4b2b6a2984719d5f93b",
+      "history": []
+    },
+    "skills/concept-brief/assets/print.sh": {
+      "version": 1,
+      "sha256": "0f25e54cf721c777f01ab6e6fa37c74d097c2ae895e23f8d85527e4bb37d7bf7",
+      "history": []
+    },
+    "skills/concept-brief/evals/evals.json": {
+      "version": 1,
+      "sha256": "d831e9a994fa5242bda70a0aa6b70e8c543de0f35fcbc632cf374736c4788a93",
+      "history": []
+    },
     "skills/demo/SKILL.md": {
       "version": 2,
       "sha256": "d59fd8741597a9f518fcd4096a4e3b894c2454b5a7a37dc2db23706d7110b9d2",

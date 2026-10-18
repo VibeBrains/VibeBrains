@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Складарь: что это и что готово</title>
+<style>
+@page {
+  size: A4;
+  margin: 20mm 20mm 22mm 20mm;
+  @top-left { content: "Складарь: что это и что готово"; font: 8pt "Helvetica Neue", Arial, sans-serif; color: #8a8a82; vertical-align: bottom; padding-bottom: 6mm; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt "Helvetica Neue", Arial, sans-serif; color: #8a8a82; vertical-align: top; padding-top: 6mm; }
+}
+:root { --ink: #1c1c1a; --mute: #6b6b63; --line: #e1e1da; --head: #f3f2ec; --blue: #3b7dc4; --blue-bg: #e3edf8; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: var(--ink); background: #fff; font: 10.5pt/1.55 "Helvetica Neue", Arial, sans-serif; }
+h1, h2 { font-family: "PT Serif", Georgia, "Times New Roman", serif; font-weight: 400; margin: 0; }
+h1 { font-size: 30pt; line-height: 1.15; letter-spacing: -0.01em; margin-top: 4mm; }
+h2 { font-size: 17pt; margin: 9mm 0 3mm; break-after: avoid; }
+.meta { margin: 5mm 0 2mm; display: flex; gap: 6px; align-items: center; font-size: 8.5pt; color: #333; }
+.pill { background: #efeee8; border-radius: 10px; padding: 2px 9px; }
+.dot { color: #999; }
+p { margin: 0 0 3mm; orphans: 3; widows: 3; }
+p.l { line-height: 1.7; }
+ul, ol { margin: 0 0 4mm; padding-left: 6mm; }
+li { margin: 0 0 1.6mm; padding-left: 1mm; }
+li, tr { break-inside: avoid; }
+b { font-weight: 700; }
+code { font: 8.8pt "SF Mono", Menlo, monospace; background: #f1f0ea; border-radius: 3px; padding: 0 3px; white-space: nowrap; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9.5pt; line-height: 1.45; }
+th { background: var(--head); color: var(--mute); font-weight: 400; text-align: left; }
+th, td { border: 1px solid var(--line); padding: 2mm 2.6mm; vertical-align: top; }
+td.c, th.c { text-align: center; white-space: nowrap; }
+.fig { margin: 4mm 0 1mm; break-inside: avoid; }
+.fig svg { width: 100%; height: auto; display: block; }
+.cap { color: var(--mute); font-size: 9pt; margin: 1mm 0 4mm; }
+svg text { font-family: "Helvetica Neue", Arial, sans-serif; }
+.st { font-size: 14px; font-weight: 700; fill: #111; }
+.bt { font-size: 13px; font-weight: 700; fill: #111; }
+.bs { font-size: 11.5px; fill: #444; }
+.lb { font-size: 11px; fill: #666; }
+.keep { break-inside: avoid; }
+.note { background: var(--blue-bg); border-left: 3px solid var(--blue); border-radius: 4px; padding: 3mm 4mm; margin: 0 0 5mm; break-inside: avoid; }
+.note p { margin: 0; }
+h3 { font-family: "PT Serif", Georgia, serif; font-weight: 400; font-size: 13pt; margin: 6mm 0 2mm; break-after: avoid; }
+.s { display: inline-block; font-size: 8.3pt; line-height: 1.35; padding: 0 7px; border-radius: 9px; white-space: nowrap; }
+.s.ok { background: #e1eedf; color: #2b6a30; }
+.s.wip { background: #e3edf8; color: #245c9a; }
+.s.plan { background: #efeee8; color: #6b6b63; }
+td.c .s + .s { margin-top: 1mm; }
+tr.grp td { background: #faf9f5; font-weight: 700; font-size: 9pt; padding: 1.3mm 2.6mm; color: #333; break-after: avoid; }
