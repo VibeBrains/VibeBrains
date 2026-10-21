@@ -38,6 +38,19 @@
             // называло не только «срок вышел», но и во сколько раз станет дороже.
             "costAfter": { "input": 1.50, "output": 7.50 },
             "costNote": "вводная цена, blog.google «Gemini 3.8 Flash» 02.09.2026"
+          },
+          {
+            // Gemini 4 Argon — GA с 13.10.2026 (ai.google.dev/gemini-api/docs/changelog, сверено 21.10.2026).
+            // Цена вводная до 30.11.2026 включительно, с 01.12.2026 вдвое выше (ai.google.dev/gemini-api/docs/pricing,
+            // сверено 21.10.2026; стандартный тариф, мышление считается в выходные токены).
+            // Окно контекста и поддержка картинок на странице цен не названы — поля не заданы, чтобы не выдумывать:
+            // с каталогом вендора (fetch: true) их подставит ответ models.list.
+            "id": "gemini-4-argon",
+            "name": "Gemini 4 Argon",
+            "cost": { "input": 2.00, "output": 10.00 },
+            "costValidUntil": "2026-11-30T23:59:59Z",
+            "costAfter": { "input": 4.00, "output": 20.00 },
+            "costNote": "вводная цена до 30.11.2026, ai.google.dev pricing 21.10.2026"
           }
         ]
       }
