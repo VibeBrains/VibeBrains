@@ -222,8 +222,8 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 13,
-      "sha256": "0dbadaa725af7f3eb7ee5d123f87da6b445647c6ba914d94366f9babd35534b4",
+      "version": 14,
+      "sha256": "f4bfbfef200821799f05378d8feee26da0627fd959226c828b55f1483dac593c",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
@@ -235,7 +235,8 @@
         "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960",
         "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f",
         "1228fd473b1ab35c0882a412512720303b66f3850e601610bd741bb740b28c18",
-        "e821835f645c29ac6cdba3c5c3b297ca1871d19ea1fcdac96a7ff37ac9876319"
+        "e821835f645c29ac6cdba3c5c3b297ca1871d19ea1fcdac96a7ff37ac9876319",
+        "0dbadaa725af7f3eb7ee5d123f87da6b445647c6ba914d94366f9babd35534b4"
       ]
     },
     "providers/arbr.jsonc": {
