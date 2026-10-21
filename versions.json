@@ -519,11 +519,12 @@
       ]
     },
     "rules/providers-json.mdc": {
-      "version": 3,
-      "sha256": "8bff2c014acbaf2c367de5f434b50b3baac85a27684e6b943faf4d0429112b8c",
+      "version": 4,
+      "sha256": "b8656ecf1cf908305a52b6ea03fca3151f85ecc633a21ef8f6be70951dd1cba3",
       "history": [
         "66ae3b57d337d6842d6d1c58bc37880a9afe33665d7cdc9b8e2c5ad101da3af3",
-        "27d6f78a0e342cbf276994440da83b5f00b250bdf8afa33f91b93095b41d1379"
+        "27d6f78a0e342cbf276994440da83b5f00b250bdf8afa33f91b93095b41d1379",
+        "8bff2c014acbaf2c367de5f434b50b3baac85a27684e6b943faf4d0429112b8c"
       ]
     },
     "rules/release.mdc": {
