@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 8,
-      "sha256": "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13",
+      "version": 9,
+      "sha256": "f747ccb4d707a23eb076bf29e23e78fc1e4512559acb097db367903160933314",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -17,7 +17,8 @@
         "90c3e37e628cca7becb94a989dcf2fbc00517f7e9b90918efbf334da04128bb1",
         "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
         "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
-        "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd"
+        "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd",
+        "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13"
       ]
     },
     "agents.json": {
@@ -130,8 +131,8 @@
       ]
     },
     "products.json": {
-      "version": 21,
-      "sha256": "f27cd56bd435cc50f77b46bf1e124007ee5534a32d35860e674a47d49e27f404",
+      "version": 22,
+      "sha256": "169f492067e4ff4b10435132870dd845d1ea83b7e7fa17aa6bb6f975704d133e",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -152,7 +153,8 @@
         "75caa65bbda63cd9f248311d3013f0ac4fbec9c83a1679d74a871c244a415a62",
         "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc",
         "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d",
-        "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058"
+        "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058",
+        "f27cd56bd435cc50f77b46bf1e124007ee5534a32d35860e674a47d49e27f404"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -612,6 +614,11 @@
       "history": [
         "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672"
       ]
+    },
+    "seedBaseSpec.md": {
+      "version": 1,
+      "sha256": "11c3c2d1802f562813c614d3365ff10399a63a2f2c64c0945f4bc77077accbf1",
+      "history": []
     },
     "servers.json": {
       "version": 1,

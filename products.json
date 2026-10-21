@@ -75,6 +75,8 @@
     { "path": "testVectors/checkpoint.json", "products": [] },
     // Контракт чекпоинта хода (снимок папки в git, формат сообщения, откат, уборка): читают разработчики и их LLM, не продукт.
     { "path": "checkpointSpec.md", "products": [] },
+    // Контракт основы слияния сидов (.vibe/local/seedBase/): что хранить, когда писать, что делать без неё. Читают разработчики и их LLM.
+    { "path": "seedBaseSpec.md", "products": [] },
     // Правки каталога в проекте. Детектор есть у VibeIDEA и VibeIDE (с 23.09.2026); продукту без детектора
     // файл бесполезен.
     { "path": "slop.json", "products": ["vibeidea", "vibeide"] },
