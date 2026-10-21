@@ -130,8 +130,8 @@
       ]
     },
     "products.json": {
-      "version": 20,
-      "sha256": "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058",
+      "version": 21,
+      "sha256": "f27cd56bd435cc50f77b46bf1e124007ee5534a32d35860e674a47d49e27f404",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -151,7 +151,8 @@
         "b35a4249b4b7f4d1fdd75d729f75083cf7f7882bcc6a66936a01ada0a12f9be7",
         "75caa65bbda63cd9f248311d3013f0ac4fbec9c83a1679d74a871c244a415a62",
         "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc",
-        "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d"
+        "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d",
+        "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
@@ -1115,6 +1116,11 @@
     "testVectors/mcpServersFile.json": {
       "version": 1,
       "sha256": "ceedc5e4ae8321c0b74a4e65026603f9324f850d90c65fb8eb37015f577fde2b",
+      "history": []
+    },
+    "testVectors/mcpToolPins.json": {
+      "version": 1,
+      "sha256": "f73d3b2d13665d96f5bd7d430f69f5729048eef5b4b5df7027e71975f67e47d8",
       "history": []
     },
     "testVectors/modelEcho.json": {
