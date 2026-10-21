@@ -220,8 +220,8 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 12,
-      "sha256": "e821835f645c29ac6cdba3c5c3b297ca1871d19ea1fcdac96a7ff37ac9876319",
+      "version": 13,
+      "sha256": "0dbadaa725af7f3eb7ee5d123f87da6b445647c6ba914d94366f9babd35534b4",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
@@ -232,7 +232,8 @@
         "24b7bcc1db8ec7085a6a669a992d4687fe6a39e8ad52999124a7f8cf63c452d9",
         "6646f5138e799f8c1070cf176d6072d26fb936ce76db3e7d64f02deb45b59960",
         "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f",
-        "1228fd473b1ab35c0882a412512720303b66f3850e601610bd741bb740b28c18"
+        "1228fd473b1ab35c0882a412512720303b66f3850e601610bd741bb740b28c18",
+        "e821835f645c29ac6cdba3c5c3b297ca1871d19ea1fcdac96a7ff37ac9876319"
       ]
     },
     "providers/arbr.jsonc": {
@@ -279,11 +280,12 @@
       "history": []
     },
     "providers/google-gemini.jsonc": {
-      "version": 3,
-      "sha256": "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731",
+      "version": 4,
+      "sha256": "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300",
       "history": [
         "e99fdc24d0a41d56cc63f993b42e074c72d2bace7037dcfb6a272ad8b745b782",
-        "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc"
+        "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc",
+        "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731"
       ]
     },
     "providers/inference-net.jsonc": {
@@ -320,8 +322,8 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 17,
-      "sha256": "fe34c656fab13a138cddccc64000fc1e03d9747b650b14ba80087509a74f54e5",
+      "version": 18,
+      "sha256": "b6d9d07ce6613b932052158a05e2efe8696da3634d7acc3b2844c6d973190407",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
@@ -337,7 +339,8 @@
         "209e8e9385f14a7e5b478d941db17a200edc520418e05fa1d59e4d734cdc3bba",
         "f51e281893c6c2660478d599a7b02c962650b291203460d99eed811477348ea3",
         "723791882772a96185995d68eb07925c5b90d3da6e1e66d1c2b1ecb938a50198",
-        "71d04eaf70135de956779d7a93005f71837b0622856001806944bd047904b3ca"
+        "71d04eaf70135de956779d7a93005f71837b0622856001806944bd047904b3ca",
+        "fe34c656fab13a138cddccc64000fc1e03d9747b650b14ba80087509a74f54e5"
       ]
     },
     "providers/muse-glimmer-local.jsonc": {
@@ -375,13 +378,14 @@
       ]
     },
     "providers/opencode-go.jsonc": {
-      "version": 6,
-      "sha256": "aa524f257f289186646d9b9668c7fc1e3d4eb601cb1866c44ef1615f1056d443",
+      "version": 7,
+      "sha256": "26d00205541530ad4c4ee66d0bfbc11121fb29cb0f058768131e7f11561c699f",
       "history": [
         "4450c9d3e49895c39db77ed6ee64fdaa648cf86b28819bded0a039b0c669efaf",
         "1ae5adaee8777fa581ce100033e8179e8ba29005bc87a6a54f2ed4ac6b68d1cd",
         "84ce375be46d78d62c4f1645fd0c12ec0dbc702a24231aed7b279add0f687078",
-        "9c69f9642687549be2c1a543250cfc4ed816c2356a2f575ec2e377e06b51d167"
+        "9c69f9642687549be2c1a543250cfc4ed816c2356a2f575ec2e377e06b51d167",
+        "aa524f257f289186646d9b9668c7fc1e3d4eb601cb1866c44ef1615f1056d443"
       ]
     },
     "providers/opencode-zen.jsonc": {
@@ -1151,10 +1155,11 @@
       ]
     },
     "testVectors/reasoningEcho.json": {
-      "version": 2,
-      "sha256": "b22430cfa5b0826795444b1cbe3afc9543df8e17d3bc5213552ac5d817a30e17",
+      "version": 3,
+      "sha256": "4841e847accdfd79001a395ec17bc683200ddda871d95d0c3f2e207da1ba6071",
       "history": [
-        "a1cb80d93e7106ad8a4e12b0c677d52277763a94e87cec852abac15cdf2c784d"
+        "a1cb80d93e7106ad8a4e12b0c677d52277763a94e87cec852abac15cdf2c784d",
+        "b22430cfa5b0826795444b1cbe3afc9543df8e17d3bc5213552ac5d817a30e17"
       ]
     },
     "testVectors/subscriptionQuota.json": {
