@@ -878,11 +878,12 @@
       ]
     },
     "skills/roadmap-autopilot/SKILL.md": {
-      "version": 3,
-      "sha256": "7fdfa0dbcbf5ecf74c94f1d95f5a347030ac49cf8b8e91828cf5f5c9470a3b52",
+      "version": 4,
+      "sha256": "732333fdb9234cf6a8491130c17b1d0eb785138508a4a155236f41737c817c8e",
       "history": [
         "cf08aed02d8cc8b9affe96b4ecca81d0fb6124dc4f862a3e0463ff331595754d",
-        "101d4be414f3f70f3c41971e4ff1d7b5cc8b5149946c59ff965f08b76ca2e78d"
+        "101d4be414f3f70f3c41971e4ff1d7b5cc8b5149946c59ff965f08b76ca2e78d",
+        "7fdfa0dbcbf5ecf74c94f1d95f5a347030ac49cf8b8e91828cf5f5c9470a3b52"
       ]
     },
     "skills/save-tokens/SKILL.md": {
