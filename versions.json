@@ -600,6 +600,11 @@
         "ca84ee6dbe8f6aeb22e89d001e0a5ad07fdeed88469c34b6c396f2ce09b4027b"
       ]
     },
+    "rules/watch-media.mdc": {
+      "version": 1,
+      "sha256": "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672",
+      "history": []
+    },
     "servers.json": {
       "version": 1,
       "sha256": "5c01624c617152b46e7a4b41a23c9a5fd5a9c8242c5b6cc7389930584428ac89",
