@@ -601,9 +601,11 @@
       ]
     },
     "rules/watch-media.mdc": {
-      "version": 1,
-      "sha256": "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672",
-      "history": []
+      "version": 2,
+      "sha256": "2ceff0048b021ba1a9481310bf2765fb817809417d178c4272b354886af14fb6",
+      "history": [
+        "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672"
+      ]
     },
     "servers.json": {
       "version": 1,
