@@ -1,0 +1,30 @@
+// Mistral AI — OpenAI-совместимый API. Ключ: MISTRAL_API_KEY=<ключ> в .vibe/.env
+// (взять: console.mistral.ai/api-keys) либо поле ключа в карточке провайдера.
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Mistral сразу. Выключить: {"id": "mistral", "active": false} в своём providers.json.
+//
+// АВТОДОПОЛНЕНИЕ (Codestral). Единственный облачный провайдер с родным FIM: модели Codestral принимают префикс и суффикс
+// методом /fim/completions (docs.mistral.ai/api/#tag/fim). Продукт говорит с ним этим методом сам, а список моделей для
+// «Автодополнения» собирает из каталога: выберите codestral-latest. Ключ нужен тот же.
+// Каталог вендора отдаёт окно контекста и признак зрения (Pixtral), цены — нет.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://api.mistral.ai/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "MISTRAL_API_KEY",
+      "docsUrl": "https://docs.mistral.ai",
+      "apiKeyUrl": "https://console.mistral.ai/api-keys",
+      "order": 36,
+      "models": {
+        "fetch": true
+      }
+    }
+  ]
+}

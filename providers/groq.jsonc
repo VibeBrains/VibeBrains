@@ -1,0 +1,29 @@
+// Groq — OpenAI-совместимый API (быстрый вывод открытых моделей). Ключ: GROQ_API_KEY=<ключ> в .vibe/.env
+// (взять: console.groq.com/keys) либо поле ключа в карточке провайдера.
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Groq сразу. Выключить: {"id": "groq", "active": false} в своём providers.json.
+//
+// РАССУЖДЕНИЕ: у gpt-oss уровень идёт полем reasoning_effort, а размышление приходит в своём поле reasoning; для остальных
+// моделей с рассуждением продукт шлёт reasoning_format "parsed" (console.groq.com/docs/reasoning) — иначе вызов инструментов
+// вместе с размышлением вендор не принимает. Список моделей приезжает из каталога вендора; цены каталог не отдаёт.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "groq",
+      "name": "Groq",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://api.groq.com/openai/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "GROQ_API_KEY",
+      "docsUrl": "https://console.groq.com/docs",
+      "apiKeyUrl": "https://console.groq.com/keys",
+      "order": 37,
+      "models": {
+        "fetch": true
+      }
+    }
+  ]
+}

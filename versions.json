@@ -182,8 +182,8 @@
       ]
     },
     "providers/README.md": {
-      "version": 16,
-      "sha256": "76020ee66ff2743dcc975d3537c049c1adea54d4b13e4ee0d80fa49968ab7c8b",
+      "version": 17,
+      "sha256": "a2e4a4ba6f006350694c4cbca00e8eaf8e54dbf6fcebbd41d6fa37dfe6643362",
       "history": [
         "541456bdca5484c2f83b77ea4608bcc5c3bbec1e3d99359cc6c464d0a805836d",
         "ef01bc2f85c2f6eac12247d00ba88a395467e50e021a92487e2c007b0a537c7e",
@@ -198,7 +198,8 @@
         "89e034498d9b4c03dacf83d96389dc7a6d273227c43957f48e0c0eb79a6a1fe4",
         "97103748b5236b55465cecdd395bb14c1f025cd7ef12c8f49e4dfee2ee791468",
         "fb141e8e39bca9f3617fce85d17583a5adc96c7a10bc17cd2c0dfc1eac876c05",
-        "0efc0ed08ad5f84199efbdc7c285873339768b294d48dfe2bd9836842b8afa3c"
+        "0efc0ed08ad5f84199efbdc7c285873339768b294d48dfe2bd9836842b8afa3c",
+        "76020ee66ff2743dcc975d3537c049c1adea54d4b13e4ee0d80fa49968ab7c8b"
       ]
     },
     "providers/_template-openai-compatible.jsonc": {
@@ -249,6 +250,16 @@
       "sha256": "4ffdfa09c1093ee39a8ff1726094086b6d91c9c38164e00cc5f7a6352734cf1e",
       "history": []
     },
+    "providers/aws-bedrock.jsonc": {
+      "version": 1,
+      "sha256": "629bd2db9d9360497b4143850b627fcfb7352180791d6be75c235e81ff1320fc",
+      "history": []
+    },
+    "providers/azure-openai.jsonc": {
+      "version": 1,
+      "sha256": "bd2647ed81ac940485fdedd32a25a12378f3ea66c8ea2e8c9c80fe83b6ad8c7b",
+      "history": []
+    },
     "providers/chatgpt.jsonc": {
       "version": 1,
       "sha256": "40e9e186f1968ad1736763f93b51febc5175bd7a2dd3e8f045991b712ddfd505",
@@ -283,13 +294,24 @@
       "history": []
     },
     "providers/google-gemini.jsonc": {
-      "version": 4,
-      "sha256": "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300",
+      "version": 5,
+      "sha256": "f68369736b12fd96f67828a9c98721d8286fcc6a714c10ff511b65fff41f9a7a",
       "history": [
         "e99fdc24d0a41d56cc63f993b42e074c72d2bace7037dcfb6a272ad8b745b782",
         "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc",
-        "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731"
+        "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731",
+        "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300"
       ]
+    },
+    "providers/google-vertex.jsonc": {
+      "version": 1,
+      "sha256": "7acd705ce98dbeb5265b2ce191c4f26de101dc361654ef46088bf59999b40b50",
+      "history": []
+    },
+    "providers/groq.jsonc": {
+      "version": 1,
+      "sha256": "0231d2692d1c0b7dd71654bb47cecc15cb1ad20a79df41006a5cf6014577624a",
+      "history": []
     },
     "providers/inference-net.jsonc": {
       "version": 2,
@@ -345,6 +367,11 @@
         "71d04eaf70135de956779d7a93005f71837b0622856001806944bd047904b3ca",
         "fe34c656fab13a138cddccc64000fc1e03d9747b650b14ba80087509a74f54e5"
       ]
+    },
+    "providers/mistral.jsonc": {
+      "version": 1,
+      "sha256": "b8bba6474cd012b1a268a9b7be61dd15ec7a69f3cc22c098b3eb1a24a53e49f9",
+      "history": []
     },
     "providers/muse-glimmer-local.jsonc": {
       "version": 4,
@@ -407,6 +434,11 @@
         "122e15b74574aee0043c024e8e49b7670178dfdeda66b37a4c76744bc726d6a6",
         "dcb2e71c2a30e4cfc6b7dc3834f06941a45654645ff5b113e784fb49d16a516e"
       ]
+    },
+    "providers/pollinations.jsonc": {
+      "version": 1,
+      "sha256": "1cecb29207e7010ba9c175429b44dec5acdc6fe81a5b9b313125f6584ec20cfe",
+      "history": []
     },
     "providers/qwen.jsonc": {
       "version": 1,

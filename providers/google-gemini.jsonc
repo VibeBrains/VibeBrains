@@ -1,18 +1,19 @@
 // Google Gemini — нативный протокол вендора (не OpenAI-совместимый слой).
-// Ключ: GEMINI_API_KEY в .vibe/.env или поле в настройках (AI Studio выдаёт его бесплатно).
+// Ключ: GEMINI_API_KEY в .vibe/.env или поле в настройках (AI Studio выдаёт его бесплатно, aistudio.google.com/apikey).
 //
-// Выключен по умолчанию, как и остальной каталог: включается переопределением
-// {"id": "google-gemini", "active": true} в своём providers.json.
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Gemini сразу. Выключить: {"id": "google-gemini", "active": false} в своём providers.json.
+//
+// Ключ уходит родным заголовком x-goog-api-key, а не параметром ?key= в адресе: адрес попадает в журналы, заголовок — нет.
 {
   "version": 1,
   "providers": [
     {
       "id": "google-gemini",
       "name": "Google Gemini",
-      "active": false, // тумблер: true — провайдер появляется в списках
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
       "protocol": "gemini",
       "baseURL": "https://generativelanguage.googleapis.com/v1beta",
-      "auth": { "type": "query", "name": "key" },
       "apiKeyRef": "google-gemini",
       "apiKeyEnv": "GEMINI_API_KEY",
       "order": 40,
