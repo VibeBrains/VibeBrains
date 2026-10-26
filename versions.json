@@ -510,9 +510,11 @@
       "history": []
     },
     "rules/brigadir-ekonomiya-tokenov.mdc": {
-      "version": 1,
-      "sha256": "55f837bf19c64f3cd5842db9a9797860eaf05eb46e75a0f5d443761a06e17584",
-      "history": []
+      "version": 2,
+      "sha256": "8325c7ce116debd06e270ec00f2098846e03d4bf67f778ad5a31c99f3a9474bf",
+      "history": [
+        "55f837bf19c64f3cd5842db9a9797860eaf05eb46e75a0f5d443761a06e17584"
+      ]
     },
     "rules/clean-rules.mdc": {
       "version": 6,
