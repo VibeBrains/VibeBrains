@@ -1,21 +1,42 @@
-// Kimi (Moonshot) — OpenAI-совместимый API, «думающие» модели.
-// Ключ: MOONSHOT_API_KEY=<ключ> в .vibe/.env (взять: platform.moonshot.ai/console/api-keys).
+// Kimi (Moonshot) — OpenAI-совместимый API, «думающие» модели. Адрес — международный контур платформы
+// (api.moonshot.ai); китайские адреса в набор не входят (решение владельца 26.10.2026).
+// Ключ: MOONSHOT_API_KEY=<ключ> в .vibe/.env (взять: platform.kimi.ai/console/api-keys).
 //
-// МОДЕЛИ (platform.kimi.ai/docs/models, сверено 11.09.2026): kimi-k3 (окно 1M), kimi-k2.7-code и
-// kimi-k2.7-code-highspeed (256K), kimi-k2.6 (256K). kimi-k2.5 и серия moonshot-v1 сняты
-// 31.08.2026 — запрос к ним возвращает 404. Картинки принимают все четыре: base64 data URL или файл
-// ms://<id>, публичные URL — нет (platform.kimi.ai/docs/guide/use-kimi-vision-model).
+// МОДЕЛИ (platform.kimi.ai/docs/models, сверено 26.10.2026): kimi-k3.1-pro — новый флагман (окно 1M, вышел около
+// 23.10.2026; дату вендор словами не называет, она видна по путям картинок в блоге), kimi-k3.1-pro-highspeed (тот же
+// интеллект в 2–3 раза быстрее), kimi-k3 (прежний флагман, 1M), kimi-k2.7-code и kimi-k2.7-code-highspeed (256K),
+// kimi-k2.6 (256K). kimi-k2.5 и серия moonshot-v1 сняты 31.08.2026 — запрос к ним возвращает 404. Серия K2 с 31.10.2026
+// закрыта для новых пользователей, а к концу декабря 2026 вендор снимает её целиком; цель миграции — kimi-k3.1-pro.
+// Картинки принимают все шесть: base64 data URL или файл ms://<id>, публичные URL — нет; видео — kimi-k3.1-pro, kimi-k3,
+// kimi-k2.6, kimi-k2.7-code и kimi-k2.7-code-highspeed (platform.kimi.ai/docs/guide/use-kimi-vision-model, сверено 26.10.2026).
 //
-// ЭКОНОМИКА K3: выключить рассуждение у kimi-k3 нельзя, уровни — low / high / max, и по умолчанию
-// стоит самый дорогой max (platform.kimi.ai/docs/guide/use-reasoning-effort). В записи ниже это
-// объявлено, и ползунок в положении «выключено» отправляет low, а не оставляет max. На простую
-// задачу у K3 уходит порядка 13 тысяч токенов рассуждений — для рутины модель невыгодна. В
-// многоходовом диалоге вендор требует возвращать ответ ассистента целиком, вместе с reasoning_content, — и у
-// сообщений с вызовами инструментов тоже. IDE делает это сама (причуда ECHO_REASONING вшита для kimi-k3,
-// kimi-k2.6, kimi-k2.7-code, kimi-for-coding и k3).
+// ВЫВОД: у серии K3 max_completion_tokens по умолчанию 131072, предел — 1048576 (platform.kimi.ai/docs/guide/kimi-k3-1-pro-quickstart,
+// сверено 26.10.2026). Для K2 вендор лимит вывода на странице моделей не называет.
+//
+// ЦЕНЫ ЗА МЛН ТОКЕНОВ, USD (platform.kimi.ai/docs/pricing/chat, сверено 26.10.2026; цифры лежат в данных страницы, а не в её
+// видимом тексте — таблица рисуется скриптом). Вход / выход / кэш-вход:
+//   kimi-k3.1-pro            2.00 / 10.00 / 0.20   (запись кэша: 5 минут 2.00, час 4.00)
+//   kimi-k3.1-pro-highspeed  4.00 / 20.00 / 0.20   (запись кэша: 5 минут 4.00, час 8.00)
+//   kimi-k3                  3.00 / 15.00 / 0.30   (запись кэша: 5 минут 3.00, час 6.00)
+//   kimi-k2.7-code           0.95 /  4.00 / 0.19
+//   kimi-k2.7-code-highspeed 1.90 /  8.00 / 0.38
+//   kimi-k2.6                0.95 /  4.00 / 0.16
+// Цена плоская, без ступеней по длине контекста. Кэш включён сам, срок по умолчанию 5 минут, час выбирается полем
+// prompt_cache_options.ttl. Налоги в цены не входят. Флагманы открываются пополнением от 1 USD.
+//
+// ЭКОНОМИКА K3 И K3.1 PRO: выключить рассуждение нельзя, уровни — low / high / max, и по умолчанию стоит самый дорогой
+// max (platform.kimi.ai/docs/guide/use-reasoning-effort, сверено 26.10.2026). В записях ниже это объявлено, и ползунок в
+// положении «выключено» отправляет low, а не оставляет max. Смена уровня посреди разговора сжигает кэш префикса — уровень
+// выбирайте до начала. На простую задачу у K3 уходит порядка 13 тысяч токенов рассуждений — для рутины модель невыгодна.
+// Расхождение вендора: руководство для Claude Code (platform.kimi.ai/docs/guide/claude-code-kimi) пишет, что у kimi-k3
+// рассуждение «можно выключить», а справочник параметров (api/models-overview) — что K3 рассуждает всегда; справочнику
+// верим, потому что он же описывает K3.1 Pro, и там «always reasons» сказано дважды. В многоходовом диалоге вендор
+// требует возвращать ответ ассистента целиком, вместе с reasoning_content, — и у сообщений с вызовами инструментов тоже.
+// IDE делает это сама (причуда ECHO_REASONING вшита для kimi-k3 и k3.1, kimi-k2.6, kimi-k2.7-code, kimi-for-coding и k3).
+// tool_choice "required" понимает серия K3; у kimi-k2.6 и kimi-k2.7-code он даёт ошибку.
 //
 // СЭМПЛИНГ ЗАКРЕПЛЁН ВЕНДОРОМ: temperature 1.0 (у K2.6 без рассуждения 0.6), top_p 0.95 — другое значение даёт
-// ошибку (platform.kimi.ai/docs/api/models-overview, сверено 17.09.2026). Не задавайте их в записях.
+// ошибку (platform.kimi.ai/docs/api/models-overview, сверено 26.10.2026). Не задавайте их в записях.
 {
   "version": 1,
   "providers": [
@@ -31,28 +52,41 @@
       "models": {
         "fetch": true
 
-        // ── Кастомные записи (platform.kimi.ai, сверено 11.09.2026) ────────────────
+        // ── Кастомные записи (platform.kimi.ai, сверено 26.10.2026) ────────────────
         // K2.7 Code рассуждает всегда, и вендор принимает у него РОВНО {"type":"enabled","keep":"all"}:
         // «only {"type":"enabled","keep":"all"} is accepted; any other configuration returns an error»
-        // (platform.kimi.ai/docs/api/models-overview, сверено 17.09.2026 — спасибо VibeIDE за находку).
-        // Там же: temperature закреплена на 1.0, top_p на 0.95 — другое значение даёт ошибку.
+        // (platform.kimi.ai/docs/api/models-overview, сверено 26.10.2026). reasoning_effort у K2 не поддерживается.
+        // Раскомментируйте нужные записи — каталог моделей (fetch) отдаёт id, но не цены и не уровни рассуждения.
         // "static": [
-        //   { "id": "kimi-k3", "name": "Kimi K3 (1M)", "pinned": true,
-        //     "contextWindow": 1048576, "vision": true,
+        //   { "id": "kimi-k3.1-pro", "name": "Kimi K3.1 Pro (1M)", "pinned": true, "default": true,
+        //     "contextWindow": 1048576, "maxOutputTokens": 131072, "vision": true,
         //     "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] },
-        //     "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.30, "currency": "USD" },
+        //     "cost": { "input": 2.00, "output": 10.00, "cacheRead": 0.20, "cacheWrite": 2.00, "cacheWrite1h": 4.00, "currency": "USD" },
         //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
-        //   { "id": "kimi-k2.7-code", "name": "Kimi K2.7 Code", "default": true,
+        //   { "id": "kimi-k3.1-pro-highspeed", "name": "Kimi K3.1 Pro HighSpeed (1M)",
+        //     "contextWindow": 1048576, "maxOutputTokens": 131072, "vision": true,
+        //     "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] },
+        //     "cost": { "input": 4.00, "output": 20.00, "cacheRead": 0.20, "cacheWrite": 4.00, "cacheWrite1h": 8.00, "currency": "USD" },
+        //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
+        //   { "id": "kimi-k3", "name": "Kimi K3 (1M)",
+        //     "contextWindow": 1048576, "maxOutputTokens": 131072, "vision": true,
+        //     "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] },
+        //     "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.30, "cacheWrite": 3.00, "cacheWrite1h": 6.00, "currency": "USD" },
+        //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
+        //   { "id": "kimi-k2.7-code", "name": "Kimi K2.7 Code (снимается к концу 2026)",
         //     "contextWindow": 262144, "vision": true,
+        //     "cost": { "input": 0.95, "output": 4.00, "cacheRead": 0.19, "currency": "USD" },
         //     "extraBody": { "thinking": { "type": "enabled", "keep": "all" } } }
         // ]
       }
     }
 
     // ── Kimi (Moonshot) по нативному протоколу Anthropic ────────────────────────────────
-    // Маршрут платформы с тем же ключом платформы: вендор даёт его в инструкции для Claude Code
-    // (адрес https://api.moonshot.ai/anthropic, модели kimi-k3, kimi-k2.7-code, kimi-k2.6;
-    // platform.kimi.ai/docs/guide/claude-code-kimi, сверено 17.09.2026).
+    // Маршрут платформы с тем же ключом платформы: вендор даёт его для Claude Code и официальных SDK Anthropic
+    // (адрес https://api.moonshot.ai/anthropic, формат Messages; platform.kimi.ai/docs/api/overview и
+    // platform.kimi.ai/docs/guide/claude-code-kimi, сверено 26.10.2026). Руководство для Claude Code называет модели
+    // kimi-k3, kimi-k2.7-code и kimi-k2.6, а kimi-k3.1-pro упоминает только в проверочном запросе curl — работает ли он
+    // на этом маршруте так же, как на OpenAI-маршруте, страница не оговаривает; живьём не проверено (ключей нет).
     // Рассуждение с инструментами обязано уходить обратно и здесь — блоками thinking. VibeIDEA это делает
     // на обоих маршрутах; если ваша IDE возвращает рассуждение только на OpenAI-маршруте, берите для
     // многоходовой работы с инструментами основной провайдер выше.
@@ -64,14 +98,46 @@
     //   "id": "kimi-anthropic", "extends": "kimi", "name": "Kimi (Anthropic-протокол)",
     //   "protocol": "anthropic", "baseURL": "https://api.moonshot.ai/anthropic/v1",
     //   "auth": { "type": "header", "name": "x-api-key" }, "order": 51,
-    //   "models": { "fetch": false, "static": [ { "id": "kimi-k3", "name": "Kimi K3 (Anthropic)" } ] }
+    //   "models": { "fetch": false, "static": [ { "id": "kimi-k3.1-pro", "name": "Kimi K3.1 Pro (Anthropic)" }, { "id": "kimi-k3", "name": "Kimi K3 (Anthropic)" } ] }
     // }
 
     // ── Kimi Code — подписка, свой ключ и свой адрес ────────────────────────────────────
-    // ЭТО НЕ ПЛАТФОРМА: ключ Kimi Code берётся в kimi.com/code/console и на api.moonshot.ai не работает,
-    // а ключ платформы не работает здесь. Модели: kimi-for-coding — с 11.09.2026 это K2.8 Preview, окно 1M,
-    // рассуждение low / high / max; kimi-for-coding-highspeed (256K); k3 (1M) и k3-256k.
-    // У K2.8 Preview нет цены за токены на платформе — модель есть только в подписке.
+    // ЭТО НЕ ПЛАТФОРМА: ключ Kimi Code берётся в консоли Kimi Code (kimi.ai/code/console) и на api.moonshot.ai не
+    // работает, а ключ платформы не работает здесь. Источники (сверено 26.10.2026): страница справки
+    // kimi.ai/ru/help/kimi-code/models и документация kimi.com/code/docs/en/kimi-code/models.html.
+    // МОДЕЛИ ТАРИФА (id — именно такие, отображаемые имена вроде «K3» вендор запрещает):
+    //   k3.1-pro                  K3.1 Pro, окно до 1 048 576, low / high / max, дефолт high, не выключается — только по документации
+    //                             kimi.com/code/docs; справка kimi.ai/ru/help этих id пока не называет (расхождение двух страниц вендора)
+    //   k3.1-pro-highspeed        K3.1 Pro HighSpeed, то же, в 2–3 раза быстрее, около 2× квоты — тоже только по документации
+    //   k3                        K3, до 1 048 576 (в тарифе Plus потолок 256K), low / high / max, дефолт high, картинки и видео
+    //   k3-256k                   K3, фиксированные 262 144, те же уровни, только картинки (видео не поддерживает)
+    //   kimi-for-coding           K2.8 Preview, 1 048 576, low / high / max, дефолт max, картинки и видео
+    //   kimi-for-coding-highspeed K2.7 Code HighSpeed, 262 144, рассуждает всегда, уровней нет; вывод в 5–6 раз быстрее
+    //                             за ~3× квоты (ускоряется только вывод модели, не инструменты). Опечатка в этом имени
+    //                             молча уводит на kimi-for-coding.
+    // Тарифы: Plus и выше — k3, k3-256k, kimi-for-coding (и k3.1-pro по документации); Pro и выше — k3 на 1M и
+    // HighSpeed. Прежние тарифы Moderato / Allegretto / Allegro / Vivace действуют у уже подписанных; страница условий
+    // (kimi.ai/ru/help/kimi-code/benefits) называет сетку «Plus и выше» и не упоминает Go, Max и Ultra — прежняя запись
+    // набора об этих тарифах страницей не подтверждена. 401 может значить, что тариф не даёт доступа к модели.
+    // Смена id модели или уровня рассуждения сбрасывает кэш контекста — переключайтесь в новом сеансе.
+    // УРОВЕНЬ: reasoning_effort low / high / max. Соответствие слов: ultra, max, xhigh -> max; high, medium -> high;
+    // low, minimum, light -> low; none выключает рассуждение (thinking.type = disabled) — но тогда запрос обслуживает
+    // K2.8 Preview без рассуждения, то есть другая модель; незнакомое значение — 400. Дефолт без значения: K3 и K3.1 Pro
+    // high, K2.8 Preview max. Платформа же объявляет у K3 дефолт max — расхождение вендора, поэтому уровень задавайте
+    // явно, а не полагайтесь на умолчание. Запрос больше 2 МБ — 400 (проверено 23.09.2026, 26.10 не перепроверялось).
+    // АДРЕС — МЕЖДУНАРОДНЫЙ (решение владельца 26.10.2026): OpenAI-маршрут https://api.kimi.ai/coding/v1, Anthropic-маршрут
+    // https://api.kimi.ai/coding/ . Аккаунты китайского региона живут на другом хосте (api.kimi.com/coding...) — в набор
+    // он не входит: если у вас такой аккаунт, замените хост сами. Ключ берите в консоли своего региона: подходит ли ключ
+    // одного региона к хосту другого, вендор не пишет. Anthropic-маршрут Kimi Code: рассуждение там уходит обратно блоками
+    // thinking — VibeIDEA это умеет, а про свою IDE проверьте.
+    // КВОТА (kimi.ai/ru/help/kimi-code/benefits, сверено 26.10.2026): общий месячный пул кредитов на все возможности Kimi
+    // (агент, Kimi Code, Kimi Work и др.), обновляется в день и час начала подписки и не переносится; кончился пул — Kimi
+    // Code заблокирован до сброса. Поверх — скользящее окно 5 часов. У новых тарифов (Plus и выше) недельного лимита нет;
+    // у прежних (Moderato и выше) он есть и сбрасывается раз в 7 дней. Это закрывает расхождение двух страниц вендора,
+    // записанное 26.09. Все устройства и ключи (приложение, CLI, VS Code, сторонние инструменты) делят одну квоту;
+    // устройство, молчавшее больше 30 дней, отвязывается само. При выработке свыше 80% консоль предлагает Extra Usage —
+    // предоплаченный баланс в USD (от 10 USD, не больше 1000 USD в день и 2000 USD на балансе), он тратится после кредитов
+    // подписки или при упоре в лимит; средства обычно не возвращаются. Правил для сторонних инструментов страница не даёт.
     // УСЛОВИЯ ВЕНДОРА (kimi.com/en/help/kimi-code/benefits, сверено 17.09.2026): подписка «for personal development
     // only, not for enterprise development scenarios»; сторонним инструментам доступ дан ключом API, но подмена
     // идентификатора клиента — нарушение: «tampering with the client identifier (User-Agent) will be treated as a
@@ -82,43 +148,28 @@
     // ПРАВИЛА СООБЩЕСТВА (kimi.com/code/docs, community-guidelines, сверено 23.09.2026): подписка — только для
     // интерактивной работы; скриптовая и пакетная автоматизация, перепродажа и подмена клиента запрещены, наказание —
     // ограничение параллельности. Поэтому для пайплайнов и автопилота IDE этот провайдер не годится.
-    // ХОСТОВ ДВА, ОБА ОФИЦИАЛЬНЫЕ — ЭТО РЕГИОНЫ, а не переименование: аккаунты kimi.com (Китай) —
-    // https://api.kimi.com/coding/, аккаунты kimi.ai (остальной мир) — https://api.kimi.ai/coding/; OpenAI-маршрут —
-    // тот же хост с /v1 (kimi.com/code/docs/en/kimi-code/models.html, сверено 23.09.2026; клиент вендора держит обе
-    // площадки в коде — packages/oauth/src/region.ts в github.com/MoonshotAI/kimi-code). Ключ берите в консоли своего
-    // региона: подходит ли ключ одного региона к хосту другого, вендор не пишет. Блок ниже — для kimi.ai; аккаунту
-    // kimi.com поменяйте хост на api.kimi.com. Anthropic-маршрут тоже есть: рассуждение там уходит обратно
-    // блоками thinking — VibeIDEA это умеет, а про свою IDE проверьте.
     // ОФИЦИАЛЬНЫЙ ПУТЬ ВЕНДОРА ИЗ IDE JETBRAINS — ACP: IDE запускает `kimi acp`, клиентом остаётся программа вендора
     // (запись "kimi" в .vibe/agents.json набора).
-    // Модели тарифа: k3, k3-256k, kimi-for-coding (= K2.8 Preview) и kimi-for-coding-highspeed (это K2.7 Code
-    // HighSpeed: 262 144, рассуждает всегда; опечатка в этом имени молча уводит на kimi-for-coding). Тарифы теперь
-    // Go / Plus / Pro / Max / Ultra (прежние Andante…Allegro): Go кодинг-квоты не даёт вовсе, k3 — с Plus, k3 на 1M и
-    // HighSpeed — с Pro. КВОТА (kimi.com/en/help/kimi-code/benefits, сверено 26.09.2026): кредиты обновляются
-    // циклом 7 дней от даты подписки и не переносятся, поверх — скользящее окно 5 часов: частые запросы упираются
-    // в него и при остатке кредитов. Сторонний обзор (codingplan.org) пишет, что недельный лимит у новых участников
-    // снят. Страница помощи вендора этого не подтверждает — там новая система тарифов только «coming soon», а
-    // документация Kimi Code (kimi.com/code/docs/en/kimi-code/membership.html, сверено 26.09.2026) уже пишет: у новых
-    // участников недельный лимит снят, у прежних квота обновляется раз в 7 дней. Две страницы вендора расходятся.
-    // По той же документации: есть месячный потолок всей подписки Kimi (дошли — Kimi Code заморожен до сброса), все
-    // устройства и ключи делят одну квоту (IDE, CLI и сторонние инструменты тратят её вместе), а после подписки
-    // списание идёт с баланса Extra Usage, если он есть.
-    // Запрос больше 2 МБ — 400. Незнакомое значение reasoning_effort — 400; "none" выключает
-    // рассуждение, но у k3 выключенное рассуждение обслуживает уже K2.8 Preview — другая модель.
-    // Уровень — reasoning_effort low/high/max, и ДЕФОЛТ РАЗНЫЙ
-    // в двух официальных источниках вендора: платформа объявляет max, документация Kimi Code для тех же
-    // k3/k3-256k — high, а max держит дефолтом только для kimi-for-coding. Это расхождение вендора,
-    // поэтому уровень задавайте явно, а не полагайтесь на умолчание.
+    // У K2.8 Preview нет цены за токены на платформе — модель есть только в подписке; цены K3.1 Pro на подписке в токенах
+    // тоже нет (расход идёт кредитами), поэтому в записях ниже "cost" не задан.
     // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
     // ,{
     //   "id": "kimi-code", "name": "Kimi Code (подписка)",
     //   "protocol": "openai", "baseURL": "https://api.kimi.ai/coding/v1",
     //   "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
     //   "models": { "fetch": false, "static": [
-    //     { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)", "default": true,
-    //       "contextWindow": 1048576, "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"] } },
-    //     { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576,
-    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } }
+    //     { "id": "k3.1-pro", "name": "Kimi K3.1 Pro (Kimi Code)", "default": true,
+    //       "contextWindow": 1048576, "vision": true,
+    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+    //     { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576, "vision": true,
+    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+    //     { "id": "k3-256k", "name": "Kimi K3 256K (Kimi Code)", "contextWindow": 262144, "vision": true,
+    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+    //     { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)",
+    //       "contextWindow": 1048576, "vision": true,
+    //       "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"] } },
+    //     { "id": "kimi-for-coding-highspeed", "name": "Kimi K2.7 Code HighSpeed (Kimi Code)",
+    //       "contextWindow": 262144, "vision": true }
     //   ] }
     // }
   ]
