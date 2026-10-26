@@ -876,9 +876,11 @@
       "history": []
     },
     "skills/rescue-session/SKILL.md": {
-      "version": 1,
-      "sha256": "28d0718967f2fc1b577e8541dca8b8fee11261facaf90a51b919822710bbc068",
-      "history": []
+      "version": 2,
+      "sha256": "24ec7eb37d4caf5a4e3328637a852cb497752e794587032de9a1024b9c53ad44",
+      "history": [
+        "28d0718967f2fc1b577e8541dca8b8fee11261facaf90a51b919822710bbc068"
+      ]
     },
     "skills/rescue-session/evals/evals.json": {
       "version": 1,

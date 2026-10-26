@@ -30,15 +30,31 @@ metadata:
 
 ### 1. Найти транскрипт
 
-Claude Code хранит сессии в `~/.claude/projects/<путь проекта, где / заменены на ->/<id>.jsonl`
-Нужная — обычно самая свежая после текущей, крупная (десятки мегабайт), изменённая перед падением:
+Каждый агент пишет журнал в свою папку — искать у себя, а не у Claude Code:
+
+| Агент | Где лежат сессии | Формат |
+|---|---|---|
+| Claude Code | `~/.claude/projects/<путь проекта, / заменены на ->/<id>.jsonl` | строка — событие, текст в `message.content` |
+| Codex | `~/.codex/sessions/<год>/<месяц>/<день>/rollout-*.jsonl` | строка — событие, папка проекта в `payload.cwd` первой строки |
+| DeepSeek Harness | `~/.dsh/storages/session_projcache/sessions/*.json` | один JSON на сессию, папка проекта в `record.identity.cwd` |
+| VibeIDEA | `~/Library/Application Support/VibeBrains/VibeIdea/vibe/chatHistory.json` | один JSON, `threads[]` с `workspaceId` и `messages[]` (`role`, `text`) |
+| VibeIDE | `~/Library/Application Support/VibeIDE/User/workspaceStorage/<хеш>/state.vscdb` | база SQLite, читать через `sqlite3` выборкой, не целиком |
+
+Пути — для macOS, на Linux вместо `~/Library/Application Support` смотреть `~/.config`
+Агента нет в таблице — найти свежие крупные файлы с историей в его папках:
+
+```bash
+find ~ -maxdepth 6 -type f -mmin -240 -size +500k \( -iname '*session*' -o -iname '*chat*' -o -iname '*history*' -o -name '*.jsonl' \) 2>/dev/null
+```
+
+Нужная сессия — свежая, крупная, изменённая перед падением, с папкой проекта в метаданных:
 
 ```bash
 ls -lt ~/.claude/projects/<папка проекта>/*.jsonl | head -5
 ```
 
 Текущая сессия тоже в списке — она маленькая и самая новая, её пропустить
-Другие агенты пишут журналы в свои папки — принцип тот же: файл построчного JSON, фильтровать скриптом
+Скрипты ниже написаны под Claude Code: для другого агента поменять только то, где лежит текст реплики и роль — порядок тот же
 
 ### 2. Хвост диалога — без инструментов
 
