@@ -1,0 +1,47 @@
+// Microsoft Azure OpenAI — модели ваших развёртываний в Azure AI Foundry. Ключ: AZURE_OPENAI_API_KEY=<ключ> в .vibe/.env
+// либо поле ключа в карточке (взять: портал Azure → ресурс Azure OpenAI → Keys and Endpoint).
+//
+// АДРЕС. Используется v1 API Azure OpenAI: `https://<ресурс>.openai.azure.com/openai/v1` (learn.microsoft.com →
+// Azure OpenAI → «OpenAI v1 API»). В нём версия API в адресе не нужна, а поле запроса `model` — имя ВАШЕГО развёртывания.
+// Ключ уходит заголовком api-key, как требует Azure.
+// ПОЛЯ КАРТОЧКИ (params): «Ресурс» (имя ресурса, часть адреса до .openai.azure.com) и необязательная «Версия API» — если
+// вписать её (например, preview), она уйдёт параметром api-version. Пока ресурс не указан, провайдер не настроен.
+//
+// МОДЕЛИ — ИМЕНА РАЗВЁРТЫВАНИЙ. Каталога развёртываний у v1 API нет (его /models отдаёт базовые модели, а не развёртывания),
+// поэтому список не подтягивается: добавьте имя каждого развёртывания кнопкой «Добавить модель» в настройках либо записью
+// в "models.static" своего providers.json. Старый список развёртываний включается так (отвечает только старым версиям API):
+//   "models": { "fetch": "https://{resource}.openai.azure.com/openai/deployments?api-version=2023-03-15-preview" }
+//
+// СВЕРЕНО С ДОКУМЕНТАЦИЕЙ AZURE, НА ЖИВОМ РЕСУРСЕ НЕ ПРОГНАНО. Если на вашем ресурсе v1 не включён, а работает старый путь
+// /openai/deployments/<имя>/chat/completions?api-version=…, впишите в своём providers.json "baseURL" с ним — имя развёртывания
+// в этот адрес подставляется вручную.
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Azure OpenAI сразу. Выключить: {"id": "azure-openai", "active": false} в своём providers.json.
+//
+// ЧТО УМЕЕТ ТОЛЬКО ЭТОТ ФАЙЛ. Блок "params" — расширение формата, которое знает VibeIDE (docs/manuals/providersSpec.md).
+// Продукт, который его не знает, прочтёт адрес со скобками `{resource}` буквально, и провайдер у него не заработает.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "azure-openai",
+      "name": "Microsoft Azure OpenAI",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://{resource}.openai.azure.com/openai/v1",
+      "auth": { "type": "header", "name": "api-key" },
+      "apiKeyEnv": "AZURE_OPENAI_API_KEY",
+      "query": { "api-version": "{apiVersion}" },
+      "docsUrl": "https://learn.microsoft.com/en-us/azure/ai-foundry/openai/api-version-lifecycle",
+      "order": 76,
+      "params": {
+        "resource": { "title": "Ресурс", "placeholder": "my-resource" },
+        "apiVersion": { "title": "Версия API", "placeholder": "preview", "optional": true }
+      },
+      "models": {
+        "fetch": false
+      }
+    }
+  ]
+}

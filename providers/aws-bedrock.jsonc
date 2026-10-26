@@ -1,0 +1,37 @@
+// AWS Bedrock — через OpenAI-совместимый шлюз: прокси LiteLLM или AWS Bedrock-Access-Gateway
+// (github.com/aws-samples/bedrock-access-gateway; docs.litellm.ai/docs/providers/bedrock). Родной протокол bedrock-runtime
+// не OpenAI-совместим, поэтому напрямую в него продукт не ходит. Учётные данные AWS живут в шлюзе, а сюда вводится его адрес
+// и, если шлюз его требует, ключ шлюза: BEDROCK_GATEWAY_API_KEY=<ключ> в .vibe/.env либо поле ключа в карточке.
+//
+// ПОЛЕ КАРТОЧКИ (params): «Адрес шлюза» с версией пути, по умолчанию http://localhost:4000/v1 (LiteLLM на этой машине).
+// Адрес на этой машине ключа не требует: не задан — шлюз спрашивается без него. Прежнее поле «Регион» встроенного провайдера
+// код отправки не читал; регион задаётся в самом шлюзе, поэтому здесь его нет.
+// МОДЕЛИ приезжают из каталога шлюза (/models) — это его имена моделей (например, bedrock/claude-…), а не id Bedrock.
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Bedrock сразу. Выключить: {"id": "aws-bedrock", "active": false} в своём providers.json.
+//
+// ЧТО УМЕЕТ ТОЛЬКО ЭТОТ ФАЙЛ. Блок "params" — расширение формата, которое знает VibeIDE (docs/manuals/providersSpec.md).
+// Продукт, который его не знает, прочтёт адрес `{endpoint}` буквально, и провайдер у него не заработает.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "aws-bedrock",
+      "name": "AWS Bedrock",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "{endpoint}",
+      "auth": "bearer",
+      "apiKeyEnv": "BEDROCK_GATEWAY_API_KEY",
+      "docsUrl": "https://docs.litellm.ai/docs/providers/bedrock",
+      "order": 77,
+      "params": {
+        "endpoint": { "title": "Адрес шлюза", "default": "http://localhost:4000/v1", "placeholder": "http://localhost:4000/v1" }
+      },
+      "models": {
+        "fetch": true
+      }
+    }
+  ]
+}

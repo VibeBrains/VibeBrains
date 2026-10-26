@@ -1,0 +1,40 @@
+// Google Vertex AI — OpenAI-совместимый мост Vertex (модели Gemini, Llama, Claude и другие, что открыты вашему проекту
+// в Model Garden). Ключа API нет: запросы подписывает короткоживущий токен Google OAuth, который продукт берёт у
+// Application Default Credentials на каждом запросе (токен живёт около часа, поэтому не хранится).
+//
+// ВХОД: выполните один раз `gcloud auth application-default login` либо задайте GOOGLE_APPLICATION_CREDENTIALS
+// (файл ключа сервисного аккаунта с ролью Vertex AI User). Не вышел — карточка так и скажет.
+// ПОЛЯ КАРТОЧКИ (params): «Регион» и «Проект» вводятся в Настройки → Облачные провайдеры → «Свои провайдеры». Адрес собирается из них
+// (cloud.google.com/vertex-ai/generative-ai/docs/multimodal/call-vertex-using-openai-library); пока проект не указан,
+// провайдер не настроен и моделей в списках нет. Регион по умолчанию — us-west2, как у прежнего встроенного провайдера;
+// большинству моделей нужен us-central1 или регион, где модель открыта (cloud.google.com/vertex-ai/docs/general/locations).
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Vertex AI сразу. Выключить: {"id": "google-vertex", "active": false} в своём providers.json.
+//
+// ЧТО УМЕЕТ ТОЛЬКО ЭТОТ ФАЙЛ. Поле "auth": "google-adc" и блок "params" — расширения формата, которые знает VibeIDE
+// (docs/manuals/providersSpec.md). Продукт, который их не знает, прочтёт файл с адресом, где остались скобки `{region}`,
+// и провайдер у него не заработает; ничего другого они не ломают.
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "google-vertex",
+      "name": "Google Vertex AI",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://{region}-aiplatform.googleapis.com/v1/projects/{project}/locations/{region}/endpoints/openapi",
+      "auth": "google-adc",
+      "docsUrl": "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/call-vertex-using-openai-library",
+      "order": 75,
+      "params": {
+        "region": { "title": "Регион", "default": "us-west2", "placeholder": "us-central1" },
+        "project": { "title": "Проект", "placeholder": "my-project" }
+      },
+      "models": {
+        // Мост Vertex повторяет /models по тому же адресу, что и чат
+        "fetch": true
+      }
+    }
+  ]
+}

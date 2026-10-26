@@ -94,7 +94,7 @@ metadata:
 
 ## Сборка и компиляция
 
-- Дистрибутив (`npm run package` / vsce и т.п.) — **только** если оператор в этом сообщении явно написал «собери» (см. [.vibe/rules/dev-engine.mdc](mdc:.vibe/rules/dev-engine.mdc) и [.vibe/rules/versioning.mdc](mdc:.vibe/rules/versioning.mdc)).
+- Дистрибутив (пакет, установщик, образ — то, что собирает порядок проекта) — **только** если оператор в этом сообщении явно написал «собери» (см. [.vibe/rules/dev-engine.mdc](mdc:.vibe/rules/dev-engine.mdc) и [.vibe/rules/versioning.mdc](mdc:.vibe/rules/versioning.mdc)).
 - Проверочная компиляция/сборка после правок — минимально достаточная для уверенности в зелёной базе: точечная проверка затронутой части, полная — только если правки задевают общий каркас проекта.
 
 ## CONTINUE_NEXT_MESSAGE

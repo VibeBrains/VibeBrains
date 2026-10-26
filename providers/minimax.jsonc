@@ -14,13 +14,17 @@
 // Взаимозаменяемыми они не являются. Прежний Token Plan продлевается как был, перейти на M Plan можно
 // в любой момент (platform.minimax.io/docs/m-plan/faq).
 //
-// MiniMax-M3.1-Flash-Preview — ТОЛЬКО ПО ПОДПИСКЕ: «available only through M Plan and MiniMax Code for now»
-// (platform.minimax.io/docs/guides/models-intro, сверено 30.09.2026). С ключом sk-api-… её нет, а в образце
-// ответа списка моделей (GET /v1/models) её тоже нет — поэтому она вписана статичной записью на обоих
-// маршрутах, а не ждёт каталога. Окно 1M, картинки и видео на входе. Мышление НЕ ВЫКЛЮЧАЕТСЯ: "disabled" и
-// reasoning_effort "none" — 400. Уровни low, medium, high, xhigh, max, и без уровня вендор ставит max —
-// поэтому положение «выключено» шлёт low. Рассуждение приходит полем reasoning_content и уходит обратно им же.
-// Цены за токены нет: модель есть только в подписке.
+// MiniMax-M3.1-Flash (19.10.2026, release-notes) — теперь и с поштучной оплатой: в pricing-paygo она есть,
+// $0.15 / $0.60 за 1M, чтение кэша $0.015 (platform.minimax.io/docs/guides/pricing-paygo, сверено 21.10.2026).
+// Прежний id MiniMax-M3.1-Flash-Preview был «только M Plan»; в справочнике API и в models-intro его больше нет,
+// а обещание «старое имя обслуживает новая модель» есть только в стороннем дайджесте — НЕ ПОДТВЕРЖДЕНО вендором,
+// поэтому в записях стоит новый id. Окно 1M (справочник API Anthropic-маршрута), картинки и видео на входе —
+// НЕ ПОДТВЕРЖДЕНО страницами вендора (в models-intro только слово «Multimodal»), флаг vision оставлен от Preview.
+// Мышление НЕ ВЫКЛЮЧАЕТСЯ: "disabled" и reasoning_effort "none" — 400. Уровни low, medium, high, xhigh, max, и без
+// уровня вендор ставит max — поэтому положение «выключено» шлёт low. Мышление считается в max_tokens: малый
+// лимит кончает ответ без текста. Блоки thinking возвращаются в историю как есть; service_tier не поддержан
+// (platform.minimax.io/docs/api-reference/text-anthropic-api, сверено 21.10.2026).
+// Рассуждение на OpenAI-маршруте приходит полем reasoning_content и уходит обратно им же.
 //
 // ДОМЕН ПРИВЯЗАН К АККАУНТУ, а не к вашему местоположению: международный — api.minimax.io,
 // материковый Китай — api.minimax.cn (так в официальной инструкции вендора для Claude Code;
@@ -49,10 +53,11 @@
       "order": 30,
       "models": {
         "fetch": true,
-        // Модели подписки в каталоге вендора нет — см. шапку. С ключом поштучной оплаты запрос к ней вернёт ошибку.
+        // Каталог вендора может модель не перечислять — она вписана статично, см. шапку.
         "static": [
-          { "id": "MiniMax-M3.1-Flash-Preview", "name": "MiniMax M3.1 Flash Preview (M Plan)",
+          { "id": "MiniMax-M3.1-Flash", "name": "MiniMax M3.1 Flash",
             "contextWindow": 1000000, "vision": true,
+            "cost": { "input": 0.15, "output": 0.60, "cacheRead": 0.015 },
             "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] } },
           // MiniMax-Text-01 — НЕ ПОДТВЕРЖДЕНА ВЕНДОРОМ (14.10.2026): ни в models-intro, ни в pricing-paygo, ни в
           // справочнике API её нет, ни как действующей, ни как снятой — запись может перестать работать без предупреждения.
@@ -114,11 +119,12 @@
             "toolFormat": "anthropic"
           },
           {
-            // Только по подписке M Plan — см. шапку файла. Усилие на этом маршруте — output_config.effort.
-            "id": "MiniMax-M3.1-Flash-Preview",
-            "name": "MiniMax M3.1 Flash Preview (Anthropic, M Plan)",
+            // Усилие на этом маршруте — output_config.effort; цена и оговорки — в шапке файла.
+            "id": "MiniMax-M3.1-Flash",
+            "name": "MiniMax M3.1 Flash (Anthropic)",
             "contextWindow": 1000000,
             "vision": true,
+            "cost": { "input": 0.15, "output": 0.60, "cacheRead": 0.015 },
             "toolFormat": "anthropic",
             "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] }
           },
@@ -138,7 +144,7 @@
           // сверено 19.09.2026). Окно у всей линейки M2.x — 204 800 токенов.
           // Модели с суффиксом `-highspeed` — быстрый вариант той же модели у вендора.
           // M2.5 и M2.7 уходят: с 19.10.2026 они закрыты для новых пользователей, 18.11.2026 выключаются. На подписке
-          // (M Plan, Token Plan) с 19.10.2026 запросы к ним сами перенаправляются на M3.1-Flash-Preview под прежним
+          // (M Plan, Token Plan) с 19.10.2026 запросы к ним сами перенаправляются на M3.1 Flash под прежним
           // именем модели; при поштучной оплате они работают до 18.11.2026, потом запросы падают
           // (platform.minimax.io/docs/guides/models-intro, сверено 14.10.2026).
           // M2.1 вендор держит в разделе Legacy: в списке ухода его нет, цена у него пока есть (pricing-paygo, сверено 14.10.2026).

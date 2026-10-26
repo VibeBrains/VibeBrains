@@ -1,0 +1,30 @@
+// Pollinations — дешёвый API со множеством моделей, OpenAI-совместимый. Ключ: POLLINATIONS_API_KEY=<ключ> в .vibe/.env
+// (взять: enter.pollinations.ai; ключи вида sk-… и pk-…) либо поле ключа в карточке провайдера.
+//
+// Копия этого файла зашита в VibeIDE и стоит под слоями файлов на диске: первый запуск без папки и проект, засеянный до
+// появления этого файла, получают Pollinations сразу. Выключить: {"id": "pollinations", "active": false} в своём providers.json.
+//
+// Расчёт идёт кредитами Pollen, а не деньгами, поэтому отчёт «Ключи и расход» цен моделей Pollinations не знает, а
+// список выбора помечает их как бесплатные (free) — это эвристика продукта, а не обещание вендора.
+// КАТАЛОГ: /v1/models отдаёт всё, что умеет вендор, — не только текст, но и картинки, звук, видео. Модели из каталога по
+// умолчанию скрыты и включаются в «Модели» поштучно; для чата берите записи с category "text".
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "pollinations",
+      "name": "Pollinations",
+      "active": true, // тумблер: false — провайдер скрыт из списков (в слиянии и extends участвует)
+      "protocol": "openai",
+      "baseURL": "https://gen.pollinations.ai/v1",
+      "auth": "bearer",
+      "apiKeyEnv": "POLLINATIONS_API_KEY",
+      "docsUrl": "https://enter.pollinations.ai/api/docs",
+      "apiKeyUrl": "https://enter.pollinations.ai/",
+      "order": 41,
+      "models": {
+        "fetch": true
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@
     { "model": "mimo-v2.5", "openai": "reasoning_content", "anthropic": "all" },
     { "model": "MiniMax-M3", "openai": "think-tags", "anthropic": "all" },
     { "model": "MiniMax-M3.1-Flash-Preview", "openai": "reasoning_content", "anthropic": "all" },
+    { "model": "MiniMax-M3.1-Flash", "openai": "reasoning_content", "anthropic": "all" },
     { "model": "minimax-m2.7", "openai": "think-tags", "anthropic": "all" },
     { "model": "MiniMax-M2.5", "openai": "think-tags", "anthropic": "all" },
     { "model": "claude-opus-5-5", "openai": null, "anthropic": "same-prefix" },
