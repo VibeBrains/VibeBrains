@@ -821,6 +821,16 @@
       "sha256": "56f4a1d6da07f8b2a27e4b99f7c6bd3c63b6ca916a300549b5aa3aadf76760cc",
       "history": []
     },
+    "skills/rescue-session/SKILL.md": {
+      "version": 1,
+      "sha256": "28d0718967f2fc1b577e8541dca8b8fee11261facaf90a51b919822710bbc068",
+      "history": []
+    },
+    "skills/rescue-session/evals/evals.json": {
+      "version": 1,
+      "sha256": "b6ece6558e99836ef1a240b95ba6a1b44fc8505f3f682296e2966b9f1bcba7fd",
+      "history": []
+    },
     "skills/resolve-merge-conflicts/SKILL.md": {
       "version": 3,
       "sha256": "29a9275fb3af3eec2c9a050a3eee4554401155bb57c1847d39d4bf8e3d4341e7",
