@@ -121,6 +121,54 @@
         "310ac907e562029afb029b3f26a29a572fb0c947884f7abc088251d373ed696e",
         "370d157589bb2efbbabb0c9655536ffef5006005a6d5b4bae990641b5f265891"
       ]
+    },
+    {
+      "path": "rules/brigadir-ekonomiya-tokenov.mdc",
+      "replacedBy": "rules/brigadier.mdc",
+      "sha256": [
+        "55f837bf19c64f3cd5842db9a9797860eaf05eb46e75a0f5d443761a06e17584",
+        "8325c7ce116debd06e270ec00f2098846e03d4bf67f778ad5a31c99f3a9474bf",
+        "9fea39a63bfb4697459261f78a649df518dda30092ea69a8eb4e50799e0cc098",
+        "ee1d31b36486b9945a886978fbfe4d479de5d4b3cb0e8f1270a2f76caa4d17c2"
+      ]
+    },
+    {
+      "path": "skills/vneshniy-ispolnitel/SKILL.md",
+      "replacedBy": "skills/brigadier/worker/README.md",
+      "sha256": [
+        "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380",
+        "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799",
+        "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad",
+        "2a90ee0507616da5d5cb420701dbbfb74530aa20a6f259c6c0c23f2700004a90",
+        "1e452b97f8a2978bc9423100884653214c18cd9a17d0ec0db2b67c4d77aa5a5e"
+      ]
+    },
+    {
+      "path": "skills/vneshniy-ispolnitel/worker.sh",
+      "replacedBy": "skills/brigadier/worker/worker.sh",
+      "sha256": [
+        "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51",
+        "895bba4fe74c929ddb48de6f92acb78cad0ae747069abfd395af55aae1c70b1b",
+        "b29add14b521be7d3a4cadc871ae59074cb9b442bccb1f87608185875487349a"
+      ]
+    },
+    {
+      "path": "skills/vneshniy-ispolnitel/worker.ps1",
+      "replacedBy": "skills/brigadier/worker/worker.ps1",
+      "sha256": [
+        "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9",
+        "8795aeba5c5e3354c1f3fdfecc6e67ffdefbb9c4b6fac1003f96b6ed789cb9c1",
+        "c683998fdd6ad3e332014b4b7abc4a73a780a419cc9bb5f20a894cacaa8c3478"
+      ]
+    },
+    {
+      "path": "skills/vneshniy-ispolnitel/providers/deepseek.json",
+      "replacedBy": "skills/brigadier/worker/providers/deepseek.json",
+      "sha256": [
+        "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb",
+        "d8b1d8225e10bf6d0aa4fa5aed19ded32df2b0c0c2c5f1fd281edc782b19a141",
+        "4034bdc00759b136eba29937a9b9e99b9e97814b5a52cb563249077204e3241b"
+      ]
     }
   ]
 }

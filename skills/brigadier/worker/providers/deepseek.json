@@ -5,8 +5,8 @@
   "keyUrl": "https://platform.deepseek.com/api_keys",
   "keyEnv": "DEEPSEEK_API_KEY",
   "secret": {
-    "service": "brigadir-worker-deepseek",
-    "env": "BRIGADIR_WORKER_DEEPSEEK_KEY"
+    "service": "brigadier-worker-deepseek",
+    "env": "BRIGADIER_WORKER_DEEPSEEK_KEY"
   },
   "tiers": {
     "cheap": {

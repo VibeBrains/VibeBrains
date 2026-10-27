@@ -5,7 +5,7 @@
 #
 # Команды:
 #   worker.sh set-key <провайдер>
-#   worker.sh import-key <провайдер> [--from-file <путь>]
+#   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --budget <usd> --brief <файл или -> [--bash-allow "<шаблон>"]… [--allow-main-tree]
@@ -15,13 +15,16 @@
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USER_PROVIDERS_DIR="${BRIGADIR_WORKER_PROVIDERS:-$HOME/.config/brigadir-worker/providers}"
-LOG_FILE="${BRIGADIR_WORKER_LOG:-${XDG_CACHE_HOME:-$HOME/.cache}/brigadir-worker/runs.jsonl}"
+USER_PROVIDERS_DIR="${BRIGADIER_WORKER_PROVIDERS:-$HOME/.config/brigadier-worker/providers}"
+LOG_FILE="${BRIGADIER_WORKER_LOG:-${XDG_CACHE_HOME:-$HOME/.cache}/brigadier-worker/runs.jsonl}"
 CHECK_TIMEOUT_SEC=30
 CHECK_MAX_TOKENS=64
 PRICES_STALE_DAYS=30
-CLAUDE_BIN="${BRIGADIR_WORKER_CLAUDE:-claude}"
-DEFAULT_ENV_FILE="${BRIGADIR_WORKER_ENV_FILE:-$HOME/.vibe/.env}"
+CLAUDE_BIN="${BRIGADIER_WORKER_CLAUDE:-claude}"
+DEFAULT_ENV_FILE="${BRIGADIER_WORKER_ENV_FILE:-$HOME/.vibe/.env}"
+# Прежнее имя записей хранилища (до переименования навыка): префикс сервиса меняется, остальное то же
+LEGACY_SERVICE_PREFIX="brigadir-"
+CURRENT_SERVICE_PREFIX="brigadier-"
 
 # Чтение и поиск, без записи и без сети
 READ_ALLOWED='Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
@@ -75,6 +78,20 @@ find_profile() {
   fi
 }
 
+# Значение записи из хранилища секретов ОС; пусто, если записи нет
+read_store() {
+  local service="$1" value=""
+  case "$(uname -s)" in
+    Darwin) value="$(security find-generic-password -s "$service" -a "$USER" -w 2>/dev/null || true)" ;;
+    Linux)
+      if command -v secret-tool >/dev/null 2>&1; then
+        value="$(secret-tool lookup service "$service" account "$USER" 2>/dev/null || true)"
+      fi
+      ;;
+  esac
+  printf '%s' "$value"
+}
+
 # Ключ: переменная окружения, затем хранилище секретов ОС
 # Значение печатается только в stdout подстановки, в аргументы оно не попадает
 read_key() {
@@ -82,17 +99,29 @@ read_key() {
   service="$(prof_get "$profile" secret.service)" || die "в профиле нет secret.service"
   env_name="$(prof_get "$profile" secret.env)" || die "в профиле нет secret.env"
   key="${!env_name:-}"
-  if [ -z "$key" ]; then
-    case "$(uname -s)" in
-      Darwin) key="$(security find-generic-password -s "$service" -a "$USER" -w 2>/dev/null || true)" ;;
-      Linux)
-        if command -v secret-tool >/dev/null 2>&1; then
-          key="$(secret-tool lookup service "$service" account "$USER" 2>/dev/null || true)"
-        fi
-        ;;
-    esac
-  fi
+  if [ -z "$key" ]; then key="$(read_store "$service")"; fi
   printf '%s' "$key"
+}
+
+# Имя записи по прежней схеме; совпадает с текущим, если сервис профиля не по схеме навыка
+legacy_service() {
+  local service="$1"
+  case "$service" in
+    "$CURRENT_SERVICE_PREFIX"*) printf '%s%s' "$LEGACY_SERVICE_PREFIX" "${service#"$CURRENT_SERVICE_PREFIX"}" ;;
+    *) printf '%s' "$service" ;;
+  esac
+}
+
+# Есть ли ключ под прежним именем: тогда он молча не читается, а владельцу говорится про import-key
+# Код 0 и подсказка в stderr — найден; код 1 — нет
+legacy_key_hint() {
+  local profile="$1" provider="$2" service legacy
+  service="$(prof_get "$profile" secret.service)" || return 1
+  legacy="$(legacy_service "$service")"
+  [ "$legacy" != "$service" ] || return 1
+  [ -n "$(read_store "$legacy")" ] || return 1
+  echo "найден ключ под старым именем ($legacy) — выполни import-key: worker.sh import-key $provider" >&2
+  return 0
 }
 
 # Запись ключа в хранилище ОС: значение приходит со stdin, в аргументы процессов не попадает
@@ -143,9 +172,10 @@ cmd_set_key() {
 
 # Перенос уже имеющегося ключа в хранилище: из переменной окружения keyEnv и файлов .env
 cmd_import_key() {
-  local provider="" from_file=""
+  local provider="" from_file="" from_legacy=0
   while [ $# -gt 0 ]; do
     case "$1" in
+      --from-legacy) from_legacy=1; shift ;;
       --from-file) from_file="${2:-}"; [ -n "$from_file" ] || die "--from-file: нужен путь"; shift 2 ;;
       -*) die "неизвестный аргумент: $1" ;;
       *) [ -z "$provider" ] || die "лишний аргумент: $1"; provider="$1"; shift ;;
@@ -159,13 +189,22 @@ cmd_import_key() {
   env_name="$(prof_get "$profile" secret.env)" || die "в профиле нет secret.env"
   key_env="$(prof_get "$profile" keyEnv)" || die "в профиле нет keyEnv (имя переменной, под которой ключ обычно лежит)"
   if [ -n "$from_file" ] && [ ! -f "$from_file" ]; then die "нет файла $from_file"; fi
+  if [ -n "$from_file" ] && [ "$from_legacy" -eq 1 ]; then die "--from-file и --from-legacy вместе не задаются"; fi
+
+  # Прежняя запись хранилища — ещё один источник; значение идёт в разбор через stdin, не через аргументы
+  local legacy_label="" legacy_value=""
+  if [ -z "$from_file" ]; then
+    legacy_label="$(legacy_service "$service")"
+    if [ "$legacy_label" != "$service" ]; then legacy_value="$(read_store "$legacy_label")"; fi
+  fi
 
   # Вывод: число разных значений, затем источники без значений; при одном значении — строка V: со значением
   local found
   found="$(python3 -I -c '
 import os, sys
 
-key_env, from_file, default_file = sys.argv[1:4]
+key_env, from_file, default_file, legacy_label, only_legacy = sys.argv[1:6]
+legacy_value = sys.stdin.read().strip()
 
 def parse_env(path):
     value = None
@@ -196,19 +235,21 @@ if from_file:
         sources.append(("%s (%s)" % (from_file, key_env), v))
 else:
     v = os.environ.get(key_env)
-    if v:
+    if v and only_legacy != "1":
         sources.append(("переменная окружения %s" % key_env, v))
-    if os.path.isfile(default_file):
+    if os.path.isfile(default_file) and only_legacy != "1":
         v = parse_env(default_file)
         if v:
             sources.append(("%s (%s)" % (default_file, key_env), v))
+    if legacy_value:
+        sources.append(("старая запись хранилища (%s)" % legacy_label, legacy_value))
 distinct = {v for _, v in sources}
 print(len(distinct))
 for label, _ in sources:
     print("S:" + label)
 if len(distinct) == 1:
     print("V:" + next(iter(distinct)))
-' "$key_env" "$from_file" "$DEFAULT_ENV_FILE")" || die "не удалось разобрать источники"
+' "$key_env" "$from_file" "$DEFAULT_ENV_FILE" "$legacy_label" "$from_legacy" <<<"$legacy_value")" || die "не удалось разобрать источники"
 
   local count
   count="$(printf '%s\n' "$found" | sed -n '1p')"
@@ -216,8 +257,10 @@ if len(distinct) == 1:
     0)
       if [ -n "$from_file" ]; then
         echo "import-key: в $from_file нет $key_env" >&2
+      elif [ "$from_legacy" -eq 1 ]; then
+        echo "import-key: старой записи хранилища нет" >&2
       else
-        echo "import-key: ключ $key_env не найден ни в переменной окружения, ни в $DEFAULT_ENV_FILE" >&2
+        echo "import-key: ключ $key_env не найден ни в переменной окружения, ни в $DEFAULT_ENV_FILE, ни в старой записи хранилища" >&2
       fi
       echo "Положите ключ вручную: worker.sh set-key $provider" >&2
       return 1
@@ -227,13 +270,13 @@ if len(distinct) == 1:
       label="$(printf '%s\n' "$found" | sed -n 's/^S://p' | sed -n '1p')"
       value="$(printf '%s\n' "$found" | sed -n 's/^V://p')"
       printf '%s\n' "$value" | store_secret "$service" "$env_name"
-      echo "import-key: ключ из $label положен в $(store_label "$service")"
+      echo "import-key: источник — $label; ключ положен в $(store_label "$service")"
       cmd_check "$provider"
       ;;
     *)
       echo "import-key: найдено несколько разных значений ключа, источники:" >&2
       printf '%s\n' "$found" | sed -n 's/^S:/  /p' >&2
-      echo "Укажите нужный файл: worker.sh import-key $provider --from-file <путь>" >&2
+      echo "Укажите нужный файл (--from-file <путь>) или прежнюю запись хранилища (--from-legacy): worker.sh import-key $provider …" >&2
       return 1
       ;;
   esac
@@ -267,6 +310,7 @@ cmd_check() {
   key="$(read_key "$profile")"
   if [ -z "$key" ]; then
     echo "check: $provider — ключ не найден (хранилище секретов или переменная окружения)" >&2
+    legacy_key_hint "$profile" "$provider" || true
     return 1
   fi
   body_file="$(mktemp)"
@@ -345,7 +389,10 @@ cmd_run() {
 
   local key base
   key="$(read_key "$profile")"
-  [ -n "$key" ] || die "ключ провайдера «$provider» не найден: worker.sh set-key $provider"
+  if [ -z "$key" ]; then
+    legacy_key_hint "$profile" "$provider" || true
+    die "ключ провайдера «$provider» не найден: worker.sh set-key $provider"
+  fi
   base="$(prof_get "$profile" baseUrl)" || die "в профиле нет baseUrl"
 
   local allowed denied
@@ -374,7 +421,7 @@ cmd_run() {
     export CLAUDE_CODE_SUBAGENT_MODEL="$model"
     export CLAUDE_CODE_EFFORT_LEVEL="$effort"
     export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
-    export BRIGADIR_WORKER=1
+    export BRIGADIER_WORKER=1
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)

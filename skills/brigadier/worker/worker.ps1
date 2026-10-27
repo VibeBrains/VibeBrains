@@ -3,7 +3,7 @@
 # Те же команды и тот же журнал, что у worker.sh
 #
 #   worker.ps1 set-key <провайдер>
-#   worker.ps1 import-key <провайдер> [-FromFile <путь>]
+#   worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]
 #   worker.ps1 check [провайдер]
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
 #                  -Dir <путь> -Budget <usd> -Brief <файл или -> [-BashAllow "<шаблон>",…] [-AllowMainTree]
@@ -22,6 +22,7 @@ param(
     [string] $Budget,
     [string] $Brief,
     [string] $FromFile,
+    [switch] $FromLegacy,
     [string[]] $BashAllow = @(),
     [switch] $AllowMainTree
 )
@@ -29,13 +30,15 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$UserProvidersDir = if ($env:BRIGADIR_WORKER_PROVIDERS) { $env:BRIGADIR_WORKER_PROVIDERS } else { Join-Path $env:APPDATA 'brigadir-worker\providers' }
-$LogFile = if ($env:BRIGADIR_WORKER_LOG) { $env:BRIGADIR_WORKER_LOG } else { Join-Path $env:LOCALAPPDATA 'brigadir-worker\runs.jsonl' }
+$UserProvidersDir = if ($env:BRIGADIER_WORKER_PROVIDERS) { $env:BRIGADIER_WORKER_PROVIDERS } else { Join-Path $env:APPDATA 'brigadier-worker\providers' }
+$LogFile = if ($env:BRIGADIER_WORKER_LOG) { $env:BRIGADIER_WORKER_LOG } else { Join-Path $env:LOCALAPPDATA 'brigadier-worker\runs.jsonl' }
 $CheckTimeoutSec = 30
 $CheckMaxTokens = 64
 $PricesStaleDays = 30
-$DefaultEnvFile = if ($env:BRIGADIR_WORKER_ENV_FILE) { $env:BRIGADIR_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
-$ClaudeBin = if ($env:BRIGADIR_WORKER_CLAUDE) { $env:BRIGADIR_WORKER_CLAUDE } else { 'claude' }
+$DefaultEnvFile = if ($env:BRIGADIER_WORKER_ENV_FILE) { $env:BRIGADIER_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
+$LegacyServicePrefix = 'brigadir-'
+$CurrentServicePrefix = 'brigadier-'
+$ClaudeBin = if ($env:BRIGADIER_WORKER_CLAUDE) { $env:BRIGADIER_WORKER_CLAUDE } else { 'claude' }
 
 $ReadAllowed = 'Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
 $ReadDenied = 'Edit,Write,NotebookEdit,WebFetch,WebSearch,Agent,Task'
@@ -49,12 +52,12 @@ function Stop-Worker([string] $Message) {
 }
 
 # Доступ к Credential Manager через advapi32: ни одной команды с ключом в аргументах
-if (-not ('BrigadirCred' -as [type])) {
+if (-not ('BrigadierCred' -as [type])) {
     Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-public static class BrigadirCred {
+public static class BrigadierCred {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct CREDENTIAL {
         public uint Flags; public uint Type; public string TargetName; public string Comment;
@@ -111,15 +114,30 @@ function Read-Profile([string] $Path) {
 function Read-Key($Prof) {
     $fromEnv = [Environment]::GetEnvironmentVariable($Prof.secret.env)
     if ($fromEnv) { return $fromEnv }
-    $stored = [BrigadirCred]::Read($Prof.secret.service)
+    $stored = [BrigadierCred]::Read($Prof.secret.service)
     if ($stored) { return $stored }
     return ''
+}
+
+# Имя записи по прежней схеме (до переименования навыка); совпадает с текущим, если сервис профиля не по схеме навыка
+function Get-LegacyService([string] $Service) {
+    if ($Service.StartsWith($CurrentServicePrefix)) { return $LegacyServicePrefix + $Service.Substring($CurrentServicePrefix.Length) }
+    return $Service
+}
+
+# Есть ли ключ под прежним именем: тогда он молча не читается, а владельцу говорится про import-key
+function Write-LegacyKeyHint($Prof, [string] $Name) {
+    $legacy = Get-LegacyService $Prof.secret.service
+    if ($legacy -eq $Prof.secret.service) { return }
+    if ([BrigadierCred]::Read($legacy)) {
+        [Console]::Error.WriteLine("найден ключ под старым именем ($legacy) — выполни import-key: worker.ps1 import-key $Name")
+    }
 }
 
 # Запись ключа в Credential Manager: значение идёт через память процесса, в аргументы не попадает
 function Save-Key($Prof, [string] $Plain) {
     if (-not $Plain) { Stop-Worker 'пустой ключ' }
-    [BrigadirCred]::Write($Prof.secret.service, $env:USERNAME, $Plain)
+    [BrigadierCred]::Write($Prof.secret.service, $env:USERNAME, $Plain)
 }
 
 function Invoke-SetKey([string] $Name) {
@@ -158,10 +176,11 @@ function Read-EnvFileValue([string] $Path, [string] $KeyName) {
 
 # Перенос уже имеющегося ключа в хранилище: из переменной окружения keyEnv и файлов .env
 function Invoke-ImportKey([string] $Name) {
-    if (-not $Name) { Stop-Worker 'нужно имя провайдера: worker.ps1 import-key <провайдер> [-FromFile <путь>]' }
+    if (-not $Name) { Stop-Worker 'нужно имя провайдера: worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]' }
     $prof = Read-Profile (Find-Profile $Name)
     $keyEnv = $prof.keyEnv
     if (-not $keyEnv) { Stop-Worker 'в профиле нет keyEnv (имя переменной, под которой ключ обычно лежит)' }
+    if ($FromFile -and $FromLegacy) { Stop-Worker '-FromFile и -FromLegacy вместе не задаются' }
     $sources = @()
     if ($FromFile) {
         if (-not (Test-Path -LiteralPath $FromFile -PathType Leaf)) { Stop-Worker "нет файла $FromFile" }
@@ -169,15 +188,20 @@ function Invoke-ImportKey([string] $Name) {
         if ($v) { $sources += [pscustomobject]@{ Label = "$FromFile ($keyEnv)"; Value = $v } }
     } else {
         $v = [Environment]::GetEnvironmentVariable($keyEnv)
-        if ($v) { $sources += [pscustomobject]@{ Label = "переменная окружения $keyEnv"; Value = $v } }
-        if (Test-Path -LiteralPath $DefaultEnvFile -PathType Leaf) {
+        if ($v -and -not $FromLegacy) { $sources += [pscustomobject]@{ Label = "переменная окружения $keyEnv"; Value = $v } }
+        if ((Test-Path -LiteralPath $DefaultEnvFile -PathType Leaf) -and -not $FromLegacy) {
             $v = Read-EnvFileValue $DefaultEnvFile $keyEnv
             if ($v) { $sources += [pscustomobject]@{ Label = "$DefaultEnvFile ($keyEnv)"; Value = $v } }
+        }
+        $legacy = Get-LegacyService $prof.secret.service
+        if ($legacy -ne $prof.secret.service) {
+            $v = [BrigadierCred]::Read($legacy)
+            if ($v) { $sources += [pscustomobject]@{ Label = "старая запись хранилища ($legacy)"; Value = $v } }
         }
     }
     $distinct = @($sources | ForEach-Object { $_.Value } | Select-Object -Unique)
     if ($distinct.Count -eq 0) {
-        $where = if ($FromFile) { "в $FromFile нет $keyEnv" } else { "ключ $keyEnv не найден ни в переменной окружения, ни в $DefaultEnvFile" }
+        $where = if ($FromFile) { "в $FromFile нет $keyEnv" } elseif ($FromLegacy) { 'старой записи хранилища нет' } else { "ключ $keyEnv не найден ни в переменной окружения, ни в $DefaultEnvFile, ни в старой записи хранилища" }
         [Console]::Error.WriteLine("import-key: $where")
         [Console]::Error.WriteLine("Положите ключ вручную: worker.ps1 set-key $Name")
         exit 1
@@ -185,11 +209,11 @@ function Invoke-ImportKey([string] $Name) {
     if ($distinct.Count -gt 1) {
         [Console]::Error.WriteLine('import-key: найдено несколько разных значений ключа, источники:')
         foreach ($src in $sources) { [Console]::Error.WriteLine("  $($src.Label)") }
-        [Console]::Error.WriteLine("Укажите нужный файл: worker.ps1 import-key $Name -FromFile <путь>")
+        [Console]::Error.WriteLine("Укажите нужный файл (-FromFile <путь>) или прежнюю запись хранилища (-FromLegacy): worker.ps1 import-key $Name …")
         exit 1
     }
     Save-Key $prof $distinct[0]
-    Write-Output "import-key: ключ из $($sources[0].Label) положен в Credential Manager ($($prof.secret.service))"
+    Write-Output "import-key: источник — $($sources[0].Label); ключ положен в Credential Manager ($($prof.secret.service))"
     Invoke-Check $Name
 }
 
@@ -211,6 +235,7 @@ function Invoke-Check([string] $Name) {
     $key = Read-Key $prof
     if (-not $key) {
         [Console]::Error.WriteLine("check: $Name — ключ не найден (Credential Manager или переменная окружения)")
+        Write-LegacyKeyHint $prof $Name
         exit 1
     }
     $model = $prof.tiers.cheap.model
@@ -255,7 +280,10 @@ function Invoke-Run {
     }
 
     $key = Read-Key $prof
-    if (-not $key) { Stop-Worker "ключ провайдера «$Provider» не найден: worker.ps1 set-key $Provider" }
+    if (-not $key) {
+        Write-LegacyKeyHint $prof $Provider
+        Stop-Worker "ключ провайдера «$Provider» не найден: worker.ps1 set-key $Provider"
+    }
 
     if ($Mode -eq 'read') { $allowed = $ReadAllowed; $denied = $ReadDenied } else { $allowed = $WriteAllowed; $denied = $WriteDenied }
     foreach ($extra in $BashAllow) { $allowed = "$allowed,Bash($extra)" }
@@ -270,7 +298,7 @@ function Invoke-Run {
     # Подмена сервера живёт только в этом процессе и его детях, затем возвращается как было
     $names = @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'ANTHROPIC_MODEL',
         'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-        'CLAUDE_CODE_SUBAGENT_MODEL', 'CLAUDE_CODE_EFFORT_LEVEL', 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', 'BRIGADIR_WORKER',
+        'CLAUDE_CODE_SUBAGENT_MODEL', 'CLAUDE_CODE_EFFORT_LEVEL', 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', 'BRIGADIER_WORKER',
         'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')
     $extraEnv = @{}
     if ($prof.extraEnv) { foreach ($p in $prof.extraEnv.PSObject.Properties) { $extraEnv[$p.Name] = [string]$p.Value; $names += $p.Name } }
@@ -294,7 +322,7 @@ function Invoke-Run {
         $env:CLAUDE_CODE_SUBAGENT_MODEL = $model
         $env:CLAUDE_CODE_EFFORT_LEVEL = $Effort
         $env:CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1'
-        $env:BRIGADIR_WORKER = '1'
+        $env:BRIGADIER_WORKER = '1'
         foreach ($k in $extraEnv.Keys) { [Environment]::SetEnvironmentVariable($k, $extraEnv[$k], 'Process') }
 
         $claudeArgs = @('-p', '--bare', '--no-session-persistence', '--output-format', 'json',
