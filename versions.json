@@ -1045,11 +1045,12 @@
       "history": []
     },
     "skills/vneshniy-ispolnitel/SKILL.md": {
-      "version": 3,
-      "sha256": "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad",
+      "version": 4,
+      "sha256": "2a90ee0507616da5d5cb420701dbbfb74530aa20a6f259c6c0c23f2700004a90",
       "history": [
         "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380",
-        "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799"
+        "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799",
+        "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad"
       ]
     },
     "skills/vneshniy-ispolnitel/providers/deepseek.json": {
