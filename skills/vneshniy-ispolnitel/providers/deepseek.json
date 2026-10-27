@@ -1,0 +1,17 @@
+{
+  "name": "deepseek",
+  "title": "DeepSeek",
+  "baseUrl": "https://api.deepseek.com/anthropic",
+  "keyUrl": "https://platform.deepseek.com/api_keys",
+  "secret": {
+    "service": "brigadir-worker-deepseek",
+    "env": "BRIGADIR_WORKER_DEEPSEEK_KEY"
+  },
+  "tiers": {
+    "cheap": { "model": "deepseek-flash" },
+    "strong": { "model": "deepseek-v4-pro" }
+  },
+  "efforts": ["low", "high", "max"],
+  "defaultEffort": "high",
+  "extraEnv": {}
+}

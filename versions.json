@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 9,
-      "sha256": "f747ccb4d707a23eb076bf29e23e78fc1e4512559acb097db367903160933314",
+      "version": 10,
+      "sha256": "4b084c069223cb3463c18f52087faa08871486f444e68bcff9d152e3d39fd789",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -18,7 +18,8 @@
         "dfa0230720c696ba53427a882b583fa60f7b5c292253381d339fea481dec905c",
         "6dc3ea843d15dc2f8b293c64b0c6b6e150c5b1a604adc742ad651f7d012c96df",
         "d9d96baf423c0d6914ae77bdf4796bceeaaa6067a8f58b84f4926723adf0edbd",
-        "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13"
+        "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13",
+        "f747ccb4d707a23eb076bf29e23e78fc1e4512559acb097db367903160933314"
       ]
     },
     "agents.json": {
@@ -510,11 +511,12 @@
       "history": []
     },
     "rules/brigadir-ekonomiya-tokenov.mdc": {
-      "version": 3,
-      "sha256": "9fea39a63bfb4697459261f78a649df518dda30092ea69a8eb4e50799e0cc098",
+      "version": 4,
+      "sha256": "ee1d31b36486b9945a886978fbfe4d479de5d4b3cb0e8f1270a2f76caa4d17c2",
       "history": [
         "55f837bf19c64f3cd5842db9a9797860eaf05eb46e75a0f5d443761a06e17584",
-        "8325c7ce116debd06e270ec00f2098846e03d4bf67f778ad5a31c99f3a9474bf"
+        "8325c7ce116debd06e270ec00f2098846e03d4bf67f778ad5a31c99f3a9474bf",
+        "9fea39a63bfb4697459261f78a649df518dda30092ea69a8eb4e50799e0cc098"
       ]
     },
     "rules/clean-rules.mdc": {
@@ -1040,6 +1042,28 @@
     "skills/update-skill/references/best-practices.md": {
       "version": 1,
       "sha256": "5303b204821eb5f6492e570bd16fa33fef0c4f36ef82b2b7d051e12b3ce5235c",
+      "history": []
+    },
+    "skills/vneshniy-ispolnitel/SKILL.md": {
+      "version": 2,
+      "sha256": "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799",
+      "history": [
+        "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380"
+      ]
+    },
+    "skills/vneshniy-ispolnitel/providers/deepseek.json": {
+      "version": 1,
+      "sha256": "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb",
+      "history": []
+    },
+    "skills/vneshniy-ispolnitel/worker.ps1": {
+      "version": 1,
+      "sha256": "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9",
+      "history": []
+    },
+    "skills/vneshniy-ispolnitel/worker.sh": {
+      "version": 1,
+      "sha256": "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51",
       "history": []
     },
     "skills/wait-what/LICENSE": {
