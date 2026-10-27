@@ -1045,33 +1045,37 @@
       "history": []
     },
     "skills/vneshniy-ispolnitel/SKILL.md": {
-      "version": 4,
-      "sha256": "2a90ee0507616da5d5cb420701dbbfb74530aa20a6f259c6c0c23f2700004a90",
+      "version": 5,
+      "sha256": "1e452b97f8a2978bc9423100884653214c18cd9a17d0ec0db2b67c4d77aa5a5e",
       "history": [
         "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380",
         "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799",
-        "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad"
+        "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad",
+        "2a90ee0507616da5d5cb420701dbbfb74530aa20a6f259c6c0c23f2700004a90"
       ]
     },
     "skills/vneshniy-ispolnitel/providers/deepseek.json": {
-      "version": 2,
-      "sha256": "d8b1d8225e10bf6d0aa4fa5aed19ded32df2b0c0c2c5f1fd281edc782b19a141",
+      "version": 3,
+      "sha256": "4034bdc00759b136eba29937a9b9e99b9e97814b5a52cb563249077204e3241b",
       "history": [
-        "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb"
+        "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb",
+        "d8b1d8225e10bf6d0aa4fa5aed19ded32df2b0c0c2c5f1fd281edc782b19a141"
       ]
     },
     "skills/vneshniy-ispolnitel/worker.ps1": {
-      "version": 2,
-      "sha256": "8795aeba5c5e3354c1f3fdfecc6e67ffdefbb9c4b6fac1003f96b6ed789cb9c1",
+      "version": 3,
+      "sha256": "c683998fdd6ad3e332014b4b7abc4a73a780a419cc9bb5f20a894cacaa8c3478",
       "history": [
-        "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9"
+        "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9",
+        "8795aeba5c5e3354c1f3fdfecc6e67ffdefbb9c4b6fac1003f96b6ed789cb9c1"
       ]
     },
     "skills/vneshniy-ispolnitel/worker.sh": {
-      "version": 2,
-      "sha256": "895bba4fe74c929ddb48de6f92acb78cad0ae747069abfd395af55aae1c70b1b",
+      "version": 3,
+      "sha256": "b29add14b521be7d3a4cadc871ae59074cb9b442bccb1f87608185875487349a",
       "history": [
-        "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51"
+        "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51",
+        "895bba4fe74c929ddb48de6f92acb78cad0ae747069abfd395af55aae1c70b1b"
       ]
     },
     "skills/wait-what/LICENSE": {

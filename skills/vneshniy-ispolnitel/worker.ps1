@@ -3,6 +3,7 @@
 # Те же команды и тот же журнал, что у worker.sh
 #
 #   worker.ps1 set-key <провайдер>
+#   worker.ps1 import-key <провайдер> [-FromFile <путь>]
 #   worker.ps1 check [провайдер]
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
 #                  -Dir <путь> -Budget <usd> -Brief <файл или -> [-BashAllow "<шаблон>",…] [-AllowMainTree]
@@ -20,6 +21,7 @@ param(
     [string] $Dir,
     [string] $Budget,
     [string] $Brief,
+    [string] $FromFile,
     [string[]] $BashAllow = @(),
     [switch] $AllowMainTree
 )
@@ -32,6 +34,7 @@ $LogFile = if ($env:BRIGADIR_WORKER_LOG) { $env:BRIGADIR_WORKER_LOG } else { Joi
 $CheckTimeoutSec = 30
 $CheckMaxTokens = 64
 $PricesStaleDays = 30
+$DefaultEnvFile = if ($env:BRIGADIR_WORKER_ENV_FILE) { $env:BRIGADIR_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
 $ClaudeBin = if ($env:BRIGADIR_WORKER_CLAUDE) { $env:BRIGADIR_WORKER_CLAUDE } else { 'claude' }
 
 $ReadAllowed = 'Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
@@ -113,19 +116,81 @@ function Read-Key($Prof) {
     return ''
 }
 
+# Запись ключа в Credential Manager: значение идёт через память процесса, в аргументы не попадает
+function Save-Key($Prof, [string] $Plain) {
+    if (-not $Plain) { Stop-Worker 'пустой ключ' }
+    [BrigadirCred]::Write($Prof.secret.service, $env:USERNAME, $Plain)
+}
+
 function Invoke-SetKey([string] $Name) {
     if (-not $Name) { Stop-Worker 'нужно имя провайдера: worker.ps1 set-key <провайдер>' }
     $prof = Read-Profile (Find-Profile $Name)
     $secure = Read-Host -AsSecureString 'Вставьте ключ и нажмите Enter (ввод не отображается)'
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
     try {
-        $plain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-        if (-not $plain) { Stop-Worker 'пустой ключ' }
-        [BrigadirCred]::Write($prof.secret.service, $env:USERNAME, $plain)
+        Save-Key $prof ([Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr))
     } finally {
         [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
     }
-    Write-Output "ключ сохранён в Credential Manager под именем $($prof.secret.service)"
+    Write-Output "ключ положен в Credential Manager ($($prof.secret.service))"
+}
+
+# Значение переменной из .env: KEY=value, export KEY=value, кавычки снимаются, комментарии пропускаются
+function Read-EnvFileValue([string] $Path, [string] $KeyName) {
+    $value = $null
+    foreach ($raw in Get-Content -LiteralPath $Path -Encoding UTF8) {
+        $line = $raw.Trim()
+        if (-not $line -or $line.StartsWith('#')) { continue }
+        if ($line -match '^export\s+') { $line = $line -replace '^export\s+', '' }
+        $eq = $line.IndexOf('=')
+        if ($eq -lt 1 -or $line.Substring(0, $eq).Trim() -ne $KeyName) { continue }
+        $val = $line.Substring($eq + 1).Trim()
+        if ($val.Length -ge 2 -and $val[0] -eq $val[$val.Length - 1] -and ($val[0] -eq '"' -or $val[0] -eq "'")) {
+            $val = $val.Substring(1, $val.Length - 2)
+        } else {
+            $cut = $val.IndexOf(' #')
+            if ($cut -ge 0) { $val = $val.Substring(0, $cut).TrimEnd() }
+        }
+        $value = $val
+    }
+    return $value
+}
+
+# Перенос уже имеющегося ключа в хранилище: из переменной окружения keyEnv и файлов .env
+function Invoke-ImportKey([string] $Name) {
+    if (-not $Name) { Stop-Worker 'нужно имя провайдера: worker.ps1 import-key <провайдер> [-FromFile <путь>]' }
+    $prof = Read-Profile (Find-Profile $Name)
+    $keyEnv = $prof.keyEnv
+    if (-not $keyEnv) { Stop-Worker 'в профиле нет keyEnv (имя переменной, под которой ключ обычно лежит)' }
+    $sources = @()
+    if ($FromFile) {
+        if (-not (Test-Path -LiteralPath $FromFile -PathType Leaf)) { Stop-Worker "нет файла $FromFile" }
+        $v = Read-EnvFileValue $FromFile $keyEnv
+        if ($v) { $sources += [pscustomobject]@{ Label = "$FromFile ($keyEnv)"; Value = $v } }
+    } else {
+        $v = [Environment]::GetEnvironmentVariable($keyEnv)
+        if ($v) { $sources += [pscustomobject]@{ Label = "переменная окружения $keyEnv"; Value = $v } }
+        if (Test-Path -LiteralPath $DefaultEnvFile -PathType Leaf) {
+            $v = Read-EnvFileValue $DefaultEnvFile $keyEnv
+            if ($v) { $sources += [pscustomobject]@{ Label = "$DefaultEnvFile ($keyEnv)"; Value = $v } }
+        }
+    }
+    $distinct = @($sources | ForEach-Object { $_.Value } | Select-Object -Unique)
+    if ($distinct.Count -eq 0) {
+        $where = if ($FromFile) { "в $FromFile нет $keyEnv" } else { "ключ $keyEnv не найден ни в переменной окружения, ни в $DefaultEnvFile" }
+        [Console]::Error.WriteLine("import-key: $where")
+        [Console]::Error.WriteLine("Положите ключ вручную: worker.ps1 set-key $Name")
+        exit 1
+    }
+    if ($distinct.Count -gt 1) {
+        [Console]::Error.WriteLine('import-key: найдено несколько разных значений ключа, источники:')
+        foreach ($src in $sources) { [Console]::Error.WriteLine("  $($src.Label)") }
+        [Console]::Error.WriteLine("Укажите нужный файл: worker.ps1 import-key $Name -FromFile <путь>")
+        exit 1
+    }
+    Save-Key $prof $distinct[0]
+    Write-Output "import-key: ключ из $($sources[0].Label) положен в Credential Manager ($($prof.secret.service))"
+    Invoke-Check $Name
 }
 
 # Предупреждение, если цены в профиле не проверялись дольше PricesStaleDays
@@ -305,7 +370,8 @@ function Invoke-Run {
 
 switch ($Command) {
     'set-key' { Invoke-SetKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
+    'import-key' { Invoke-ImportKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'check' { Invoke-Check $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'run' { Invoke-Run }
-    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 12 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
+    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 13 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
 }

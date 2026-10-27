@@ -5,6 +5,7 @@
 #
 # Команды:
 #   worker.sh set-key <провайдер>
+#   worker.sh import-key <провайдер> [--from-file <путь>]
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --budget <usd> --brief <файл или -> [--bash-allow "<шаблон>"]… [--allow-main-tree]
@@ -20,6 +21,7 @@ CHECK_TIMEOUT_SEC=30
 CHECK_MAX_TOKENS=64
 PRICES_STALE_DAYS=30
 CLAUDE_BIN="${BRIGADIR_WORKER_CLAUDE:-claude}"
+DEFAULT_ENV_FILE="${BRIGADIR_WORKER_ENV_FILE:-$HOME/.vibe/.env}"
 
 # Чтение и поиск, без записи и без сети
 READ_ALLOWED='Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
@@ -34,7 +36,7 @@ WORKER_PROMPT='Ты внешний исполнитель: делай задач
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-  sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -93,24 +95,147 @@ read_key() {
   printf '%s' "$key"
 }
 
+# Запись ключа в хранилище ОС: значение приходит со stdin, в аргументы процессов не попадает
+store_secret() {
+  local service="$1" env_name="$2" value out
+  IFS= read -r value || true
+  [ -n "$value" ] || die "пустой ключ"
+  case "$(uname -s)" in
+    Darwin)
+      # `security -i` читает команды со stdin; printf — встроенная команда, значения в argv нет
+      local esc="${value//\\/\\\\}"
+      esc="${esc//\"/\\\"}"
+      out="$(printf 'add-generic-password -U -s "%s" -a "%s" -w "%s"\n' "$service" "$USER" "$esc" | security -i 2>&1)" ||
+        die "связка macOS не приняла ключ"
+      case "$out" in *rror*) die "связка macOS не приняла ключ" ;; esac
+      ;;
+    Linux)
+      command -v secret-tool >/dev/null 2>&1 || die "нет secret-tool (пакет libsecret-tools); запасной путь — переменная $env_name"
+      printf '%s' "$value" | secret-tool store --label="$service" service "$service" account "$USER" ||
+        die "secret-tool не принял ключ"
+      ;;
+    *) die "для этой системы — переменная $env_name" ;;
+  esac
+}
+
+# Название хранилища для сообщений
+store_label() {
+  case "$(uname -s)" in
+    Darwin) printf 'связку macOS (%s)' "$1" ;;
+    Linux) printf 'secret-tool (%s)' "$1" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 cmd_set_key() {
-  local provider="${1:-}" profile service env_name
+  local provider="${1:-}" profile service env_name key
   [ -n "$provider" ] || usage
   profile="$(find_profile "$provider")" || exit 1
   service="$(prof_get "$profile" secret.service)" || die "в профиле нет secret.service"
   env_name="$(prof_get "$profile" secret.env)" || die "в профиле нет secret.env"
-  case "$(uname -s)" in
-    Darwin)
-      # Ключ вводится в приглашении самой утилиты, не в аргументе
-      echo "Вставьте ключ и нажмите Enter (ввод не отображается), затем повторите его"
-      security add-generic-password -U -s "$service" -a "$USER" -w
+  # Ключ вводится в приглашении, не в аргументе
+  printf 'Вставьте ключ и нажмите Enter (ввод не отображается): '
+  IFS= read -rs key
+  echo
+  printf '%s\n' "$key" | store_secret "$service" "$env_name"
+  echo "ключ положен в $(store_label "$service")"
+}
+
+# Перенос уже имеющегося ключа в хранилище: из переменной окружения keyEnv и файлов .env
+cmd_import_key() {
+  local provider="" from_file=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --from-file) from_file="${2:-}"; [ -n "$from_file" ] || die "--from-file: нужен путь"; shift 2 ;;
+      -*) die "неизвестный аргумент: $1" ;;
+      *) [ -z "$provider" ] || die "лишний аргумент: $1"; provider="$1"; shift ;;
+    esac
+  done
+  [ -n "$provider" ] || usage
+  need_python
+  local profile service env_name key_env
+  profile="$(find_profile "$provider")" || exit 1
+  service="$(prof_get "$profile" secret.service)" || die "в профиле нет secret.service"
+  env_name="$(prof_get "$profile" secret.env)" || die "в профиле нет secret.env"
+  key_env="$(prof_get "$profile" keyEnv)" || die "в профиле нет keyEnv (имя переменной, под которой ключ обычно лежит)"
+  if [ -n "$from_file" ] && [ ! -f "$from_file" ]; then die "нет файла $from_file"; fi
+
+  # Вывод: число разных значений, затем источники без значений; при одном значении — строка V: со значением
+  local found
+  found="$(python3 -I -c '
+import os, sys
+
+key_env, from_file, default_file = sys.argv[1:4]
+
+def parse_env(path):
+    value = None
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("export ") or line.startswith("export\t"):
+                line = line[7:].lstrip()
+            name, sep, val = line.partition("=")
+            if not sep or name.strip() != key_env:
+                continue
+            val = val.strip()
+            if len(val) >= 2 and val[0] == val[-1] and val[0] in (chr(34), chr(39)):
+                val = val[1:-1]
+            else:
+                cut = val.find(" #")
+                if cut >= 0:
+                    val = val[:cut].rstrip()
+            value = val
+    return value
+
+sources = []
+if from_file:
+    v = parse_env(from_file)
+    if v:
+        sources.append(("%s (%s)" % (from_file, key_env), v))
+else:
+    v = os.environ.get(key_env)
+    if v:
+        sources.append(("переменная окружения %s" % key_env, v))
+    if os.path.isfile(default_file):
+        v = parse_env(default_file)
+        if v:
+            sources.append(("%s (%s)" % (default_file, key_env), v))
+distinct = {v for _, v in sources}
+print(len(distinct))
+for label, _ in sources:
+    print("S:" + label)
+if len(distinct) == 1:
+    print("V:" + next(iter(distinct)))
+' "$key_env" "$from_file" "$DEFAULT_ENV_FILE")" || die "не удалось разобрать источники"
+
+  local count
+  count="$(printf '%s\n' "$found" | sed -n '1p')"
+  case "$count" in
+    0)
+      if [ -n "$from_file" ]; then
+        echo "import-key: в $from_file нет $key_env" >&2
+      else
+        echo "import-key: ключ $key_env не найден ни в переменной окружения, ни в $DEFAULT_ENV_FILE" >&2
+      fi
+      echo "Положите ключ вручную: worker.sh set-key $provider" >&2
+      return 1
       ;;
-    Linux)
-      command -v secret-tool >/dev/null 2>&1 || die "нет secret-tool (пакет libsecret-tools); запасной путь — переменная $env_name"
-      echo "Вставьте ключ и нажмите Enter"
-      secret-tool store --label="$service" service "$service" account "$USER"
+    1)
+      local label value
+      label="$(printf '%s\n' "$found" | sed -n 's/^S://p' | sed -n '1p')"
+      value="$(printf '%s\n' "$found" | sed -n 's/^V://p')"
+      printf '%s\n' "$value" | store_secret "$service" "$env_name"
+      echo "import-key: ключ из $label положен в $(store_label "$service")"
+      cmd_check "$provider"
       ;;
-    *) die "для этой системы — переменная $env_name" ;;
+    *)
+      echo "import-key: найдено несколько разных значений ключа, источники:" >&2
+      printf '%s\n' "$found" | sed -n 's/^S:/  /p' >&2
+      echo "Укажите нужный файл: worker.sh import-key $provider --from-file <путь>" >&2
+      return 1
+      ;;
   esac
 }
 
@@ -341,6 +466,7 @@ main() {
   shift
   case "$sub" in
     set-key) cmd_set_key "$@" ;;
+    import-key) cmd_import_key "$@" ;;
     check) cmd_check "$@" ;;
     run) cmd_run "$@" ;;
     *) usage ;;
