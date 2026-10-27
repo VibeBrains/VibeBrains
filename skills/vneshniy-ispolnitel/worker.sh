@@ -18,6 +18,7 @@ USER_PROVIDERS_DIR="${BRIGADIR_WORKER_PROVIDERS:-$HOME/.config/brigadir-worker/p
 LOG_FILE="${BRIGADIR_WORKER_LOG:-${XDG_CACHE_HOME:-$HOME/.cache}/brigadir-worker/runs.jsonl}"
 CHECK_TIMEOUT_SEC=30
 CHECK_MAX_TOKENS=64
+PRICES_STALE_DAYS=30
 CLAUDE_BIN="${BRIGADIR_WORKER_CLAUDE:-claude}"
 
 # Чтение и поиск, без записи и без сети
@@ -113,6 +114,24 @@ cmd_set_key() {
   esac
 }
 
+# Предупреждение, если цены в профиле не проверялись дольше PRICES_STALE_DAYS
+prices_age_warning() {
+  python3 -I -c '
+import datetime, json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+if "prices" not in d:
+    print("check: %s — в профиле нет prices, стоимость будет неизвестна" % sys.argv[2])
+    sys.exit(0)
+try:
+    age = (datetime.date.today() - datetime.date.fromisoformat(d["pricesCheckedAt"])).days
+except (KeyError, ValueError):
+    print("check: %s — нет корректной pricesCheckedAt — обнови цены" % sys.argv[2])
+    sys.exit(0)
+if age > int(sys.argv[3]):
+    print("check: %s — цены проверены %d дней назад — обнови" % (sys.argv[2], age))
+' "$1" "$2" "$PRICES_STALE_DAYS"
+}
+
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 cmd_check() {
   local provider="${1:-deepseek}" profile base model key code body_file
@@ -137,6 +156,7 @@ cmd_check() {
   if [ "$code" = "200" ]; then
     echo "check: $provider — ключ найден, сервер отвечает (модель $model)"
     rm -f "$body_file"
+    prices_age_warning "$profile" "$provider"
     return 0
   fi
   # Тело ответа сервера ключа не содержит; печатаем только тип ошибки
@@ -243,10 +263,10 @@ cmd_run() {
   if [ "$brief" = "-" ]; then rm -f "$brief_file"; fi
 
   # Отчёт и строка журнала; текста брифа в журнале нет
-  python3 -I - "$out_file" "$err_file" "$LOG_FILE" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" <<'PY'
+  python3 -I - "$out_file" "$err_file" "$LOG_FILE" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$profile" <<'PY'
 import json, os, sys, time
 
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started = sys.argv[1:12]
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, profile_file = sys.argv[1:13]
 raw = open(out_file, encoding="utf-8", errors="replace").read().strip()
 err = open(err_file, encoding="utf-8", errors="replace").read().strip()
 data = None
@@ -258,15 +278,24 @@ if isinstance(data, list):
     data = next((x for x in reversed(data) if isinstance(x, dict) and x.get("type") == "result"), None)
 
 result = ""
-cost = 0.0
+counter = 0.0
+real_cost = None  # None — цены модели в профиле нет
 tokens_in = tokens_out = 0
 verdict = "ошибка"
 if isinstance(data, dict):
     result = str(data.get("result") or "")
-    cost = float(data.get("total_cost_usd") or 0.0)
+    counter = float(data.get("total_cost_usd") or 0.0)
     usage = data.get("usage") or {}
-    tokens_in = int(usage.get("input_tokens") or 0) + int(usage.get("cache_read_input_tokens") or 0) + int(usage.get("cache_creation_input_tokens") or 0)
+    tok_hit = int(usage.get("cache_read_input_tokens") or 0)
+    # Записи в кэш у DeepSeek отдельной цены нет: считаем как промах
+    tok_miss = int(usage.get("input_tokens") or 0) + int(usage.get("cache_creation_input_tokens") or 0)
+    tokens_in = tok_miss + tok_hit
     tokens_out = int(usage.get("output_tokens") or 0)
+    try:
+        price = json.load(open(profile_file, encoding="utf-8"))["prices"][model]
+        real_cost = (tok_miss * price["inputMiss"] + tok_hit * price["inputHit"] + tokens_out * price["output"]) / 1e6
+    except (OSError, ValueError, KeyError, TypeError):
+        real_cost = None
     subtype = str(data.get("subtype") or "")
     if "budget" in subtype:
         verdict = "упёрся в бюджет"
@@ -282,7 +311,8 @@ line = {
     "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     "provider": provider, "tier": tier, "model": model, "effort": effort, "mode": mode,
     "dir": workdir, "tokensIn": tokens_in, "tokensOut": tokens_out,
-    "costUsd": round(cost, 6), "seconds": elapsed, "verdict": verdict,
+    "costUsd": None if real_cost is None else round(real_cost, 6),
+    "claudeCounterUsd": round(counter, 6), "seconds": elapsed, "verdict": verdict,
 }
 try:
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -294,7 +324,9 @@ except OSError as e:
 print(result)
 print("---")
 print("исполнитель: провайдер=%s ступень=%s модель=%s уровень=%s режим=%s" % (provider, tier, model, effort, mode))
-print("токены: вход=%d выход=%d; стоимость по счётчику claude: $%.4f; время: %dс" % (tokens_in, tokens_out, cost, elapsed))
+cost_text = "неизвестна (нет prices в профиле)" if real_cost is None else "$%.4f" % real_cost
+print("токены: вход=%d выход=%d; время: %dс" % (tokens_in, tokens_out, elapsed))
+print("стоимость: %s; счётчик claude (для --budget): $%.4f" % (cost_text, counter))
 print("итог: %s" % verdict)
 sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
 PY

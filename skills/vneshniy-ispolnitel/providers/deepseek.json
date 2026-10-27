@@ -8,10 +8,33 @@
     "env": "BRIGADIR_WORKER_DEEPSEEK_KEY"
   },
   "tiers": {
-    "cheap": { "model": "deepseek-flash" },
-    "strong": { "model": "deepseek-v4-pro" }
+    "cheap": {
+      "model": "deepseek-flash"
+    },
+    "strong": {
+      "model": "deepseek-v4-pro"
+    }
   },
-  "efforts": ["low", "high", "max"],
+  "efforts": [
+    "low",
+    "high",
+    "max"
+  ],
   "defaultEffort": "high",
-  "extraEnv": {}
+  "extraEnv": {},
+  "prices": {
+    "deepseek-flash": {
+      "inputMiss": 0.3,
+      "inputHit": 0.006,
+      "output": 1.2
+    },
+    "deepseek-v4-pro": {
+      "inputMiss": 1.32,
+      "inputHit": 0.044,
+      "output": 3.96
+    }
+  },
+  "pricesNote": "USD за 1M токенов, пиковый тариф: считаем по верхней оценке; непиковый вдвое дешевле (все часы, кроме 01-04 и 06-10 UTC в будни)",
+  "pricesSource": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "pricesCheckedAt": "2026-10-27"
 }

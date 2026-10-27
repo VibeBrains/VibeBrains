@@ -1045,26 +1045,33 @@
       "history": []
     },
     "skills/vneshniy-ispolnitel/SKILL.md": {
-      "version": 2,
-      "sha256": "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799",
+      "version": 3,
+      "sha256": "a35bec85953e2cbdc9ff5b3f883a203d50440fc0931fb7a4f40b751918c216ad",
       "history": [
-        "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380"
+        "8a818ca88c72ee94a2dd4bb928ee0ccc1f0beeaea8589fcd07f3993e55811380",
+        "12a6952ab482605b3086471b511250237a498629263629aa983afbe5a9e85799"
       ]
     },
     "skills/vneshniy-ispolnitel/providers/deepseek.json": {
-      "version": 1,
-      "sha256": "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb",
-      "history": []
+      "version": 2,
+      "sha256": "d8b1d8225e10bf6d0aa4fa5aed19ded32df2b0c0c2c5f1fd281edc782b19a141",
+      "history": [
+        "0c3be7ca5f66e1a463dfb524f9cff84c8d6724ef3aba2d0ce6f8d297d4a7bffb"
+      ]
     },
     "skills/vneshniy-ispolnitel/worker.ps1": {
-      "version": 1,
-      "sha256": "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9",
-      "history": []
+      "version": 2,
+      "sha256": "8795aeba5c5e3354c1f3fdfecc6e67ffdefbb9c4b6fac1003f96b6ed789cb9c1",
+      "history": [
+        "acee87494a49eb2bd3605f1a8ea2454feb4edb94913622465091740d6800f3c9"
+      ]
     },
     "skills/vneshniy-ispolnitel/worker.sh": {
-      "version": 1,
-      "sha256": "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51",
-      "history": []
+      "version": 2,
+      "sha256": "895bba4fe74c929ddb48de6f92acb78cad0ae747069abfd395af55aae1c70b1b",
+      "history": [
+        "649f0ecfd5a48925d1765717ecf36b04a2b5ef8a365f84e2a13e8ce472d3aa51"
+      ]
     },
     "skills/wait-what/LICENSE": {
       "version": 1,

@@ -31,6 +31,7 @@ $UserProvidersDir = if ($env:BRIGADIR_WORKER_PROVIDERS) { $env:BRIGADIR_WORKER_P
 $LogFile = if ($env:BRIGADIR_WORKER_LOG) { $env:BRIGADIR_WORKER_LOG } else { Join-Path $env:LOCALAPPDATA 'brigadir-worker\runs.jsonl' }
 $CheckTimeoutSec = 30
 $CheckMaxTokens = 64
+$PricesStaleDays = 30
 $ClaudeBin = if ($env:BRIGADIR_WORKER_CLAUDE) { $env:BRIGADIR_WORKER_CLAUDE } else { 'claude' }
 
 $ReadAllowed = 'Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
@@ -127,6 +128,17 @@ function Invoke-SetKey([string] $Name) {
     Write-Output "ключ сохранён в Credential Manager под именем $($prof.secret.service)"
 }
 
+# Предупреждение, если цены в профиле не проверялись дольше PricesStaleDays
+function Write-PricesAgeWarning($Prof, [string] $Name) {
+    if (-not $Prof.prices) { Write-Output "check: $Name — в профиле нет prices, стоимость будет неизвестна"; return }
+    $checked = [datetime]::MinValue
+    if (-not [datetime]::TryParseExact([string]$Prof.pricesCheckedAt, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture, 'None', [ref]$checked)) {
+        Write-Output "check: $Name — нет корректной pricesCheckedAt — обнови цены"; return
+    }
+    $age = [int]((Get-Date).Date - $checked.Date).TotalDays
+    if ($age -gt $PricesStaleDays) { Write-Output "check: $Name — цены проверены $age дней назад — обнови" }
+}
+
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 function Invoke-Check([string] $Name) {
     if (-not $Name) { $Name = 'deepseek' }
@@ -143,6 +155,7 @@ function Invoke-Check([string] $Name) {
         $null = Invoke-RestMethod -Method Post -Uri "$($prof.baseUrl)/v1/messages" -Headers $headers -ContentType 'application/json' `
             -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec $CheckTimeoutSec
         Write-Output "check: $Name — ключ найден, сервер отвечает (модель $model)"
+        Write-PricesAgeWarning $prof $Name
         exit 0
     } catch {
         $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
@@ -243,14 +256,19 @@ function Invoke-Run {
     try { if ($raw) { $data = $raw | ConvertFrom-Json } } catch { $data = $null }
     if ($data -is [array]) { $data = $data | Where-Object { $_.type -eq 'result' } | Select-Object -Last 1 }
 
-    $result = ''; $cost = 0.0; $tokensIn = 0; $tokensOut = 0; $verdict = 'ошибка'
+    $result = ''; $counter = 0.0; $realCost = $null; $tokensIn = 0; $tokensOut = 0; $verdict = 'ошибка'
     if ($data) {
         $result = [string]$data.result
-        if ($data.total_cost_usd) { $cost = [double]$data.total_cost_usd }
+        if ($data.total_cost_usd) { $counter = [double]$data.total_cost_usd }
         $u = $data.usage
         if ($u) {
-            $tokensIn = [int]$u.input_tokens + [int]$u.cache_read_input_tokens + [int]$u.cache_creation_input_tokens
+            $tokHit = [int]$u.cache_read_input_tokens
+            # Записи в кэш у DeepSeek отдельной цены нет: считаем как промах
+            $tokMiss = [int]$u.input_tokens + [int]$u.cache_creation_input_tokens
+            $tokensIn = $tokMiss + $tokHit
             $tokensOut = [int]$u.output_tokens
+            $price = if ($prof.prices) { $prof.prices.$model } else { $null }
+            if ($price) { $realCost = ($tokMiss * [double]$price.inputMiss + $tokHit * [double]$price.inputHit + $tokensOut * [double]$price.output) / 1e6 }
         }
         if ([string]$data.subtype -like '*budget*') { $verdict = 'упёрся в бюджет' }
         elseif ($data.is_error) { $verdict = 'ошибка' }
@@ -265,7 +283,8 @@ function Invoke-Run {
     # Строка журнала без текста брифа
     $line = [ordered]@{
         ts = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); provider = $Provider; tier = $Tier; model = $model; effort = $Effort
-        mode = $Mode; dir = $workDir; tokensIn = $tokensIn; tokensOut = $tokensOut; costUsd = [math]::Round($cost, 6)
+        mode = $Mode; dir = $workDir; tokensIn = $tokensIn; tokensOut = $tokensOut
+        costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); claudeCounterUsd = [math]::Round($counter, 6)
         seconds = $seconds; verdict = $verdict
     } | ConvertTo-Json -Compress
     try {
@@ -277,7 +296,9 @@ function Invoke-Run {
     Write-Output $result
     Write-Output '---'
     Write-Output "исполнитель: провайдер=$Provider ступень=$Tier модель=$model уровень=$Effort режим=$Mode"
-    Write-Output ("токены: вход={0} выход={1}; стоимость по счётчику claude: `${2:N4}; время: {3}с" -f $tokensIn, $tokensOut, $cost, $seconds)
+    $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' } else { ('${0:N4}' -f $realCost) }
+    Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
+    Write-Output ("стоимость: {0}; счётчик claude (для --budget): `${1:N4}" -f $costText, $counter)
     Write-Output "итог: $verdict"
     switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
 }
