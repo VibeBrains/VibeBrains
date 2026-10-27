@@ -6,7 +6,8 @@
 #   worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]
 #   worker.ps1 check [провайдер]
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
-#                  -Dir <путь> -Budget <usd> -Brief <файл или -> [-BashAllow "<шаблон>",…] [-AllowMainTree]
+#                  -Dir <путь> -Brief <файл или -> [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree]
+#   (потолок цены запуска — maxRunUsd из профиля; -Budget переопределяет его вручную)
 #
 # Ключ хранится в Диспетчере учётных данных Windows (Credential Manager), в аргументы процессов не попадает
 
@@ -31,10 +32,13 @@ $ErrorActionPreference = 'Stop'
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $UserProvidersDir = if ($env:BRIGADIER_WORKER_PROVIDERS) { $env:BRIGADIER_WORKER_PROVIDERS } else { Join-Path $env:APPDATA 'brigadier-worker\providers' }
-$LogFile = if ($env:BRIGADIER_WORKER_LOG) { $env:BRIGADIER_WORKER_LOG } else { Join-Path $env:LOCALAPPDATA 'brigadier-worker\runs.jsonl' }
+# Журнал: переменная окружения BRIGADIER_WORKER_LOG, затем logFile профиля, затем этот путь
+$DefaultLogFile = Join-Path $env:LOCALAPPDATA 'brigadier-worker\runs.jsonl'
 $CheckTimeoutSec = 30
 $CheckMaxTokens = 64
 $PricesStaleDays = 30
+# Знаков на токен для оценки выхода по тексту потока (usage в потоке отдаёт output_tokens=0); берётся с запасом вниз
+$CharsPerToken = 2.5
 $DefaultEnvFile = if ($env:BRIGADIER_WORKER_ENV_FILE) { $env:BRIGADIER_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
 $LegacyServicePrefix = 'brigadir-'
 $CurrentServicePrefix = 'brigadier-'
@@ -279,9 +283,109 @@ function Write-WorktreeResult($wt, $branch, $base, $title, $repo) {
     Write-Output "убрать после приёмки: git -C $repo worktree remove --force $wt; git -C $repo branch -D $branch; Remove-Item $diffFile"
 }
 
+# Запуск claude с разбором потока и потолком цены в настоящих долларах провайдера
+# Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
+# потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
+# Обрыв — taskkill всего дерева процессов (SIGTERM на Windows нет)
+function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFile, $Price, $Cap, [string] $ErrFile) {
+    $psi = New-Object Diagnostics.ProcessStartInfo
+    $psi.FileName = $Exe
+    $psi.Arguments = $ArgLine
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $psi.RedirectStandardInput = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.StandardOutputEncoding = [Text.Encoding]::UTF8
+    $psi.StandardErrorEncoding = [Text.Encoding]::UTF8
+    $proc = [Diagnostics.Process]::Start($psi)
+    $errTask = $proc.StandardError.ReadToEndAsync()
+    $briefBytes = [IO.File]::ReadAllBytes($BriefFile)
+    $proc.StandardInput.BaseStream.Write($briefBytes, 0, $briefBytes.Length)
+    $proc.StandardInput.Close()
+
+    $msgs = @{}      # id сообщения -> @(вход с промахом кэша, вход из кэша); usage повторяется в каждом блоке сообщения
+    $texts = [ordered]@{}
+    $seen = @{}
+    $outChars = 0
+    $thinkTokens = 0
+    $result = $null
+    $over = $false
+    function Get-Spent {
+        $miss = 0; $hit = 0
+        foreach ($v in $msgs.Values) { $miss += $v[0]; $hit += $v[1] }
+        $out = [int]($outChars / $CharsPerToken) + $thinkTokens
+        if (-not $Price) { return $null }
+        return ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6
+    }
+    try {
+        while ($null -ne ($ln = $proc.StandardOutput.ReadLine())) {
+            try { $ev = $ln | ConvertFrom-Json } catch { continue }
+            if (-not $ev) { continue }
+            if ($ev.type -eq 'result') { $result = $ev; continue }
+            if ($ev.type -eq 'assistant') {
+                $m = $ev.message
+                $mid = if ($m.id) { [string]$m.id } else { '?' }
+                $u = $m.usage
+                $msgs[$mid] = @(([int]$u.input_tokens + [int]$u.cache_creation_input_tokens), [int]$u.cache_read_input_tokens)
+                foreach ($c in @($m.content)) {
+                    $key = $mid + '|' + ($c | ConvertTo-Json -Compress -Depth 20)
+                    if ($seen.ContainsKey($key)) { continue }
+                    $seen[$key] = $true
+                    if ($c.type -eq 'text') {
+                        if (-not $texts.Contains($mid)) { $texts[$mid] = '' }
+                        $texts[$mid] += [string]$c.text
+                        $outChars += ([string]$c.text).Length
+                    } elseif ($c.type -eq 'tool_use') {
+                        $outChars += ($c.input | ConvertTo-Json -Compress -Depth 20).Length
+                    }
+                }
+            } elseif ($ev.type -eq 'system' -and $ev.subtype -eq 'thinking_tokens') {
+                $thinkTokens += [int]$ev.estimated_tokens_delta
+            } else { continue }
+            if ($null -ne $Cap -and -not $over -and -not $result) {
+                $spent = Get-Spent
+                if ($null -ne $spent -and $spent -gt $Cap) {
+                    $over = $true
+                    & taskkill /T /F /PID $proc.Id 2>&1 | Out-Null
+                }
+            }
+        }
+    } finally {
+        if (-not $proc.HasExited) { & taskkill /T /F /PID $proc.Id 2>&1 | Out-Null }
+        $proc.WaitForExit()
+    }
+    [IO.File]::WriteAllText($ErrFile, [string]$errTask.Result, (New-Object Text.UTF8Encoding($false)))
+
+    $miss = 0; $hit = 0
+    foreach ($v in $msgs.Values) { $miss += $v[0]; $hit += $v[1] }
+    $out = [int]($outChars / $CharsPerToken) + $thinkTokens
+    $exact = $false; $counter = $null; $isError = $false
+    $text = if ($texts.Count -gt 0) { [string]@($texts.Values)[-1] } else { '' }
+    if ($result) {
+        $u = $result.usage
+        if ($u) {
+            $miss = [int]$u.input_tokens + [int]$u.cache_creation_input_tokens
+            $hit = [int]$u.cache_read_input_tokens
+            $out = [int]$u.output_tokens
+            $exact = $true
+        }
+        $counter = if ($result.total_cost_usd) { [double]$result.total_cost_usd } else { 0.0 }
+        $isError = [bool]$result.is_error
+        if ($result.result) { $text = [string]$result.result }
+    }
+    $verdict = if ($over) { 'упёрся в бюджет' } elseif (-not $result -or $isError) { 'ошибка' } else { 'успех' }
+    $cost = $null
+    if ($Price) { $cost = ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6 }
+    return @{
+        result = $text; verdict = $verdict; partial = ($over -or -not $result); tokMiss = $miss; tokHit = $hit; tokOut = $out
+        exact = $exact; costUsd = $cost; counter = $counter; exitCode = $proc.ExitCode
+    }
+}
+
 function Invoke-Run {
-    foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Budget', $Budget), @('Brief', $Brief))) {
-        if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Budget -Brief' }
+    foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Brief', $Brief))) {
+        if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Brief' }
     }
     if (-not (Get-Command $ClaudeBin -ErrorAction SilentlyContinue)) { Stop-Worker "нет команды $ClaudeBin" }
     $prof = Read-Profile (Find-Profile $Provider)
@@ -293,7 +397,27 @@ function Invoke-Run {
     if (-not $Effort) { $Effort = $prof.defaultEffort }
     if (-not $Effort) { Stop-Worker 'не задан -Effort и нет defaultEffort' }
     if ($efforts -notcontains $Effort) { Stop-Worker "уровень «$Effort» не из списка провайдера: $($efforts -join ',')" }
-    if ($Budget -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker '-Budget — число в долларах, например 0.30' }
+    if ($Budget) {
+        if ($Budget -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker '-Budget — число в долларах, например 0.30' }
+        $cap = [double]::Parse($Budget, [Globalization.CultureInfo]::InvariantCulture)
+    } else {
+        # Потолок по умолчанию — страховка от зацикливания, maxRunUsd профиля; нет поля — запуск без потолка
+        $cap = $null
+        if ($null -ne $prof.maxRunUsd) {
+            if ("$($prof.maxRunUsd)" -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker 'maxRunUsd в профиле — число в долларах' }
+            $cap = [double]$prof.maxRunUsd
+        }
+    }
+    # Без цен в профиле реальную стоимость не посчитать: потолок не применим
+    $price = if ($prof.prices) { $prof.prices.$model } else { $null }
+    $capNote = ''
+    if (-not $price) { $cap = $null; $capNote = 'потолок не считается: в профиле нет цен' }
+    elseif ($null -eq $cap) { $capNote = 'потолок не задан: в профиле нет maxRunUsd' }
+    if ($env:BRIGADIER_WORKER_LOG) { $LogFile = $env:BRIGADIER_WORKER_LOG }
+    elseif ($prof.logFile) {
+        $LogFile = [Environment]::ExpandEnvironmentVariables([string]$prof.logFile)
+        if ($LogFile -match '^~[\\/]') { $LogFile = Join-Path $HOME $LogFile.Substring(2) }
+    } else { $LogFile = $DefaultLogFile }
     if (-not (Test-Path -LiteralPath $Dir -PathType Container)) { Stop-Worker "нет каталога $Dir" }
     $workDir = (Resolve-Path -LiteralPath $Dir).Path
 
@@ -349,10 +473,8 @@ function Invoke-Run {
     $saved = @{}
     foreach ($n in $names) { $saved[$n] = [Environment]::GetEnvironmentVariable($n, 'Process') }
 
-    $outFile = [IO.Path]::GetTempFileName()
     $errFile = [IO.Path]::GetTempFileName()
     $started = Get-Date
-    $exit = 1
     try {
         foreach ($n in @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')) {
             [Environment]::SetEnvironmentVariable($n, $null, 'Process')
@@ -369,60 +491,41 @@ function Invoke-Run {
         $env:BRIGADIER_WORKER = '1'
         foreach ($k in $extraEnv.Keys) { [Environment]::SetEnvironmentVariable($k, $extraEnv[$k], 'Process') }
 
-        $claudeArgs = @('-p', '--bare', '--no-session-persistence', '--output-format', 'json',
-            '--max-budget-usd', $Budget, '--model', $model, '--permission-mode', 'dontAsk',
+        $claudeArgs = @('-p', '--bare', '--no-session-persistence', '--output-format', 'stream-json', '--verbose',
+            '--model', $model, '--permission-mode', 'dontAsk',
             '--allowedTools', $allowed, '--disallowedTools', $denied, '--append-system-prompt', $WorkerPrompt)
-        # Start-Process не берёт в кавычки элементы с пробелами: делаем это сами (двойных кавычек внутри аргументов нет)
-        $claudeArgs = $claudeArgs | ForEach-Object { '"' + $_ + '"' }
+        # Аргументы собираются одной строкой: элементы с пробелами берём в кавычки сами (двойных кавычек внутри аргументов нет)
+        $argLine = ($claudeArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
+        $claudeExe = (Get-Command $ClaudeBin).Source
         Push-Location $workDir
         try {
-            $proc = Start-Process -FilePath $ClaudeBin -ArgumentList $claudeArgs -NoNewWindow -Wait -PassThru `
-                -RedirectStandardInput $briefFile -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-            $exit = $proc.ExitCode
+            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile
         } finally { Pop-Location }
     } finally {
         foreach ($n in $names) { [Environment]::SetEnvironmentVariable($n, $saved[$n], 'Process') }
         Remove-Item -LiteralPath $briefFile -Force -ErrorAction SilentlyContinue
     }
 
-    $raw = (Get-Content -LiteralPath $outFile -Raw -Encoding UTF8)
     $err = (Get-Content -LiteralPath $errFile -Raw -Encoding UTF8)
-    Remove-Item -LiteralPath $outFile, $errFile -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
 
-    $data = $null
-    try { if ($raw) { $data = $raw | ConvertFrom-Json } } catch { $data = $null }
-    if ($data -is [array]) { $data = $data | Where-Object { $_.type -eq 'result' } | Select-Object -Last 1 }
-
-    $result = ''; $counter = 0.0; $realCost = $null; $tokensIn = 0; $tokensOut = 0; $verdict = 'ошибка'
-    if ($data) {
-        $result = [string]$data.result
-        if ($data.total_cost_usd) { $counter = [double]$data.total_cost_usd }
-        $u = $data.usage
-        if ($u) {
-            $tokHit = [int]$u.cache_read_input_tokens
-            # Записи в кэш у DeepSeek отдельной цены нет: считаем как промах
-            $tokMiss = [int]$u.input_tokens + [int]$u.cache_creation_input_tokens
-            $tokensIn = $tokMiss + $tokHit
-            $tokensOut = [int]$u.output_tokens
-            $price = if ($prof.prices) { $prof.prices.$model } else { $null }
-            if ($price) { $realCost = ($tokMiss * [double]$price.inputMiss + $tokHit * [double]$price.inputHit + $tokensOut * [double]$price.output) / 1e6 }
-        }
-        if ([string]$data.subtype -like '*budget*') { $verdict = 'упёрся в бюджет' }
-        elseif ($data.is_error) { $verdict = 'ошибка' }
-        else { $verdict = 'успех' }
-    }
-    if ($verdict -eq 'ошибка' -and -not $result) {
+    $result = [string]$run.result; $verdict = $run.verdict; $partial = $run.partial
+    $realCost = $run.costUsd; $counter = $run.counter; $exact = $run.exact
+    $tokensIn = $run.tokMiss + $run.tokHit; $tokensOut = $run.tokOut
+    if (-not $result -and $verdict -eq 'упёрся в бюджет') { $result = '(обрыв по потолку до первого текстового ответа исполнителя)' }
+    elseif ($verdict -ne 'успех' -and -not $result) {
         $tail = if ($err) { $err.Substring(0, [Math]::Min(500, $err.Length)) } else { 'пусто' }
         $result = "(пустой ответ; stderr: $tail)"
-    }
+    } elseif ($partial -and $result) { $result = "[частичный результат: последний ответ исполнителя до обрыва]`n" + $result }
     $seconds = [int]((Get-Date) - $started).TotalSeconds
 
     # Строка журнала без текста брифа
     $line = [ordered]@{
         ts = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); provider = $Provider; tier = $Tier; model = $model; effort = $Effort
         mode = $Mode; dir = $workDir; tokensIn = $tokensIn; tokensOut = $tokensOut
-        costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); claudeCounterUsd = [math]::Round($counter, 6)
-        seconds = $seconds; verdict = $verdict
+        costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); costExact = $exact; capUsd = $cap
+        claudeCounterUsd = $(if ($null -eq $counter) { $null } else { [math]::Round($counter, 6) })
+        seconds = $seconds; verdict = $verdict; partial = $partial
     } | ConvertTo-Json -Compress
     try {
         $logDir = Split-Path -Parent $LogFile
@@ -433,9 +536,15 @@ function Invoke-Run {
     Write-Output $result
     Write-Output '---'
     Write-Output "исполнитель: провайдер=$Provider ступень=$Tier модель=$model уровень=$Effort режим=$Mode"
-    $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' } else { ('${0:N4}' -f $realCost) }
+    $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' }
+    elseif ($exact) { ('${0:N4}' -f $realCost) }
+    else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
+    $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
     Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
-    Write-Output ("стоимость: {0}; счётчик claude (для --budget): `${1:N4}" -f $costText, $counter)
+    Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
+    if ($null -ne $cap) { Write-Output ('потолок: ${0:N4} (в настоящих долларах провайдера)' -f $cap) }
+    elseif ($capNote) { Write-Output $capNote }
+    if ($partial) { Write-Output 'результат частичный' }
     Write-Output "итог: $verdict"
     if ($wtPath) { Write-WorktreeResult $wtPath $wtBranch $wtBase $briefTitle $repoRoot }
     switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
@@ -446,5 +555,5 @@ switch ($Command) {
     'import-key' { Invoke-ImportKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'check' { Invoke-Check $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'run' { Invoke-Run }
-    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 13 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
+    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 14 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
 }

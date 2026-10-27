@@ -8,7 +8,8 @@
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
-#                 --dir <путь> --budget <usd> --brief <файл или -> [--bash-allow "<шаблон>"]… [--allow-main-tree]
+#                 --dir <путь> --brief <файл или -> [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree]
+#   (потолок цены запуска — maxRunUsd из профиля; --budget переопределяет его вручную)
 #   (write в основном дереве git: скрипт сам создаёт worktree и ветку brigadier/<время>, правки коммитит туда)
 #
 # Ключ в аргументы командной строки не попадает никогда: ни в свои, ни в чужие процессы
@@ -17,10 +18,15 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 USER_PROVIDERS_DIR="${BRIGADIER_WORKER_PROVIDERS:-$HOME/.config/brigadier-worker/providers}"
-LOG_FILE="${BRIGADIER_WORKER_LOG:-${XDG_CACHE_HOME:-$HOME/.cache}/brigadier-worker/runs.jsonl}"
+# Журнал: переменная окружения BRIGADIER_WORKER_LOG, затем logFile профиля, затем этот путь
+DEFAULT_LOG_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/brigadier-worker/runs.jsonl"
 CHECK_TIMEOUT_SEC=30
 CHECK_MAX_TOKENS=64
 PRICES_STALE_DAYS=30
+# Знаков на токен для оценки выхода по тексту потока (usage в потоке отдаёт output_tokens=0); берётся с запасом вниз
+CHARS_PER_TOKEN=2.5
+# Секунд между SIGTERM и SIGKILL при обрыве по потолку
+KILL_GRACE_SEC=5
 CLAUDE_BIN="${BRIGADIER_WORKER_CLAUDE:-claude}"
 DEFAULT_ENV_FILE="${BRIGADIER_WORKER_ENV_FILE:-$HOME/.vibe/.env}"
 # Прежнее имя записей хранилища (до переименования навыка): префикс сервиса меняется, остальное то же
@@ -44,7 +50,7 @@ WORKER_PROMPT='Ты внешний исполнитель: делай задач
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-  sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -66,6 +72,18 @@ elif isinstance(node, dict):
         print("%s=%s" % (k, v))
 else:
     print(node)
+' "$1" "$2"
+}
+
+# Есть ли в профиле цены модели (имя модели может содержать точку, поэтому не через prof_get)
+has_price() {
+  python3 -I -c '
+import json, sys
+try:
+    p = json.load(open(sys.argv[1], encoding="utf-8"))["prices"][sys.argv[2]]
+    sys.exit(0 if all(k in p for k in ("inputMiss", "inputHit", "output")) else 1)
+except (OSError, ValueError, KeyError, TypeError):
+    sys.exit(1)
 ' "$1" "$2"
 }
 
@@ -349,6 +367,151 @@ except Exception:
   return 1
 }
 
+# Запуск claude с разбором потока и потолком цены в настоящих долларах провайдера
+# Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
+# потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
+# Итог пишется в файл JSON; потолок пуст — запуск идёт без потолка
+# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, команда claude…
+run_stream() {
+  python3 -I -c '
+import json, os, signal, subprocess, sys, threading
+
+out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg = sys.argv[1:9]
+argv = sys.argv[9:]
+cap = float(cap_arg) if cap_arg else None
+chars_per_token = float(cpt_arg)
+grace = float(grace_arg)
+
+try:
+    price = json.load(open(profile_file, encoding="utf-8"))["prices"][model]
+except (OSError, ValueError, KeyError, TypeError):
+    price = None
+
+msgs = {}        # id сообщения -> (вход с промахом кэша, вход из кэша); usage повторяется в каждом блоке сообщения
+texts = {}       # id сообщения -> куски текста ответа
+seen = set()     # (id, блок): один и тот же блок не считается дважды
+out_chars = 0
+think_tokens = 0
+result = None
+
+
+def totals():
+    miss = sum(m for m, _ in msgs.values())
+    hit = sum(h for _, h in msgs.values())
+    return miss, hit
+
+
+def cost_of(miss, hit, out):
+    if price is None:
+        return None
+    return (miss * price["inputMiss"] + hit * price["inputHit"] + out * price["output"]) / 1e6
+
+
+def est_out():
+    return int(out_chars / chars_per_token) + think_tokens
+
+
+proc = subprocess.Popen(argv, stdin=open(brief_file, "rb"), stdout=subprocess.PIPE, stderr=open(err_file, "wb"), start_new_session=True)
+over = False
+killer = None
+
+
+def signal_group(sig):
+    try:
+        os.killpg(proc.pid, sig)
+    except (ProcessLookupError, PermissionError):
+        pass
+
+
+def stop():
+    global killer
+    signal_group(signal.SIGTERM)
+    killer = threading.Timer(grace, lambda: signal_group(signal.SIGKILL))
+    killer.start()
+
+
+try:
+    for raw in proc.stdout:
+        try:
+            ev = json.loads(raw)
+        except ValueError:
+            continue
+        if not isinstance(ev, dict):
+            continue
+        kind = ev.get("type")
+        if kind == "result":
+            result = ev
+            continue
+        if kind == "assistant":
+            m = ev.get("message") or {}
+            mid = m.get("id") or "?"
+            u = m.get("usage") or {}
+            msgs[mid] = (int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0), int(u.get("cache_read_input_tokens") or 0))
+            for c in m.get("content") or []:
+                if not isinstance(c, dict):
+                    continue
+                key = (mid, json.dumps(c, sort_keys=True, ensure_ascii=False))
+                if key in seen:
+                    continue
+                seen.add(key)
+                if c.get("type") == "text":
+                    texts.setdefault(mid, []).append(str(c.get("text") or ""))
+                    out_chars += len(str(c.get("text") or ""))
+                elif c.get("type") == "tool_use":
+                    out_chars += len(json.dumps(c.get("input"), ensure_ascii=False))
+        elif kind == "system" and ev.get("subtype") == "thinking_tokens":
+            think_tokens += int(ev.get("estimated_tokens_delta") or 0)
+        else:
+            continue
+        if cap is not None and not over and result is None:
+            miss, hit = totals()
+            spent = cost_of(miss, hit, est_out())
+            if spent is not None and spent > cap:
+                over = True
+                stop()
+finally:
+    proc.stdout.close()
+    rc = proc.wait()
+    if killer is not None:
+        killer.cancel()
+    signal_group(signal.SIGKILL)
+
+miss, hit = totals()
+out = est_out()
+exact = False
+counter = None
+subtype = ""
+is_error = False
+text = "".join(texts[list(texts)[-1]]) if texts else ""
+if isinstance(result, dict):
+    u = result.get("usage") or {}
+    if u:
+        miss = int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0)
+        hit = int(u.get("cache_read_input_tokens") or 0)
+        out = int(u.get("output_tokens") or 0)
+        exact = True
+    counter = float(result.get("total_cost_usd") or 0.0)
+    subtype = str(result.get("subtype") or "")
+    is_error = bool(result.get("is_error"))
+    if result.get("result"):
+        text = str(result["result"])
+
+if over:
+    verdict = "упёрся в бюджет"
+elif result is None or is_error:
+    verdict = "ошибка"
+else:
+    verdict = "успех"
+# Частичный результат: обрыв, либо поток кончился без итогового события и текст взят из последнего сообщения
+partial = over or result is None
+
+json.dump({
+    "result": text, "verdict": verdict, "partial": partial, "tokMiss": miss, "tokHit": hit, "tokOut": out,
+    "exact": exact, "costUsd": cost_of(miss, hit, out), "claudeCounterUsd": counter, "subtype": subtype, "claudeRc": rc,
+}, open(out_file, "w", encoding="utf-8"), ensure_ascii=False)
+' "$@"
+}
+
 # Итог write-запуска: правки исполнителя — одним коммитом в ветку worktree, затем путь, ветка, дифф и команда уборки
 # Worktree не удаляется: его принимает бригадир
 finish_worktree() {
@@ -387,8 +550,8 @@ cmd_run() {
       *) die "неизвестный аргумент: $1" ;;
     esac
   done
-  [ -n "$provider" ] && [ -n "$tier" ] && [ -n "$mode" ] && [ -n "$dir" ] && [ -n "$budget" ] && [ -n "$brief" ] ||
-    die "обязательны --provider --tier --mode --dir --budget --brief"
+  [ -n "$provider" ] && [ -n "$tier" ] && [ -n "$mode" ] && [ -n "$dir" ] && [ -n "$brief" ] ||
+    die "обязательны --provider --tier --mode --dir --brief"
   need_python
   command -v "$CLAUDE_BIN" >/dev/null 2>&1 || die "нет команды $CLAUDE_BIN"
 
@@ -399,11 +562,37 @@ cmd_run() {
   efforts="$(prof_get "$profile" efforts)" || die "в профиле нет списка efforts"
   [ -n "$effort" ] || effort="$(prof_get "$profile" defaultEffort)" || die "не задан --effort и нет defaultEffort"
   case ",$efforts," in *",$effort,"*) ;; *) die "уровень «$effort» не из списка провайдера: $efforts" ;; esac
-  [[ "$budget" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "--budget — число в долларах, например 0.30"
+  if [ -n "$budget" ]; then
+    [[ "$budget" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "--budget — число в долларах, например 0.30"
+  else
+    # Потолок по умолчанию — страховка от зацикливания, maxRunUsd профиля; нет поля — запуск без потолка
+    budget="$(prof_get "$profile" maxRunUsd 2>/dev/null || true)"
+    [ -z "$budget" ] || [[ "$budget" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "maxRunUsd в профиле — число в долларах"
+  fi
+  # Без цен в профиле реальную стоимость не посчитать: потолок не применим
+  local cap_note=""
+  if ! has_price "$profile" "$model"; then
+    budget=""
+    cap_note="потолок не считается: в профиле нет цен"
+  elif [ -z "$budget" ]; then
+    cap_note="потолок не задан: в профиле нет maxRunUsd"
+  fi
+  local log_file profile_log
+  if [ -n "${BRIGADIER_WORKER_LOG:-}" ]; then
+    log_file="$BRIGADIER_WORKER_LOG"
+  else
+    profile_log="$(prof_get "$profile" logFile 2>/dev/null || true)"
+    log_file="${profile_log:-$DEFAULT_LOG_FILE}"
+    case "$log_file" in \~/*) log_file="$HOME/${log_file#\~/}" ;; esac
+  fi
   case "$mode" in read | write) ;; *) die "--mode: read или write" ;; esac
   [ -d "$dir" ] || die "нет каталога $dir"
   dir="$(cd "$dir" && pwd)"
-  if [ "$brief" != "-" ] && [ ! -f "$brief" ]; then die "нет файла брифа $brief"; fi
+  if [ "$brief" != "-" ]; then
+    [ -f "$brief" ] || die "нет файла брифа $brief"
+    # Запуск идёт из каталога --dir, поэтому путь к брифу нужен абсолютный
+    brief="$(cd "$(dirname "$brief")" && pwd)/$(basename "$brief")"
+  fi
 
   # Режим write: основное дерево репозитория не трогаем — worktree создаётся ниже, после проверок ключа и брифа
   local make_worktree=0 repo_root=""
@@ -467,58 +656,44 @@ cmd_run() {
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)
-    "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format json \
-      --max-budget-usd "$budget" --model "$model" \
+    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" \
+      "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format stream-json --verbose --model "$model" \
       --permission-mode dontAsk \
       --allowedTools "$allowed" --disallowedTools "$denied" \
-      --append-system-prompt "$WORKER_PROMPT" <"$brief_file" >"$out_file" 2>"$err_file"
+      --append-system-prompt "$WORKER_PROMPT"
   )
   local claude_rc=$?
   if [ "$brief" = "-" ]; then rm -f "$brief_file"; fi
 
   # Отчёт и строка журнала; текста брифа в журнале нет
-  python3 -I - "$out_file" "$err_file" "$LOG_FILE" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$profile" <<'PY'
+  python3 -I - "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" <<'PY'
 import json, os, sys, time
 
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, profile_file = sys.argv[1:13]
-raw = open(out_file, encoding="utf-8", errors="replace").read().strip()
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note = sys.argv[1:14]
+raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if os.path.exists(out_file) else ""
 err = open(err_file, encoding="utf-8", errors="replace").read().strip()
-data = None
 try:
     data = json.loads(raw) if raw else None
 except ValueError:
     data = None
-if isinstance(data, list):
-    data = next((x for x in reversed(data) if isinstance(x, dict) and x.get("type") == "result"), None)
+if not isinstance(data, dict):
+    data = {}
 
-result = ""
-counter = 0.0
-real_cost = None  # None — цены модели в профиле нет
-tokens_in = tokens_out = 0
-verdict = "ошибка"
-if isinstance(data, dict):
-    result = str(data.get("result") or "")
-    counter = float(data.get("total_cost_usd") or 0.0)
-    usage = data.get("usage") or {}
-    tok_hit = int(usage.get("cache_read_input_tokens") or 0)
-    # Записи в кэш у DeepSeek отдельной цены нет: считаем как промах
-    tok_miss = int(usage.get("input_tokens") or 0) + int(usage.get("cache_creation_input_tokens") or 0)
-    tokens_in = tok_miss + tok_hit
-    tokens_out = int(usage.get("output_tokens") or 0)
-    try:
-        price = json.load(open(profile_file, encoding="utf-8"))["prices"][model]
-        real_cost = (tok_miss * price["inputMiss"] + tok_hit * price["inputHit"] + tokens_out * price["output"]) / 1e6
-    except (OSError, ValueError, KeyError, TypeError):
-        real_cost = None
-    subtype = str(data.get("subtype") or "")
-    if "budget" in subtype:
-        verdict = "упёрся в бюджет"
-    elif data.get("is_error"):
-        verdict = "ошибка"
-    else:
-        verdict = "успех"
-if verdict == "ошибка" and not result:
+result = str(data.get("result") or "")
+verdict = data.get("verdict") or "ошибка"
+partial = bool(data.get("partial", True))
+real_cost = data.get("costUsd")  # None — цен модели в профиле нет
+counter = data.get("claudeCounterUsd")  # None — claude не успел выдать итоговое событие
+tokens_in = int(data.get("tokMiss") or 0) + int(data.get("tokHit") or 0)
+tokens_out = int(data.get("tokOut") or 0)
+exact = bool(data.get("exact"))
+cap = float(cap_arg) if cap_arg else None
+if not result and verdict == "упёрся в бюджет":
+    result = "(обрыв по потолку до первого текстового ответа исполнителя)"
+elif verdict != "успех" and not result:
     result = "(пустой ответ; stderr: %s)" % (err[:500] if err else "пусто")
+elif partial and result:
+    result = "[частичный результат: последний ответ исполнителя до обрыва]\n" + result
 
 elapsed = int(time.time()) - int(started)
 line = {
@@ -526,7 +701,9 @@ line = {
     "provider": provider, "tier": tier, "model": model, "effort": effort, "mode": mode,
     "dir": workdir, "tokensIn": tokens_in, "tokensOut": tokens_out,
     "costUsd": None if real_cost is None else round(real_cost, 6),
-    "claudeCounterUsd": round(counter, 6), "seconds": elapsed, "verdict": verdict,
+    "costExact": exact, "capUsd": cap,
+    "claudeCounterUsd": None if counter is None else round(counter, 6),
+    "seconds": elapsed, "verdict": verdict, "partial": partial,
 }
 try:
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -538,9 +715,19 @@ except OSError as e:
 print(result)
 print("---")
 print("исполнитель: провайдер=%s ступень=%s модель=%s уровень=%s режим=%s" % (provider, tier, model, effort, mode))
-cost_text = "неизвестна (нет prices в профиле)" if real_cost is None else "$%.4f" % real_cost
+if real_cost is None:
+    cost_text = "неизвестна (нет prices в профиле)"
+else:
+    cost_text = ("$%.4f" if exact else "~$%.4f (оценка: выход по длине текста, итога от claude нет)") % real_cost
 print("токены: вход=%d выход=%d; время: %dс" % (tokens_in, tokens_out, elapsed))
-print("стоимость: %s; счётчик claude (для --budget): $%.4f" % (cost_text, counter))
+counter_text = "нет итогового события" if counter is None else "$%.4f" % counter
+print("стоимость: %s; счётчик claude (справочно, по ценам Claude): %s" % (cost_text, counter_text))
+if cap is not None:
+    print("потолок: $%.4f (в настоящих долларах провайдера)" % cap)
+elif cap_note:
+    print(cap_note)
+if partial:
+    print("результат частичный")
 print("итог: %s" % verdict)
 sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
 PY

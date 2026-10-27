@@ -512,12 +512,13 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 4,
-      "sha256": "9205bf261d8407bde65d920e7e30070d6c32026e0f34a075ca5bf62048daaa69",
+      "version": 5,
+      "sha256": "e98af00e73922ac8b9fad0480df2ea1c7e34666617ee7e42fd378f62c0533559",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
-        "3b272911f6dc71eed090f0471b5b80bc8e28921beb93b33111fb34fa6627e844"
+        "3b272911f6dc71eed090f0471b5b80bc8e28921beb93b33111fb34fa6627e844",
+        "9205bf261d8407bde65d920e7e30070d6c32026e0f34a075ca5bf62048daaa69"
       ]
     },
     "rules/clean-rules.mdc": {
@@ -705,32 +706,37 @@
       ]
     },
     "skills/brigadier/worker/README.md": {
-      "version": 3,
-      "sha256": "01489de8f76e3db05d94ad27c7bce749203b9a939e11da16be787ff911ad696c",
+      "version": 4,
+      "sha256": "1a60a040607dcc469849c1a62e43fe7ea3f593dbf5884d705c0b31f9507d6825",
       "history": [
         "82f00708c56dbe503230c840e1effdffb01d7c2845f83b106c17bb231f4e0146",
-        "a56241a1c84fe7509bcba6c6947dc20a30d98b704b67f21f18ffa18ed379974d"
+        "a56241a1c84fe7509bcba6c6947dc20a30d98b704b67f21f18ffa18ed379974d",
+        "01489de8f76e3db05d94ad27c7bce749203b9a939e11da16be787ff911ad696c"
       ]
     },
     "skills/brigadier/worker/providers/deepseek.json": {
-      "version": 1,
-      "sha256": "a91f7d7840e2051b5b75f1ede6220db64017241948dfcb4b597f55946ddae794",
-      "history": []
+      "version": 2,
+      "sha256": "b5f0401f3f055517f06e2c425be4cdb0f40e48b2eccd70d769898bbb90bd08c1",
+      "history": [
+        "a91f7d7840e2051b5b75f1ede6220db64017241948dfcb4b597f55946ddae794"
+      ]
     },
     "skills/brigadier/worker/worker.ps1": {
-      "version": 3,
-      "sha256": "264fdc6666e4702f247bacba733e38214bb432bc0785188164e06988b20cb694",
+      "version": 4,
+      "sha256": "2bd4a03e46aa038752b21323cea54aecefd5f571dd1eb9bc049f8bd4963b479e",
       "history": [
         "6e4299b5cb636217a15275cd9020525855fa5898dfabf37e4278daadb41f1792",
-        "17ae17ccec8e1682f93f98ec8a70751d962adb99e8ae69340d84a37c2f7ea6e8"
+        "17ae17ccec8e1682f93f98ec8a70751d962adb99e8ae69340d84a37c2f7ea6e8",
+        "264fdc6666e4702f247bacba733e38214bb432bc0785188164e06988b20cb694"
       ]
     },
     "skills/brigadier/worker/worker.sh": {
-      "version": 3,
-      "sha256": "bbf69abbd80ee768f53ec7779a862f6cfc2042c9e985fe3c233273f6ecef960f",
+      "version": 4,
+      "sha256": "fe6c11fe78486c872c2890155b2638c5e6a8e0222de6db913bd8a20001e0691b",
       "history": [
         "10f0ca3dfb911c8cb75bf3f5c18a1d5580f48aefbac52e9e8da2495db35a1fd5",
-        "f08da0eee72ae47551fd1574d07366ede6f532b7e4edf100a310350bdf2f6805"
+        "f08da0eee72ae47551fd1574d07366ede6f532b7e4edf100a310350bdf2f6805",
+        "bbf69abbd80ee768f53ec7779a862f6cfc2042c9e985fe3c233273f6ecef960f"
       ]
     },
     "skills/codebase-design/DEEPENING.md": {
