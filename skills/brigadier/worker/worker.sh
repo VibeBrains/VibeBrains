@@ -9,6 +9,7 @@
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --budget <usd> --brief <файл или -> [--bash-allow "<шаблон>"]… [--allow-main-tree]
+#   (write в основном дереве git: скрипт сам создаёт worktree и ветку brigadier/<время>, правки коммитит туда)
 #
 # Ключ в аргументы командной строки не попадает никогда: ни в свои, ни в чужие процессы
 
@@ -32,6 +33,10 @@ READ_DENIED='Edit,Write,NotebookEdit,WebFetch,WebSearch,Agent,Task'
 # Запись только файловыми инструментами в каталоге запуска; коммитит и пушит бригадир
 WRITE_ALLOWED="$READ_ALLOWED,Edit,Write"
 WRITE_DENIED='NotebookEdit,WebFetch,WebSearch,Agent,Task,Bash(git commit*),Bash(git push*),Bash(git reset*),Bash(git checkout*),Bash(git clean*),Bash(git rebase*),Bash(git merge*),Bash(rm *)'
+
+# Каталог временных worktree режима write; ветка исполнителя — BRANCH_PREFIX/<время>
+WORKTREES_ROOT="${BRIGADIER_WORKER_WORKTREES:-${TMPDIR:-/tmp}/brigadier-worktrees}"
+BRANCH_PREFIX="brigadier"
 
 # Добавка к системному промпту: без CLAUDE.md исполнитель не знает, кто он
 WORKER_PROMPT='Ты внешний исполнитель: делай задачу из брифа сам, никому её не передавай и субагентов не запускай. Не коммить и не пушь. В конце дай короткий итог: что сделано, что проверено, что не удалось.'
@@ -344,6 +349,26 @@ except Exception:
   return 1
 }
 
+# Итог write-запуска: правки исполнителя — одним коммитом в ветку worktree, затем путь, ветка, дифф и команда уборки
+# Worktree не удаляется: его принимает бригадир
+finish_worktree() {
+  local wt="$1" branch="$2" base="$3" title="$4" repo="$5" diff_file
+  diff_file="$wt.diff"
+  if [ -n "$(git -C "$wt" status --porcelain 2>/dev/null)" ]; then
+    git -C "$wt" add -A >/dev/null 2>&1
+    git -C "$wt" commit -q -m "brigadier: $title" >/dev/null 2>&1 || echo "worktree: коммит правок не удался — правки лежат в $wt без коммита" >&2
+  fi
+  git -C "$wt" diff "$base" HEAD >"$diff_file" 2>/dev/null
+  echo "---"
+  echo "worktree: $wt"
+  echo "ветка: $branch (от $base)"
+  echo "полный дифф: $diff_file"
+  git -C "$wt" diff --stat "$base" HEAD 2>/dev/null
+  if [ ! -s "$diff_file" ]; then echo "изменений нет"; fi
+  echo "влить: git -C $repo merge $branch"
+  echo "убрать после приёмки: git -C $repo worktree remove --force $wt && git -C $repo branch -D $branch && rm -f $diff_file"
+}
+
 cmd_run() {
   local provider="" tier="" effort="" mode="" dir="" budget="" brief=""
   local allow_main=0
@@ -380,11 +405,13 @@ cmd_run() {
   dir="$(cd "$dir" && pwd)"
   if [ "$brief" != "-" ] && [ ! -f "$brief" ]; then die "нет файла брифа $brief"; fi
 
+  # Режим write: основное дерево репозитория не трогаем — worktree создаётся ниже, после проверок ключа и брифа
+  local make_worktree=0 repo_root=""
   if [ "$mode" = "write" ] && [ "$allow_main" -eq 0 ]; then
     local gd cd_
     gd="$(git -C "$dir" rev-parse --absolute-git-dir 2>/dev/null)" || die "режим write: $dir не в git-репозитории"
     cd_="$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"
-    [ "$gd" != "$cd_" ] || die "режим write только в отдельном git worktree (git worktree add …); основное дерево — с --allow-main-tree"
+    if [ "$gd" = "$cd_" ]; then make_worktree=1; repo_root="$dir"; fi
   fi
 
   local key base
@@ -403,6 +430,21 @@ cmd_run() {
   local out_file err_file brief_file
   out_file="$(mktemp)"; err_file="$(mktemp)"
   if [ "$brief" = "-" ]; then brief_file="$(mktemp)"; cat >"$brief_file"; else brief_file="$brief"; fi
+
+  # Первая строка брифа нужна для сообщения коммита; бриф со stdin после запуска уже удалён
+  local brief_title
+  brief_title="$(sed -n '/[^[:space:]]/{p;q;}' "$brief_file" | cut -c1-100)"
+  [ -n "$brief_title" ] || brief_title="задача исполнителя"
+
+  local wt_path="" wt_branch="" wt_base=""
+  if [ "$make_worktree" -eq 1 ]; then
+    wt_base="$(git -C "$dir" rev-parse --short HEAD 2>/dev/null)" || die "в репозитории $dir нет коммитов: нечего брать за основу worktree"
+    wt_branch="$BRANCH_PREFIX/$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$WORKTREES_ROOT" || die "не создать каталог $WORKTREES_ROOT"
+    wt_path="$(mktemp -d "$WORKTREES_ROOT/wt.XXXXXX")" || die "не создать каталог worktree"
+    git -C "$dir" worktree add -q -b "$wt_branch" "$wt_path" HEAD >&2 || { rmdir "$wt_path" 2>/dev/null; die "git worktree add не удался"; }
+    dir="$wt_path"
+  fi
 
   local started
   started="$(date +%s)"
@@ -504,6 +546,7 @@ sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
 PY
   local rc=$?
   rm -f "$out_file" "$err_file"
+  if [ -n "$wt_path" ]; then finish_worktree "$wt_path" "$wt_branch" "$wt_base" "$brief_title" "$repo_root"; fi
   return $rc
 }
 

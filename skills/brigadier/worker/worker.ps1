@@ -40,6 +40,10 @@ $LegacyServicePrefix = 'brigadir-'
 $CurrentServicePrefix = 'brigadier-'
 $ClaudeBin = if ($env:BRIGADIER_WORKER_CLAUDE) { $env:BRIGADIER_WORKER_CLAUDE } else { 'claude' }
 
+# Каталог временных worktree режима write; ветка исполнителя — brigadier/<время>
+$WorktreesRoot = if ($env:BRIGADIER_WORKER_WORKTREES) { $env:BRIGADIER_WORKER_WORKTREES } else { Join-Path ([IO.Path]::GetTempPath()) 'brigadier-worktrees' }
+$BranchPrefix = 'brigadier'
+
 $ReadAllowed = 'Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
 $ReadDenied = 'Edit,Write,NotebookEdit,WebFetch,WebSearch,Agent,Task'
 $WriteAllowed = "$ReadAllowed,Edit,Write"
@@ -254,6 +258,27 @@ function Invoke-Check([string] $Name) {
     }
 }
 
+# Итог write-запуска: правки исполнителя — одним коммитом в ветку worktree, затем путь, ветка, дифф и команда уборки
+# Worktree не удаляется: его принимает бригадир
+function Write-WorktreeResult($wt, $branch, $base, $title, $repo) {
+    $diffFile = "$wt.diff"
+    if (& git -C $wt status --porcelain 2>$null) {
+        & git -C $wt add -A *> $null
+        & git -C $wt commit -q -m "brigadier: $title" *> $null
+        if ($LASTEXITCODE -ne 0) { [Console]::Error.WriteLine("worktree: коммит правок не удался — правки лежат в $wt без коммита") }
+    }
+    $diffText = (& git -C $wt diff $base HEAD 2>$null) -join "`n"
+    [IO.File]::WriteAllText($diffFile, $diffText, (New-Object Text.UTF8Encoding($false)))
+    Write-Output '---'
+    Write-Output "worktree: $wt"
+    Write-Output "ветка: $branch (от $base)"
+    Write-Output "полный дифф: $diffFile"
+    & git -C $wt diff --stat $base HEAD 2>$null
+    if (-not $diffText) { Write-Output 'изменений нет' }
+    Write-Output "влить: git -C $repo merge $branch"
+    Write-Output "убрать после приёмки: git -C $repo worktree remove --force $wt; git -C $repo branch -D $branch; Remove-Item $diffFile"
+}
+
 function Invoke-Run {
     foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Budget', $Budget), @('Brief', $Brief))) {
         if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Budget -Brief' }
@@ -272,11 +297,13 @@ function Invoke-Run {
     if (-not (Test-Path -LiteralPath $Dir -PathType Container)) { Stop-Worker "нет каталога $Dir" }
     $workDir = (Resolve-Path -LiteralPath $Dir).Path
 
+    # Режим write: основное дерево репозитория не трогаем — worktree создаётся ниже, после проверок ключа и брифа
+    $makeWorktree = $false
     if ($Mode -eq 'write' -and -not $AllowMainTree) {
         $gitDir = (& git -C $workDir rev-parse --absolute-git-dir 2>$null)
         if ($LASTEXITCODE -ne 0) { Stop-Worker "режим write: $workDir не в git-репозитории" }
         $commonDir = (& git -C $workDir rev-parse --path-format=absolute --git-common-dir 2>$null)
-        if ($gitDir -eq $commonDir) { Stop-Worker 'режим write только в отдельном git worktree (git worktree add …); основное дерево — с -AllowMainTree' }
+        if ($gitDir -eq $commonDir) { $makeWorktree = $true; $repoRoot = $workDir }
     }
 
     $key = Read-Key $prof
@@ -294,6 +321,23 @@ function Invoke-Run {
     }
     $briefFile = [IO.Path]::GetTempFileName()
     [IO.File]::WriteAllText($briefFile, $briefText, (New-Object Text.UTF8Encoding($false)))
+
+    # Первая строка брифа нужна для сообщения коммита
+    $briefTitle = ($briefText -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -First 1)
+    if (-not $briefTitle) { $briefTitle = 'задача исполнителя' }
+    if ($briefTitle.Length -gt 100) { $briefTitle = $briefTitle.Substring(0, 100) }
+
+    $wtPath = ''; $wtBranch = ''; $wtBase = ''
+    if ($makeWorktree) {
+        $wtBase = (& git -C $workDir rev-parse --short HEAD 2>$null)
+        if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет коммитов: нечего брать за основу worktree" }
+        $wtBranch = "$BranchPrefix/" + (Get-Date).ToString('yyyyMMdd-HHmmss')
+        New-Item -ItemType Directory -Path $WorktreesRoot -Force | Out-Null
+        $wtPath = Join-Path $WorktreesRoot ('wt.' + [Guid]::NewGuid().ToString('N').Substring(0, 6))
+        & git -C $workDir worktree add -q -b $wtBranch $wtPath HEAD 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
+        if ($LASTEXITCODE -ne 0) { Stop-Worker 'git worktree add не удался' }
+        $workDir = $wtPath
+    }
 
     # Подмена сервера живёт только в этом процессе и его детях, затем возвращается как было
     $names = @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'ANTHROPIC_MODEL',
@@ -393,6 +437,7 @@ function Invoke-Run {
     Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
     Write-Output ("стоимость: {0}; счётчик claude (для --budget): `${1:N4}" -f $costText, $counter)
     Write-Output "итог: $verdict"
+    if ($wtPath) { Write-WorktreeResult $wtPath $wtBranch $wtBase $briefTitle $repoRoot }
     switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
 }
 
