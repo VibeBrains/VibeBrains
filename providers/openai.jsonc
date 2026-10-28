@@ -5,7 +5,7 @@
 // Для дешёвых маршрутов выбирайте полный id тира (gpt-5.6-terra / gpt-5.6-luna) — иначе
 // будете платить по флагманскому тарифу. Terra и Luna — кандидаты на рутину (коммиты,
 // переименования, короткие правки), Sol оставляйте на сложные задачи.
-// У GPT-6 имена значат другое: флагман — Astra, Sol — средний тир, Luna — самый дешёвый, Terra нет,
+// У GPT-6 имена значат другое: флагман — Astra, Sol — средний тир, Terra — вдвое дешевле Sol (с 6.1), Luna — самый дешёвый,
 // а голого алиаса "gpt-6" в документации вендора нет вовсе (developers.openai.com/api/docs/models,
 // сверено 23.09.2026).
 //
@@ -106,6 +106,14 @@
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     "reasoning": { "canTurnOff": false, "effort": ["low", "medium", "high", "xhigh", "max"] },
         //     "cost": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite": 2.5, "currency": "USD",
+        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } },
+        //   // GPT-6.1 Terra (developers.openai.com/api/docs/models/gpt-6.1-terra, сверено 28.10.2026): контекст и выход
+        //   // как у Sol, цена вдвое ниже — $1 / $5, кэш $0.05, запись $1.25. В отличие от Sol принимает "none":
+        //   // рассуждение выключается. Инструменты — тоже только на Responses
+        //   { "id": "gpt-6.1-terra", "name": "GPT-6.1 Terra (рутина)", "protocol": "openai-responses",
+        //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
+        //     "reasoning": { "canTurnOff": true, "effort": ["low", "medium", "high", "xhigh", "max"] },
+        //     "cost": { "input": 1, "output": 5, "cacheRead": 0.05, "cacheWrite": 1.25, "currency": "USD",
         //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } }
         // ]
       }
