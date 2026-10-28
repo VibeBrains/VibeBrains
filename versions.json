@@ -512,14 +512,15 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 6,
-      "sha256": "865c575b34b86ebb71e15592e66f8c9b1487c3696ba8f5208873f7e31f350601",
+      "version": 7,
+      "sha256": "cf7ce3bf8292023a130757b7b377c0b7dfd1d2ad326896058dc66f97b3e94f77",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
         "3b272911f6dc71eed090f0471b5b80bc8e28921beb93b33111fb34fa6627e844",
         "9205bf261d8407bde65d920e7e30070d6c32026e0f34a075ca5bf62048daaa69",
-        "e98af00e73922ac8b9fad0480df2ea1c7e34666617ee7e42fd378f62c0533559"
+        "e98af00e73922ac8b9fad0480df2ea1c7e34666617ee7e42fd378f62c0533559",
+        "865c575b34b86ebb71e15592e66f8c9b1487c3696ba8f5208873f7e31f350601"
       ]
     },
     "rules/clean-rules.mdc": {
