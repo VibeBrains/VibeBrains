@@ -1,6 +1,6 @@
 ---
 name: example
-description: Когда нужна короткая демонстрация Agent Skill или проверка команд /skill: в этом проекте.
+description: Когда нужна короткая демонстрация Agent Skill или проверка команд /skill — в этом проекте.
 metadata:
   # Всё наше — под metadata: спецификация Agent Skills разрешает на верхнем уровне только
   # name, description, license, allowed-tools, compatibility и metadata, а эталонный

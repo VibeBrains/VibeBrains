@@ -514,8 +514,8 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 9,
-      "sha256": "f4070f1210e71eada60299eb4c8eb30f575582b3ef2735c4831f7f07f7aa8477",
+      "version": 10,
+      "sha256": "a1dd101d2d56a276201aab177f989b01305fd0712d31201164da1b67ddb74ffe",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
@@ -524,18 +524,20 @@
         "e98af00e73922ac8b9fad0480df2ea1c7e34666617ee7e42fd378f62c0533559",
         "865c575b34b86ebb71e15592e66f8c9b1487c3696ba8f5208873f7e31f350601",
         "cf7ce3bf8292023a130757b7b377c0b7dfd1d2ad326896058dc66f97b3e94f77",
-        "55a31e705af9956c559edac224b7d195321654f06b4ecf4acb90c8576e89d74b"
+        "55a31e705af9956c559edac224b7d195321654f06b4ecf4acb90c8576e89d74b",
+        "f4070f1210e71eada60299eb4c8eb30f575582b3ef2735c4831f7f07f7aa8477"
       ]
     },
     "rules/clean-rules.mdc": {
-      "version": 6,
-      "sha256": "a5214f4eb6a813c65f8b354d354961f3cf478a773b837e99f52c7aa3f4f9f4dd",
+      "version": 7,
+      "sha256": "39b06a75ee0ee11f945cf358944b28449a363914c725d179f0d8686b91e4f0d3",
       "history": [
         "bd459a3233045ec34c6bc553ede775728a9bd75992c83261cc7b1db5a9e285ce",
         "ca1a55531ec3590e5328803162772b7061dbec8c28bd5184a2a012a7a06c0eaf",
         "e21f07fc89fc8425066bcc097c1ea8d8fb2d7e3b2a42ca2b2fa39bfbdb0c1971",
         "2f4dc671993c46e68c96e2b01415af7f887cb585d067431edecd7a611f7f640f",
-        "06715aaccfcd8cddd6f9d003637cbf5f243085ecac54de174296d1b92f06571a"
+        "06715aaccfcd8cddd6f9d003637cbf5f243085ecac54de174296d1b92f06571a",
+        "a5214f4eb6a813c65f8b354d354961f3cf478a773b837e99f52c7aa3f4f9f4dd"
       ]
     },
     "rules/dev-engine.mdc": {
@@ -556,15 +558,18 @@
       ]
     },
     "rules/nginx.mdc": {
-      "version": 1,
-      "sha256": "60fc04eebca8cdb81b5f9436d221dbe0ab7fdbf2e9b8c2fe6c3ab1ac7713ef3f",
-      "history": []
+      "version": 2,
+      "sha256": "83a568ce1213d61bc1a11a881d69de7cf2ba1a290f2ff38f122e9312e76df392",
+      "history": [
+        "60fc04eebca8cdb81b5f9436d221dbe0ab7fdbf2e9b8c2fe6c3ab1ac7713ef3f"
+      ]
     },
     "rules/pipeline.mdc": {
-      "version": 2,
-      "sha256": "2516d568844622b2ad0d3410d8f9787ef8ee033545fa9a462270c80858777d45",
+      "version": 3,
+      "sha256": "410608ae1b6fece57080c253086efe2e6e19e233d1cbc29780a81257022ea1f5",
       "history": [
-        "72c9da8f26070e48d60075dce2868a81f6f47f625f3511743cf79e32d8e45f57"
+        "72c9da8f26070e48d60075dce2868a81f6f47f625f3511743cf79e32d8e45f57",
+        "2516d568844622b2ad0d3410d8f9787ef8ee033545fa9a462270c80858777d45"
       ]
     },
     "rules/providers-json.mdc": {
@@ -599,12 +604,13 @@
       "history": []
     },
     "rules/roadmap-autopilot.mdc": {
-      "version": 4,
-      "sha256": "0d3521c059f97da596ab30d9a0d8845226f7e023c5ac2d14cdb770a0808663cc",
+      "version": 5,
+      "sha256": "eef279898bf97f11e280200252b105d20bfa94411e13ab9409438fded6c81e9f",
       "history": [
         "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640",
         "702df9a15848cf09d77eab52e727bccd05242edc0a28d24bdde294057406b8dd",
-        "ede07df7e4900a00c9c993315d3aee17632293d9546cb830a9c3003faeb40912"
+        "ede07df7e4900a00c9c993315d3aee17632293d9546cb830a9c3003faeb40912",
+        "0d3521c059f97da596ab30d9a0d8845226f7e023c5ac2d14cdb770a0808663cc"
       ]
     },
     "rules/roadmap.mdc": {
@@ -615,12 +621,13 @@
       ]
     },
     "rules/script-save.mdc": {
-      "version": 4,
-      "sha256": "c81da3953daed1316ae892cc892146643c763a689cf980cd4e4796b437755bec",
+      "version": 5,
+      "sha256": "d38d290eb2048c630fb8e09abd52753788562cd1cde34559684031b4bf5bb0dd",
       "history": [
         "bf15b48f9bcedc1a7eb2ed9205924bca549934e0d9fe4533619fa7b7422f8e32",
         "201539a713ea911932056a3f7c04a7377a67f95eff546be38b7592af6178a948",
-        "db444b47d00a6ed334952505f940da876737d92ddfcf636f6a3d7bc29edeed42"
+        "db444b47d00a6ed334952505f940da876737d92ddfcf636f6a3d7bc29edeed42",
+        "c81da3953daed1316ae892cc892146643c763a689cf980cd4e4796b437755bec"
       ]
     },
     "rules/security.mdc": {
@@ -629,17 +636,20 @@
       "history": []
     },
     "rules/spec-first.mdc": {
-      "version": 3,
-      "sha256": "ac547e0fba6aaaeddddef71ffccb0eacde18170801975130ab86a7f16993c57a",
+      "version": 4,
+      "sha256": "c21548b6ce6b2583ecf72e6ed0efd770b11ec5c4a68bd9c505d90212c0d9916b",
       "history": [
         "35fc757d7dffbe89994108c2ffa91b60149bb8914fdb2f1dbb26862e5ca2bccc",
-        "254fcb2b71705940ed8f74eb5635f660dbc714eea74bd3f50c2290f675a74184"
+        "254fcb2b71705940ed8f74eb5635f660dbc714eea74bd3f50c2290f675a74184",
+        "ac547e0fba6aaaeddddef71ffccb0eacde18170801975130ab86a7f16993c57a"
       ]
     },
     "rules/ui-kit.mdc": {
-      "version": 1,
-      "sha256": "30b8e8ab9e940e68544bd8b8af460848c3275579ee35937c80feacc05277881b",
-      "history": []
+      "version": 2,
+      "sha256": "264ddd7edb240f8868a6e58bafb564186637f7903cab49da7b113357a0c57f2c",
+      "history": [
+        "30b8e8ab9e940e68544bd8b8af460848c3275579ee35937c80feacc05277881b"
+      ]
     },
     "rules/verification.mdc": {
       "version": 2,
@@ -761,9 +771,11 @@
       "history": []
     },
     "skills/codebase-design/SKILL.md": {
-      "version": 1,
-      "sha256": "86684f734040f01cdf371fd78a0d56a5cad0b249dc8c8619611a647a49d18c7e",
-      "history": []
+      "version": 2,
+      "sha256": "5d8ccceb6a771a35bf2a9c07fdcd657845d1464299ee5d4299e7c04d58d67f50",
+      "history": [
+        "86684f734040f01cdf371fd78a0d56a5cad0b249dc8c8619611a647a49d18c7e"
+      ]
     },
     "skills/codebase-design/evals/evals.json": {
       "version": 1,
@@ -771,9 +783,11 @@
       "history": []
     },
     "skills/concept-brief/SKILL.md": {
-      "version": 1,
-      "sha256": "d0f06dc0c3b8711b2d20120a53f2d0cb2bd58ac84cb5b01e4dbb81c2cff5bdc4",
-      "history": []
+      "version": 2,
+      "sha256": "d86dc8609be00bbb9e0100e7e9f6ed5c2251e7159710656f323d6139d36d4e00",
+      "history": [
+        "d0f06dc0c3b8711b2d20120a53f2d0cb2bd58ac84cb5b01e4dbb81c2cff5bdc4"
+      ]
     },
     "skills/concept-brief/assets/build.py": {
       "version": 1,
@@ -835,9 +849,11 @@
       "history": []
     },
     "skills/diagnosing-bugs/SKILL.md": {
-      "version": 1,
-      "sha256": "ec5375990d055cb127555bf51c75e2901ff8259af6bc0b9253b09df32e2de1b8",
-      "history": []
+      "version": 2,
+      "sha256": "e4b78b65d9e0e2887ee54be89d2fa128b7745fa77d6ba1ae4e3a29ecabc93249",
+      "history": [
+        "ec5375990d055cb127555bf51c75e2901ff8259af6bc0b9253b09df32e2de1b8"
+      ]
     },
     "skills/diagnosing-bugs/evals/evals.json": {
       "version": 1,
@@ -850,11 +866,12 @@
       "history": []
     },
     "skills/example/SKILL.md": {
-      "version": 3,
-      "sha256": "e69efccaf4ee5934b42838b7b31be068828f4660f49127154453772381cc5f22",
+      "version": 4,
+      "sha256": "76eabcf3e82faeffd877f46e3491149a766ba20426d8bb1dc06395c8f6ed4822",
       "history": [
         "7d53df652924ac6a3efb078802e274befdf7f4120868dd69dd81e5e88e5b0d5a",
-        "b1a170e5c89f9742b52ab9ac04fc6c59cc51841be341234835fdb5aeed61d86d"
+        "b1a170e5c89f9742b52ab9ac04fc6c59cc51841be341234835fdb5aeed61d86d",
+        "e69efccaf4ee5934b42838b7b31be068828f4660f49127154453772381cc5f22"
       ]
     },
     "skills/example/evals/evals.json": {
@@ -868,10 +885,11 @@
       "history": []
     },
     "skills/grill/SKILL.md": {
-      "version": 2,
-      "sha256": "b4d387cba683cf36bab4b3061085af7539cface8bd087ad98f8d97bbf5c93cb4",
+      "version": 3,
+      "sha256": "71585d1273f74b15db4fbbc804ffc567c68dc399ea20f6119837e2c0eaac1e19",
       "history": [
-        "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9"
+        "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9",
+        "b4d387cba683cf36bab4b3061085af7539cface8bd087ad98f8d97bbf5c93cb4"
       ]
     },
     "skills/grilling/LICENSE": {
@@ -880,9 +898,11 @@
       "history": []
     },
     "skills/grilling/SKILL.md": {
-      "version": 1,
-      "sha256": "cf1ae4d87ed4383d369fa024296381c33ca9993e3d2550c245500df027d984a8",
-      "history": []
+      "version": 2,
+      "sha256": "45cc8a92918b670d315764ad2b1ff37a5109e68fcdf537258c90ea1ee47bae48",
+      "history": [
+        "cf1ae4d87ed4383d369fa024296381c33ca9993e3d2550c245500df027d984a8"
+      ]
     },
     "skills/grilling/evals/evals.json": {
       "version": 1,
@@ -920,14 +940,18 @@
       "history": []
     },
     "skills/night-work/SKILL.md": {
-      "version": 1,
-      "sha256": "b50dbeb6c98189111adf5ae24dd60fc2ca074cae3a563357e140daab798f395a",
-      "history": []
+      "version": 2,
+      "sha256": "458db670909365cd5287c743f55f0f8ad44298fbae57bebf336c7e6f05daa600",
+      "history": [
+        "b50dbeb6c98189111adf5ae24dd60fc2ca074cae3a563357e140daab798f395a"
+      ]
     },
     "skills/optimize-by-metric/SKILL.md": {
-      "version": 1,
-      "sha256": "13973698c31616de03af8892ac15db16ff2ad369514dde0f732cbabb640b3870",
-      "history": []
+      "version": 2,
+      "sha256": "98c78d56cda526ef44a32b0fa60d4093515474a869a218e8820ccf4773ba4951",
+      "history": [
+        "13973698c31616de03af8892ac15db16ff2ad369514dde0f732cbabb640b3870"
+      ]
     },
     "skills/party/SKILL.md": {
       "version": 1,
@@ -965,9 +989,11 @@
       "history": []
     },
     "skills/retro/SKILL.md": {
-      "version": 1,
-      "sha256": "66436c486e165a5d1e1b450e72de2cdff78c5f91728dab45c98a1625eb2d6e10",
-      "history": []
+      "version": 2,
+      "sha256": "0c8f2aae942ee1746a47221bdcb6860b88e664cd77fb428b82b239e8d9b9b06e",
+      "history": [
+        "66436c486e165a5d1e1b450e72de2cdff78c5f91728dab45c98a1625eb2d6e10"
+      ]
     },
     "skills/retro/evals/evals.json": {
       "version": 1,
@@ -1019,9 +1045,11 @@
       "history": []
     },
     "skills/self-excuses/SKILL.md": {
-      "version": 1,
-      "sha256": "72845c9cf3083ab2cdf6cce8f8ff2a2419d1f8376df7617c7ca566f2a564a346",
-      "history": []
+      "version": 2,
+      "sha256": "15f0af781c00dbdd7bbd947c4ce9cc1934c3f5db9c62bb613094c853645b978a",
+      "history": [
+        "72845c9cf3083ab2cdf6cce8f8ff2a2419d1f8376df7617c7ca566f2a564a346"
+      ]
     },
     "skills/self-excuses/evals/evals.json": {
       "version": 1,
@@ -1029,12 +1057,13 @@
       "history": []
     },
     "skills/spec-driven-implementation/SKILL.md": {
-      "version": 4,
-      "sha256": "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913",
+      "version": 5,
+      "sha256": "343e0b759dd325bf3759e54f60c0ec7a56239093ac98a460080b3d50e6a86b70",
       "history": [
         "5a66167e446e8f1e59945cadd2e4ad00d32c9e33fe64d799d95768266df5cc67",
         "6f6e898e5010214275c1c516aac9574284b8fd2d32bf2cc8a4dd424f70af9883",
-        "3fdd6ec6ab9266c311624ed09f10bdd05bdd4e56e76da227db3526e74ca0ab20"
+        "3fdd6ec6ab9266c311624ed09f10bdd05bdd4e56e76da227db3526e74ca0ab20",
+        "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913"
       ]
     },
     "skills/tdd/LICENSE": {
@@ -1073,9 +1102,11 @@
       "history": []
     },
     "skills/to-questionnaire/SKILL.md": {
-      "version": 1,
-      "sha256": "1024f69b8977e0557058bdea5e51c86cfd498581bc2d1d70d0b6a33813b71157",
-      "history": []
+      "version": 2,
+      "sha256": "43df68e8b0501bf5788362abfc96d6b9594dfdc3d2fa1aa9ca75c48332dbd3d2",
+      "history": [
+        "1024f69b8977e0557058bdea5e51c86cfd498581bc2d1d70d0b6a33813b71157"
+      ]
     },
     "skills/to-questionnaire/evals/evals.json": {
       "version": 1,
@@ -1106,9 +1137,11 @@
       "history": []
     },
     "skills/wait-what/SKILL.md": {
-      "version": 1,
-      "sha256": "56085c8a230eda9c40cefb534d2d60e59ee19ef22344ceb6de37a91dea191d37",
-      "history": []
+      "version": 2,
+      "sha256": "b5f2499a3489602581c7f67e9b97852d19f485afa46bca85de81950d45675b83",
+      "history": [
+        "56085c8a230eda9c40cefb534d2d60e59ee19ef22344ceb6de37a91dea191d37"
+      ]
     },
     "skills/wait-what/evals/evals.json": {
       "version": 1,
@@ -1121,9 +1154,11 @@
       "history": []
     },
     "skills/wizard/SKILL.md": {
-      "version": 1,
-      "sha256": "9056aa326870a173cdc9ec181c64fed1f61db3b6f6ab821a30d3f49f155e1319",
-      "history": []
+      "version": 2,
+      "sha256": "9bec2e96a87b07a71df136a43ef310802a676c4599210fa98f520f6b008cdabf",
+      "history": [
+        "9056aa326870a173cdc9ec181c64fed1f61db3b6f6ab821a30d3f49f155e1319"
+      ]
     },
     "skills/wizard/evals/evals.json": {
       "version": 1,
@@ -1183,9 +1218,11 @@
       "history": []
     },
     "skills/writing-for-agents/SKILL.md": {
-      "version": 1,
-      "sha256": "ae9388e0aa0392868ffec29eabded0338b9d8783b6c69f963f69d798ca125f98",
-      "history": []
+      "version": 2,
+      "sha256": "24fc6ec5a915e8e31da78538b569cedc50a0166752e8ab74d5476247055f8721",
+      "history": [
+        "ae9388e0aa0392868ffec29eabded0338b9d8783b6c69f963f69d798ca125f98"
+      ]
     },
     "skills/writing-for-agents/evals/evals.json": {
       "version": 1,
