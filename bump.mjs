@@ -13,7 +13,8 @@
  *
  * Запуск: `node bump.mjs` (после правки любых файлов набора, ДО коммита).
  * Проверка без записи: `node bump.mjs --check` — код возврата 1, если реестр устарел
- * (тот же гейт прогоняют оба продукта на своих тестах).
+ * (тот же гейт прогоняют оба продукта на своих тестах)
+ * Оба режима сначала проверяют шапки навыков и правил: ошибка в шапке — код 1, реестр не пишется
  */
 
 import { execFileSync } from 'child_process';
@@ -91,11 +92,50 @@ async function readRegistry() {
 	}
 }
 
+/**
+ * Однострочные поля шапки, которые читают и строгий YAML (GitHub, Claude Code), и ручные разборщики продуктов
+ * Значение в кавычках или блоком (`>`, `|`) — валидный YAML, проверяется только закрытие кавычки
+ * Без кавычек YAML ломается на «: » и « #» внутри значения и на служебном знаке в начале
+ * globs и triggers не проверяются: это формат Cursor и VibeIDE, а не YAML
+ */
+const PLAIN_KEYS = new Set(['name', 'title', 'description']);
+const YAML_INDICATOR_START = /^[-?:,\[\]{}#&*!|>'"%@`]/;
+
+/** Ошибки шапки файла набора: строка на ошибку, пустой список — шапка в порядке */
+function frontmatterErrors(rel, text) {
+	if (!(rel.endsWith('SKILL.md') || rel.endsWith('.mdc')) || !text.startsWith('---')) { return []; }
+	const end = text.indexOf('\n---', 3);
+	if (end < 0) { return [`${rel}: шапка не закрыта строкой ---`]; }
+	const errors = [];
+	for (const line of text.slice(3, end).split(/\r?\n/)) {
+		const kv = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line);
+		if (!kv || !PLAIN_KEYS.has(kv[1]) || kv[2] === '') { continue; }
+		const value = kv[2];
+		if (/^[>|][+-]?\d?\s*$/.test(value)) { continue; }
+		if (value[0] === '"' || value[0] === "'") {
+			const closed = value.length > 1 && value.endsWith(value[0]) && !(value[0] === '"' && /(^|[^\\])(\\\\)*\\"$/.test(value.slice(1)));
+			if (!closed) { errors.push(`${rel}: поле ${kv[1]} — кавычка не закрыта в той же строке`); }
+			continue;
+		}
+		if (value.includes(': ')) { errors.push(`${rel}: в поле ${kv[1]} двоеточие с пробелом — заменить на « — » или взять значение в кавычки`); }
+		if (value.includes(' #')) { errors.push(`${rel}: в поле ${kv[1]} « #» — YAML читает остаток как комментарий`); }
+		if (YAML_INDICATOR_START.test(value)) { errors.push(`${rel}: поле ${kv[1]} начинается со служебного знака YAML «${value[0]}»`); }
+	}
+	return errors;
+}
+
 async function main() {
 	const check = process.argv.includes('--check');
 	const fromGit = process.argv.includes('--from-git');
 	const donors = parseDonors(process.argv);
 	const files = (await collect(ROOT)).sort();
+	const headerErrors = [];
+	for (const rel of files) { headerErrors.push(...frontmatterErrors(rel, await fs.readFile(path.join(ROOT, rel), 'utf8'))); }
+	if (headerErrors.length > 0) {
+		console.error('[bump] шапки навыков и правил не читаются строгим YAML:');
+		for (const e of headerErrors) { console.error(`  ! ${e}`); }
+		process.exit(1);
+	}
 	const previous = await readRegistry();
 	const next = {};
 	const bumped = [];
