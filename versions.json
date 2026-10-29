@@ -74,11 +74,12 @@
       ]
     },
     "hooks.json": {
-      "version": 3,
-      "sha256": "c127af783beb90d374ed478fe2b0dde7649f68c56caa0dcc8e38f2a65fed2675",
+      "version": 4,
+      "sha256": "3ada45347ef8f6ea069456ac7392d04101c97944e9fbe72458913369c8184c7a",
       "history": [
         "974f1918da89ad9caad0dbf05b0db41ea9f9be7ec106aec8720e98ef03592794",
-        "71156e0a6dd69a235f661d69dbc18d30202c2092e421141315b83a23ff7597bb"
+        "71156e0a6dd69a235f661d69dbc18d30202c2092e421141315b83a23ff7597bb",
+        "c127af783beb90d374ed478fe2b0dde7649f68c56caa0dcc8e38f2a65fed2675"
       ]
     },
     "http-client.env.json": {
@@ -116,8 +117,8 @@
       "history": []
     },
     "pipelines.json": {
-      "version": 15,
-      "sha256": "3d63a69870e818f2eb131cf98cadb2fa9b699eea1a9c051fb03732d0a66946bb",
+      "version": 16,
+      "sha256": "c530d9f42a2034140033dae387a3c7c0ade3dee4adc34f594639b346705ed9b6",
       "history": [
         "af20fff2728121578c7e618bf40985afa50344889cfbd88051711e2963a207ab",
         "748c2d4975db1b4c43b42279385f68c9026ec4c5236ac3579e820f35f8712189",
@@ -132,7 +133,8 @@
         "23fa80ac55ed7262f069319bae41550c160573f0da75f07cfb416c7ab6c8b5fb",
         "e6dfb5f0bb4dca932beacadbc13160bcc02c01ca9cbc299ed7a69cd62428183e",
         "03743ac0b658ea1885c539e5841dacd01b31a6bb37291a99da8f5c25cd183971",
-        "e30736a24da4991e4d6d236dcdcdfdd8bfdf2fdb752f266d7c37a8c4566c7a9b"
+        "e30736a24da4991e4d6d236dcdcdfdd8bfdf2fdb752f266d7c37a8c4566c7a9b",
+        "3d63a69870e818f2eb131cf98cadb2fa9b699eea1a9c051fb03732d0a66946bb"
       ]
     },
     "products.json": {
@@ -326,8 +328,8 @@
       ]
     },
     "providers/kimi.jsonc": {
-      "version": 14,
-      "sha256": "7e0a35ec489f37aad25ef4fca69f7570dd2372298beeb84f20b50d3fb727cc0f",
+      "version": 15,
+      "sha256": "4e8ab23142998ea0bea7f3a525096a7655d77c1da918e641e8c50c6d36722cce",
       "history": [
         "da4da08f31e5ee5fce31b3fb4ec0810fcbf86abee42db5af93bbf1e11d825bd6",
         "e4658822d56641836bcb0cd9ec2a55304a49ae804981a4970fd044af6f8e833e",
@@ -340,7 +342,8 @@
         "73237e4652fe479a6246952d578e81c6ccd9cbf0d03ce6b960b709108bdeee38",
         "027a7c1dc053b1b200efdf5dbfb344c8c850ef02364b68a773e1d6321d50e2d7",
         "6692bd5ecb5ad7aec01b5b5fa366bcfc56b4f75427f6b76e53eb8e9dea75e541",
-        "6f52a3f13782c41ce5ae9e238941b6bf2fe0d0f81b3f6795bd47f5a53c6c3ec5"
+        "6f52a3f13782c41ce5ae9e238941b6bf2fe0d0f81b3f6795bd47f5a53c6c3ec5",
+        "7e0a35ec489f37aad25ef4fca69f7570dd2372298beeb84f20b50d3fb727cc0f"
       ]
     },
     "providers/meta-muse.jsonc": {
@@ -353,8 +356,8 @@
       ]
     },
     "providers/minimax.jsonc": {
-      "version": 18,
-      "sha256": "b6d9d07ce6613b932052158a05e2efe8696da3634d7acc3b2844c6d973190407",
+      "version": 19,
+      "sha256": "38fa94cc4991d4edd2438bef5c13f695164e3b6897431789f67e903bc8891580",
       "history": [
         "e60b792d17c7e3267a312ad58246bd1989de33a05de1238b36afae6659406cdd",
         "180a5aa87457282f01c1dbf2b4859bfb8d75c5bc157b61e9f8aec874a3bc0cd0",
@@ -371,7 +374,8 @@
         "f51e281893c6c2660478d599a7b02c962650b291203460d99eed811477348ea3",
         "723791882772a96185995d68eb07925c5b90d3da6e1e66d1c2b1ecb938a50198",
         "71d04eaf70135de956779d7a93005f71837b0622856001806944bd047904b3ca",
-        "fe34c656fab13a138cddccc64000fc1e03d9747b650b14ba80087509a74f54e5"
+        "fe34c656fab13a138cddccc64000fc1e03d9747b650b14ba80087509a74f54e5",
+        "b6d9d07ce6613b932052158a05e2efe8696da3634d7acc3b2844c6d973190407"
       ]
     },
     "providers/mistral.jsonc": {
@@ -396,8 +400,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 15,
-      "sha256": "de890805edd14d3b62373dfc0659774c71564fe4074014b1ac323e80881397c9",
+      "version": 16,
+      "sha256": "27ca33387d85ebb73ac0daed884f5a25fcd4d20abf9768b8b439d211136c47c7",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -411,7 +415,8 @@
         "2d9d9cc0f6864619e313fa98fb0479ad529640f6877da6fa351db419f0ee81c1",
         "7094f99a2b4e410cb2fb96f3ca00112b25c0996e588dd3dd6135353b16eeb1c8",
         "7db11259ab138b2172981f0bb8dc0f5e00a388953a7c68305d8a63d10f3d7be7",
-        "12b9a255e87b15ad5e2ffc58773afcc9be158b67f891d4c76b07048ef56cc9fe"
+        "12b9a255e87b15ad5e2ffc58773afcc9be158b67f891d4c76b07048ef56cc9fe",
+        "de890805edd14d3b62373dfc0659774c71564fe4074014b1ac323e80881397c9"
       ]
     },
     "providers/opencode-go.jsonc": {
@@ -655,10 +660,11 @@
       ]
     },
     "rules/verification.mdc": {
-      "version": 2,
-      "sha256": "7e337bf4c8dd90a6be18378a79c002377b9dcfee3b58bcade7f9e748a5ff6a77",
+      "version": 3,
+      "sha256": "9909cc3a1b03c908a42d8fdf523eedf39b77e91902db92465aa0d3c0a81429f9",
       "history": [
-        "5129417712a44865a354f78757ef394d3151d457273b6a087b6c87baf525585d"
+        "5129417712a44865a354f78757ef394d3151d457273b6a087b6c87baf525585d",
+        "7e337bf4c8dd90a6be18378a79c002377b9dcfee3b58bcade7f9e748a5ff6a77"
       ]
     },
     "rules/versioning.mdc": {
@@ -1048,9 +1054,11 @@
       "history": []
     },
     "skills/security-audit/SKILL.md": {
-      "version": 1,
-      "sha256": "0d2d132f5ff2bdc361f36ec33849deaef46353174995db5f3b5a4497327e120f",
-      "history": []
+      "version": 2,
+      "sha256": "77e688fbd498640a7c70299db6f283084f52d426fbb6ec8c73b3fa2e2fd7b5fa",
+      "history": [
+        "0d2d132f5ff2bdc361f36ec33849deaef46353174995db5f3b5a4497327e120f"
+      ]
     },
     "skills/security-audit/evals/evals.json": {
       "version": 1,

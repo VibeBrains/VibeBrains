@@ -74,8 +74,9 @@
         //     "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.30, "cacheWrite": 3.00, "cacheWrite1h": 6.00, "currency": "USD" },
         //     "costNote": "platform.kimi.ai/docs/pricing/chat" },
         //   { "id": "kimi-k2.7-code", "name": "Kimi K2.7 Code (снимается к концу 2026)",
-        //     "contextWindow": 262144, "vision": true,
+        //     "contextWindow": 262144, "vision": true, "sunsetDate": "2026-12-31",
         //     "cost": { "input": 0.95, "output": 4.00, "cacheRead": 0.19, "currency": "USD" },
+        //     "costNote": "снятие K2 к концу 2026; день 31.12.2026 — по агрегатору, страница вендора его не называет",
         //     "extraBody": { "thinking": { "type": "enabled", "keep": "all" } } }
         // ]
       }
@@ -116,7 +117,9 @@
     //                             за ~3× квоты (ускоряется только вывод модели, не инструменты). Опечатка в этом имени
     //                             молча уводит на kimi-for-coding.
     // Тарифы: Plus и выше — k3, k3-256k, kimi-for-coding (и k3.1-pro по документации); Pro и выше — k3 на 1M и
-    // HighSpeed. Прежние тарифы Moderato / Allegretto / Allegro / Vivace действуют у уже подписанных; страница условий
+    // HighSpeed. У K3.1 Pro окно тоже зависит от тарифа: 1M и HighSpeed вендор даёт с Pro/Allegretto, на младших
+    // тарифах в сводке разбора — 256K; страница вендора потолок для этого id не называет. Прежние тарифы
+    // Moderato / Allegretto / Allegro / Vivace действуют у уже подписанных; страница условий
     // (kimi.ai/ru/help/kimi-code/benefits) называет сетку «Plus и выше» и не упоминает Go, Max и Ultra — прежняя запись
     // набора об этих тарифах страницей не подтверждена. 401 может значить, что тариф не даёт доступа к модели.
     // Смена id модели или уровня рассуждения сбрасывает кэш контекста — переключайтесь в новом сеансе.
@@ -157,6 +160,7 @@
     //   "id": "kimi-code", "name": "Kimi Code (подписка)",
     //   "protocol": "openai", "baseURL": "https://api.kimi.ai/coding/v1",
     //   "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
+    //   "docsUrl": "https://www.kimi.com/code/docs/en/kimi-code/whats-new.html",
     //   "models": { "fetch": false, "static": [
     //     { "id": "k3.1-pro", "name": "Kimi K3.1 Pro (Kimi Code)", "default": true,
     //       "contextWindow": 1048576, "vision": true,

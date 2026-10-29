@@ -55,6 +55,16 @@
     { "event": "preToolUse", "command": "node .vibe/hooks/no-migrations.js", "tools": ["write_text_file"], "label": "миграции только руками", "active": false },
     // postToolUse не отменяет сделанное — формулирует требование исправить.
     { "event": "postToolUse", "command": "npm run lint --silent", "tools": ["write_text_file"], "timeoutMs": 60000, "label": "линтер после записи", "active": false },
+    // Инструкции агента — только из корня проекта и только из коммита. AGENTS.md или CLAUDE.md,
+    // которого нет под git, мог приехать из чужого пакета или появиться из ответа модели, а агент
+    // прочитает его как правило проекта. postToolUse не отменяет запись — только называет её вслух.
+    {
+      "event": "postToolUse",
+      "tools": ["edit_file", "rewrite_file", "create_file_or_folder", "write_text_file"],
+      "command": "p=$(jq -r '(.params.path // .params.uri) // empty'); [ -n \"$p\" ] || exit 0; case \"$p\" in \"$PWD\"/*) p=${p#\"$PWD\"/} ;; esac; case \"$p\" in AGENTS.md|*/AGENTS.md|CLAUDE.md|*/CLAUDE.md) git ls-files --error-unmatch -- \"$p\" >/dev/null 2>&1 || echo 'инструкции только из корня проекта и только из коммита' ;; esac; exit 0",
+      "label": "инструкции только из корня и коммита",
+      "active": false
+    },
     // turnEnd срабатывает в конце хода; изменённые файлы приходят в stdin-JSON (changedFiles).
     { "event": "turnEnd", "command": "npm test --silent", "timeoutMs": 300000, "label": "тесты в конце хода", "active": false },
     // pipelineStepEnd — гейт приёмки между шагами пайплайна (каскад «дешёвая модель, потом
