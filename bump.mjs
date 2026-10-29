@@ -27,6 +27,8 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY = path.join(ROOT, 'versions.json');
 /** Служебные файлы набора: описывают набор, но сами в проекты не сеются. */
 const METADATA = new Set(['versions.json', 'deprecated.json']);
+/** Каталоги про набор, а не его часть: мануалы и утилиты не сеются в проекты */
+const NOT_SEEDED_DIRS = new Set(['docs', 'tools']);
 
 /** sha256 от LF-нормализованного UTF-8 — CRLF-чекаут не должен выглядеть правкой. */
 function sha256(text) {
@@ -37,6 +39,7 @@ async function collect(dir, rel = '') {
 	const out = [];
 	for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
 		if (entry.name === '.git' || entry.name === '.github') { continue; }
+		if (!rel && entry.isDirectory() && NOT_SEEDED_DIRS.has(entry.name)) { continue; }
 		const relPath = rel ? `${rel}/${entry.name}` : entry.name;
 		if (entry.isDirectory()) {
 			out.push(...await collect(path.join(dir, entry.name), relPath));

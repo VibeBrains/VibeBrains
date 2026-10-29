@@ -64,11 +64,6 @@
         "9bc928b8fa26037f183a505539ea97bf4c73c6217d997de24d9f124ac48f5d92"
       ]
     },
-    "docs/manuals/connectAgent.md": {
-      "version": 1,
-      "sha256": "9f9036c39e411ef767091033dce6a29504e088f8d47170074981ec0aefed21e2",
-      "history": []
-    },
     "gitignore.seed": {
       "version": 4,
       "sha256": "2b2e919461870c2feb6a30ca2a8816020d64908d4d28ecd7fb12355c0dab6d2a",
@@ -1337,11 +1332,6 @@
     "testVectors/textToolCalls.json": {
       "version": 1,
       "sha256": "ab40f230328923e78dd82f62fd24d749acf904e09e04cc2dc127bcf281288d26",
-      "history": []
-    },
-    "tools/rulesToAgentsMd.mjs": {
-      "version": 1,
-      "sha256": "352266817d2eeaad824ab03fd6e378e2c7c7b81457676610266499466a27ec68",
       "history": []
     },
     "voice/sttModels.jsonc": {
