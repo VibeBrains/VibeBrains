@@ -101,13 +101,76 @@ async function readRegistry() {
 const PLAIN_KEYS = new Set(['name', 'title', 'description']);
 const YAML_INDICATOR_START = /^[-?:,\[\]{}#&*!|>'"%@`]/;
 
+/**
+ * Поля шапки: key → значение или строки блока
+ * Значение в двойных или одинарных кавычках отдаётся без кавычек
+ * Блок `>` или `|` собирается до следующего ключа верхнего уровня
+ */
+function headerFields(lines) {
+	const fields = new Map();
+	for (let i = 0; i < lines.length; i++) {
+		const kv = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(lines[i]);
+		if (!kv) { continue; }
+		const [, key, raw] = kv;
+		if (/^[>|][+-]?\d?\s*$/.test(raw)) {
+			const block = [];
+			for (let j = i + 1; j < lines.length && !/^[A-Za-z][\w-]*:\s*/.test(lines[j]); j++) {
+				block.push(lines[j]);
+			}
+			fields.set(key, { value: '', block });
+			continue;
+		}
+		let value = raw.replace(/\s+$/, '');
+		if (value.length > 1 && (value[0] === '"' || value[0] === "'") && value.endsWith(value[0])) {
+			value = value.slice(1, -1);
+		}
+		fields.set(key, { value, block: null });
+	}
+	return fields;
+}
+
+/** Проверки стандарта Agent Skills для SKILL.md: name и description */
+function agentSkillErrors(rel, fields) {
+	const errors = [];
+	const folder = rel.split('/').slice(-2)[0] ?? '';
+	const name = fields.get('name');
+	if (!name || name.value === '') {
+		errors.push(`${rel}: поле name обязательно`);
+	} else {
+		const value = name.value;
+		if (value.length > 64) { errors.push(`${rel}: name длиннее 64 символов`); }
+		if (!/^[a-z0-9-]+$/.test(value)) { errors.push(`${rel}: name — только строчные латинские буквы, цифры и дефис`); }
+		if (value.startsWith('-') || value.endsWith('-')) { errors.push(`${rel}: name не начинается и не кончается дефисом`); }
+		if (value.includes('--')) { errors.push(`${rel}: name без двойного дефиса`); }
+		if (value !== folder) { errors.push(`${rel}: name «${value}» не совпадает с именем папки «${folder}»`); }
+	}
+	const description = fields.get('description');
+	if (!description) {
+		errors.push(`${rel}: поле description обязательно`);
+	} else {
+		// Блок считаем по сумме длин его строк без отступа
+		const length = description.block
+			? description.block.reduce((sum, line) => sum + line.trim().length, 0)
+			: description.value.trim().length;
+		if (length === 0) { errors.push(`${rel}: поле description обязательно`); }
+		else if (length > 1024) { errors.push(`${rel}: description длиннее 1024 символов (${length})`); }
+	}
+	return errors;
+}
+
 /** Ошибки шапки файла набора: строка на ошибку, пустой список — шапка в порядке */
 function frontmatterErrors(rel, text) {
-	if (!(rel.endsWith('SKILL.md') || rel.endsWith('.mdc')) || !text.startsWith('---')) { return []; }
+	const isSkill = rel.endsWith('SKILL.md');
+	const isRule = rel.endsWith('.mdc');
+	if (!isSkill && !isRule) { return []; }
+	if (!text.startsWith('---')) {
+		return isSkill ? [`${rel}: шапка не найдена — поле name обязательно`] : [];
+	}
 	const end = text.indexOf('\n---', 3);
 	if (end < 0) { return [`${rel}: шапка не закрыта строкой ---`]; }
+	const lines = text.slice(3, end).split(/\r?\n/);
 	const errors = [];
-	for (const line of text.slice(3, end).split(/\r?\n/)) {
+	for (const line of lines) {
 		const kv = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line);
 		if (!kv || !PLAIN_KEYS.has(kv[1]) || kv[2] === '') { continue; }
 		const value = kv[2];
@@ -121,6 +184,7 @@ function frontmatterErrors(rel, text) {
 		if (value.includes(' #')) { errors.push(`${rel}: в поле ${kv[1]} « #» — YAML читает остаток как комментарий`); }
 		if (YAML_INDICATOR_START.test(value)) { errors.push(`${rel}: поле ${kv[1]} начинается со служебного знака YAML «${value[0]}»`); }
 	}
+	if (isSkill) { errors.push(...agentSkillErrors(rel, headerFields(lines))); }
 	return errors;
 }
 

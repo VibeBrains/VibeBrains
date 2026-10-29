@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 12,
-      "sha256": "3e2d8cd8cafe74628d339247c7002233484d8a15d2288456509b514eacba5239",
+      "version": 14,
+      "sha256": "14ccef246e77a6c31b08e603f0a79a67d42a1729e668c3cb4cb832a0c04a5cae",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -21,7 +21,9 @@
         "4e7b9887186e5a721339c6ee88f2e3ffc3d7cc175ceee03c1ed777adc1282f13",
         "f747ccb4d707a23eb076bf29e23e78fc1e4512559acb097db367903160933314",
         "4b084c069223cb3463c18f52087faa08871486f444e68bcff9d152e3d39fd789",
-        "b98e9ce3e6b5e00e156b23c9aa954d654fe105c11c170ae2ecb25bf64bb3a27a"
+        "b98e9ce3e6b5e00e156b23c9aa954d654fe105c11c170ae2ecb25bf64bb3a27a",
+        "3e2d8cd8cafe74628d339247c7002233484d8a15d2288456509b514eacba5239",
+        "e5bdc6ba88a36cb3f7d500ec8cb13e7c3a8315fdf9ee7620cf7f670b1da0aa7b"
       ]
     },
     "agents.json": {
@@ -61,6 +63,11 @@
       "history": [
         "9bc928b8fa26037f183a505539ea97bf4c73c6217d997de24d9f124ac48f5d92"
       ]
+    },
+    "docs/manuals/connectAgent.md": {
+      "version": 1,
+      "sha256": "9f9036c39e411ef767091033dce6a29504e088f8d47170074981ec0aefed21e2",
+      "history": []
     },
     "gitignore.seed": {
       "version": 4,
@@ -1330,6 +1337,11 @@
     "testVectors/textToolCalls.json": {
       "version": 1,
       "sha256": "ab40f230328923e78dd82f62fd24d749acf904e09e04cc2dc127bcf281288d26",
+      "history": []
+    },
+    "tools/rulesToAgentsMd.mjs": {
+      "version": 1,
+      "sha256": "352266817d2eeaad824ab03fd6e378e2c7c7b81457676610266499466a27ec68",
       "history": []
     },
     "voice/sttModels.jsonc": {
