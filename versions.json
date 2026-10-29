@@ -724,6 +724,11 @@
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d"
       ]
     },
+    "skills/brigadier/evals/evals.json": {
+      "version": 1,
+      "sha256": "4d468e2e97c81f2793014381dc9bf9ba83a5f4e777ead1af0eef510318ab20a8",
+      "history": []
+    },
     "skills/brigadier/worker/README.md": {
       "version": 4,
       "sha256": "1a60a040607dcc469849c1a62e43fe7ea3f593dbf5884d705c0b31f9507d6825",
@@ -948,6 +953,11 @@
       "history": [
         "b50dbeb6c98189111adf5ae24dd60fc2ca074cae3a563357e140daab798f395a"
       ]
+    },
+    "skills/night-work/evals/evals.json": {
+      "version": 1,
+      "sha256": "14cbd58477725da2dfa5a04393bf5b1d6541798f4365e1aa2cbfa92822adb7f2",
+      "history": []
     },
     "skills/optimize-by-metric/SKILL.md": {
       "version": 2,
