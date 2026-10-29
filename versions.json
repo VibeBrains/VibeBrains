@@ -516,8 +516,8 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 10,
-      "sha256": "a1dd101d2d56a276201aab177f989b01305fd0712d31201164da1b67ddb74ffe",
+      "version": 11,
+      "sha256": "01de9fee250e941bf3826a7fc6aa2b6543a5ad7d80653fecb57c155a204af8dc",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
@@ -527,7 +527,8 @@
         "865c575b34b86ebb71e15592e66f8c9b1487c3696ba8f5208873f7e31f350601",
         "cf7ce3bf8292023a130757b7b377c0b7dfd1d2ad326896058dc66f97b3e94f77",
         "55a31e705af9956c559edac224b7d195321654f06b4ecf4acb90c8576e89d74b",
-        "f4070f1210e71eada60299eb4c8eb30f575582b3ef2735c4831f7f07f7aa8477"
+        "f4070f1210e71eada60299eb4c8eb30f575582b3ef2735c4831f7f07f7aa8477",
+        "a1dd101d2d56a276201aab177f989b01305fd0712d31201164da1b67ddb74ffe"
       ]
     },
     "rules/clean-rules.mdc": {
