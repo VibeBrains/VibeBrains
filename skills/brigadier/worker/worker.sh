@@ -595,6 +595,14 @@ cmd_run() {
     log_file="${profile_log:-$DEFAULT_LOG_FILE}"
     case "$log_file" in \~/*) log_file="$HOME/${log_file#\~/}" ;; esac
   fi
+  # Каталог worktree: переменная сильнее, затем worktreesDir профиля, затем временный каталог
+  # Временный каталог лежит на системном диске, а исполнитель собирает проект внутри своей копии
+  if [ -z "${BRIGADIER_WORKER_WORKTREES:-}" ]; then
+    local profile_wt
+    profile_wt="$(prof_get "$profile" worktreesDir 2>/dev/null || true)"
+    case "$profile_wt" in \~/*) profile_wt="$HOME/${profile_wt#\~/}" ;; esac
+    if [ -n "$profile_wt" ]; then WORKTREES_ROOT="$profile_wt"; fi
+  fi
   case "$mode" in read | write) ;; *) die "--mode: read или write" ;; esac
   [ -d "$dir" ] || die "нет каталога $dir"
   dir="$(cd "$dir" && pwd)"

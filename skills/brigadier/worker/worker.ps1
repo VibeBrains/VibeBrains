@@ -426,6 +426,12 @@ function Invoke-Run {
         $LogFile = [Environment]::ExpandEnvironmentVariables([string]$prof.logFile)
         if ($LogFile -match '^~[\\/]') { $LogFile = Join-Path $HOME $LogFile.Substring(2) }
     } else { $LogFile = $DefaultLogFile }
+    # Каталог worktree: переменная сильнее, затем worktreesDir профиля, затем временный каталог
+    # Временный каталог лежит на системном диске, а исполнитель собирает проект внутри своей копии
+    if (-not $env:BRIGADIER_WORKER_WORKTREES -and $prof.worktreesDir) {
+        $WorktreesRoot = [Environment]::ExpandEnvironmentVariables([string]$prof.worktreesDir)
+        if ($WorktreesRoot -match '^~[\\/]') { $WorktreesRoot = Join-Path $HOME $WorktreesRoot.Substring(2) }
+    }
     if (-not (Test-Path -LiteralPath $Dir -PathType Container)) { Stop-Worker "нет каталога $Dir" }
     $workDir = (Resolve-Path -LiteralPath $Dir).Path
 
