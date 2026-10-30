@@ -2,6 +2,7 @@
 description: Как писать заметки к выпуску (release notes, changelog, GitHub Release). Применяется, когда просят написать или оформить заметки к релизу.
 globs:
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # Заметки к выпуску

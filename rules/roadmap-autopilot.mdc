@@ -3,6 +3,7 @@ description: Автопилот roadmap — автономный прогон do
 globs:
 triggers: "ночной прогон", "автопилот", "roadmap night", "автономный роадмап", "закрывай роадмап", "пока сплю", "пока я сплю", "прогон AFK", "не получилось — иди дальше", "skip on failure", "/skill:roadmap-autopilot"
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # Roadmap Autopilot

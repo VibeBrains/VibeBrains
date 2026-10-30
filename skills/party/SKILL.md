@@ -7,6 +7,8 @@ description: >
   agent sessions to collaborate in one chat, asks to invite another agent to an
   existing party, or pastes "/party join <ref> …" to make you join one as a
   guest.
+metadata:
+  vibeVersion: "1.0.0"
 ---
 
 # party: organize or join an agents-party

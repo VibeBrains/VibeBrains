@@ -2,6 +2,7 @@
 description: Как правильно собрать/править .vibe/providers.json — свои LLM-провайдеры и модели IDE (без пересборки). Применяется при работе с этим файлом.
 globs: **/.vibe/providers.json
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # .vibe/providers.json — авторская инструкция для модели

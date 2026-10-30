@@ -2,6 +2,7 @@
 description: На что смотреть в ревью TypeScript и что оставить тайпчекеру и линтеру. Применяется к изменениям в *.ts, *.tsx, *.js, *.jsx, *.mjs, *.cjs.
 globs: **/*.ts,**/*.tsx,**/*.js,**/*.jsx,**/*.mjs,**/*.cjs
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # Ревью TypeScript и JavaScript

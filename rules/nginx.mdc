@@ -2,6 +2,7 @@
 description: Работа с конфигами Nginx. Применяется при упоминании — nginx, конфиг сайта, sites-available, sites-enabled, reload nginx.
 globs:
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # Nginx — работа с конфигами

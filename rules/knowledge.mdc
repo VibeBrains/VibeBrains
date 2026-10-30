@@ -1,6 +1,7 @@
 ---
 description: Правило ведения базы знаний проекта — термины, открытия, договорённости.
 alwaysApply: true
+vibeVersion: "1.0.0"
 ---
 
 # Knowledge Base

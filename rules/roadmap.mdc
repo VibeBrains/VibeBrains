@@ -1,6 +1,7 @@
 ---
 description: Соответствие roadmap — выполненные пункты отмечать, план не опережать.
 alwaysApply: true
+vibeVersion: "1.0.0"
 ---
 
 # Roadmap

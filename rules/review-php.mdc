@@ -2,6 +2,7 @@
 description: На что смотреть в ревью PHP и что оставить статическому анализу. Применяется к изменениям в *.php и *.phtml.
 globs: **/*.php,**/*.phtml
 alwaysApply: false
+vibeVersion: "1.0.0"
 ---
 
 # Ревью PHP

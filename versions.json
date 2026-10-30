@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "comment": "Ревизии файлов набора. Генерируется bump.mjs — руками не править. history хранит sha256 прошлых ревизий: по ним сеялка узнаёт нетронутую копию старого релиза.",
+  "comment": "Ревизии файлов набора. Генерируется bump.mjs — руками не править. history хранит sha256 прошлых ревизий: по ним сеялка узнаёт нетронутую копию старого релиза. vibeVersion — версия правила или навыка из шапки.",
   "files": {
     "AGENTS.template.md": {
       "version": 1,
@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 14,
-      "sha256": "14ccef246e77a6c31b08e603f0a79a67d42a1729e668c3cb4cb832a0c04a5cae",
+      "version": 16,
+      "sha256": "e31827b2d815681bb997e6858dd34b892a70957d8974eec004d262926073ca92",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -23,7 +23,9 @@
         "4b084c069223cb3463c18f52087faa08871486f444e68bcff9d152e3d39fd789",
         "b98e9ce3e6b5e00e156b23c9aa954d654fe105c11c170ae2ecb25bf64bb3a27a",
         "3e2d8cd8cafe74628d339247c7002233484d8a15d2288456509b514eacba5239",
-        "e5bdc6ba88a36cb3f7d500ec8cb13e7c3a8315fdf9ee7620cf7f670b1da0aa7b"
+        "e5bdc6ba88a36cb3f7d500ec8cb13e7c3a8315fdf9ee7620cf7f670b1da0aa7b",
+        "14ccef246e77a6c31b08e603f0a79a67d42a1729e668c3cb4cb832a0c04a5cae",
+        "f421efc556127fc786079bc2167ab2abf288dcd6a779e61148c5f3f69f243300"
       ]
     },
     "agents.json": {
@@ -516,8 +518,8 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 13,
-      "sha256": "517c32ae6c95f49c015c470db8b7239a64ef535ba8d6ebf138a9bee7b6830bd7",
+      "version": 14,
+      "sha256": "39eebdca07ae7bc2527706be9894fd4f70cc011ce08570750996b37594d5e635",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
@@ -530,157 +532,200 @@
         "f4070f1210e71eada60299eb4c8eb30f575582b3ef2735c4831f7f07f7aa8477",
         "a1dd101d2d56a276201aab177f989b01305fd0712d31201164da1b67ddb74ffe",
         "01de9fee250e941bf3826a7fc6aa2b6543a5ad7d80653fecb57c155a204af8dc",
-        "dd4b43b13aafdba14545c64e572de46516da4081c7faaea67d11853793be28a6"
-      ]
+        "dd4b43b13aafdba14545c64e572de46516da4081c7faaea67d11853793be28a6",
+        "517c32ae6c95f49c015c470db8b7239a64ef535ba8d6ebf138a9bee7b6830bd7"
+      ],
+      "vibeVersion": "1.1.0"
     },
     "rules/clean-rules.mdc": {
-      "version": 7,
-      "sha256": "39b06a75ee0ee11f945cf358944b28449a363914c725d179f0d8686b91e4f0d3",
+      "version": 8,
+      "sha256": "5f77900b85260e134c50db74ce276cd6cd52b4efd3269d552a89ca6f93c4b62e",
       "history": [
         "bd459a3233045ec34c6bc553ede775728a9bd75992c83261cc7b1db5a9e285ce",
         "ca1a55531ec3590e5328803162772b7061dbec8c28bd5184a2a012a7a06c0eaf",
         "e21f07fc89fc8425066bcc097c1ea8d8fb2d7e3b2a42ca2b2fa39bfbdb0c1971",
         "2f4dc671993c46e68c96e2b01415af7f887cb585d067431edecd7a611f7f640f",
         "06715aaccfcd8cddd6f9d003637cbf5f243085ecac54de174296d1b92f06571a",
-        "a5214f4eb6a813c65f8b354d354961f3cf478a773b837e99f52c7aa3f4f9f4dd"
-      ]
+        "a5214f4eb6a813c65f8b354d354961f3cf478a773b837e99f52c7aa3f4f9f4dd",
+        "39b06a75ee0ee11f945cf358944b28449a363914c725d179f0d8686b91e4f0d3"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/dev-engine.mdc": {
-      "version": 3,
-      "sha256": "202dd9bae340937c8791cafb2b4487561a54cd220c32f5d6f2f628efea443a34",
+      "version": 4,
+      "sha256": "fac2095d9fc580148f536fab51b5331f46b1a3d2cfe1bd25f56f6c830e888cc7",
       "history": [
         "9df1f33060c133ffabc55f0158c9a3e2aa1bcd9f1c16e5ae5324b7e8f6204891",
-        "6c00af49f895afd3d8da1d563da85e4f92de41c4b043a889c8baf4d91af7eb05"
-      ]
+        "6c00af49f895afd3d8da1d563da85e4f92de41c4b043a889c8baf4d91af7eb05",
+        "202dd9bae340937c8791cafb2b4487561a54cd220c32f5d6f2f628efea443a34"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/knowledge.mdc": {
-      "version": 4,
-      "sha256": "26bd8262c4a3a61984914ce93ecc9409dca9b06f9bce0ae01b22c88e6b67c066",
+      "version": 5,
+      "sha256": "7c68f1bf22dc9eea36b13c63b259be6853fc6900ef5988c312ab3a6142bea5c4",
       "history": [
         "10274639c49cff0cc9d9445143cc12587591aa446b201f171f3614328955b622",
         "20bb7f8cd022fc8e41ee8ce213dca1982f003f66459bf7aae98ed3cf7b0b1dd6",
-        "9e306d9f697961399a4bf8a024b24f9abb691abdfadd345673e7c5462c4146da"
-      ]
+        "9e306d9f697961399a4bf8a024b24f9abb691abdfadd345673e7c5462c4146da",
+        "26bd8262c4a3a61984914ce93ecc9409dca9b06f9bce0ae01b22c88e6b67c066"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/nginx.mdc": {
-      "version": 2,
-      "sha256": "83a568ce1213d61bc1a11a881d69de7cf2ba1a290f2ff38f122e9312e76df392",
+      "version": 3,
+      "sha256": "1a389e1b455d55ed2eca372aee0c6c57926809812121c9f2530e2173ee1e58c2",
       "history": [
-        "60fc04eebca8cdb81b5f9436d221dbe0ab7fdbf2e9b8c2fe6c3ab1ac7713ef3f"
-      ]
+        "60fc04eebca8cdb81b5f9436d221dbe0ab7fdbf2e9b8c2fe6c3ab1ac7713ef3f",
+        "83a568ce1213d61bc1a11a881d69de7cf2ba1a290f2ff38f122e9312e76df392"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/pipeline.mdc": {
-      "version": 3,
-      "sha256": "410608ae1b6fece57080c253086efe2e6e19e233d1cbc29780a81257022ea1f5",
+      "version": 4,
+      "sha256": "1e82ebb14680f13d8ae91a0b8364eff047feb72ae733502c309cd1d6cc9565f3",
       "history": [
         "72c9da8f26070e48d60075dce2868a81f6f47f625f3511743cf79e32d8e45f57",
-        "2516d568844622b2ad0d3410d8f9787ef8ee033545fa9a462270c80858777d45"
-      ]
+        "2516d568844622b2ad0d3410d8f9787ef8ee033545fa9a462270c80858777d45",
+        "410608ae1b6fece57080c253086efe2e6e19e233d1cbc29780a81257022ea1f5"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/providers-json.mdc": {
-      "version": 4,
-      "sha256": "b8656ecf1cf908305a52b6ea03fca3151f85ecc633a21ef8f6be70951dd1cba3",
+      "version": 5,
+      "sha256": "e871ef3dfad9b6008a7f0aff76debbb456743242fbd241d89b6fd15805d60147",
       "history": [
         "66ae3b57d337d6842d6d1c58bc37880a9afe33665d7cdc9b8e2c5ad101da3af3",
         "27d6f78a0e342cbf276994440da83b5f00b250bdf8afa33f91b93095b41d1379",
-        "8bff2c014acbaf2c367de5f434b50b3baac85a27684e6b943faf4d0429112b8c"
-      ]
+        "8bff2c014acbaf2c367de5f434b50b3baac85a27684e6b943faf4d0429112b8c",
+        "b8656ecf1cf908305a52b6ea03fca3151f85ecc633a21ef8f6be70951dd1cba3"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/release.mdc": {
-      "version": 7,
-      "sha256": "7fcb11e90ce68ee59bf1062e49e58d495d9aa8bf3de023c3e976f445a9bf1fa8",
+      "version": 8,
+      "sha256": "4645b21d9bab67bbef7895ca28f0cacb78b37d8ea9068d114127ef68780fa71c",
       "history": [
         "b6c0667330841a496f4222cbe59e2a0fd75620742a2683b2c80bf89b9b0e6280",
         "de2631c3d2e3c570d23a8ccda45344cfd50be0e0b010d2c42cd0e05971aa2b23",
         "d70d6150c902056714ab0447e8a142d7b2f89d395a5bd040be21fbb2eaca888e",
         "f83945c8173f93074a91c3a4227667f2875cc1f10c4abdea7695bdaa14074b90",
         "535d37fd2eb1b58c1ed29ffaf2237c75f215cbdc30390e08f223d6908279394b",
-        "822d5ce8a14753c8e9ac4f93789e63119b77520a3d8e173ecfc33c63a73b6699"
-      ]
+        "822d5ce8a14753c8e9ac4f93789e63119b77520a3d8e173ecfc33c63a73b6699",
+        "7fcb11e90ce68ee59bf1062e49e58d495d9aa8bf3de023c3e976f445a9bf1fa8"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/review-php.mdc": {
-      "version": 1,
-      "sha256": "69e30f647cfa648d4561bc7064f827ae274331710efbbb9a8961b3cec29de4e1",
-      "history": []
+      "version": 2,
+      "sha256": "9130351a24e782cf2b73637edff980bf7df41d40ce5a24e9cbca2f0e55e9379b",
+      "history": [
+        "69e30f647cfa648d4561bc7064f827ae274331710efbbb9a8961b3cec29de4e1"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/review-typescript.mdc": {
-      "version": 1,
-      "sha256": "2ab4bf44da72aeec003816240ca26ed07480ce6aa82bca42ba15123999fe938f",
-      "history": []
+      "version": 2,
+      "sha256": "7b82d8147beb28265fbcb6e3b961c83497d3a5f33ee2ca275fdc0cc7634dd7f6",
+      "history": [
+        "2ab4bf44da72aeec003816240ca26ed07480ce6aa82bca42ba15123999fe938f"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/roadmap-autopilot.mdc": {
-      "version": 5,
-      "sha256": "eef279898bf97f11e280200252b105d20bfa94411e13ab9409438fded6c81e9f",
+      "version": 6,
+      "sha256": "54d2e4af0d8d00ae2310a0a326e2b12094e4d4c28d5fed046213144377f15730",
       "history": [
         "eeee1bbf82d0cf695fe4d133fd8d17d8d849768fc505ec685d59528f53f9b640",
         "702df9a15848cf09d77eab52e727bccd05242edc0a28d24bdde294057406b8dd",
         "ede07df7e4900a00c9c993315d3aee17632293d9546cb830a9c3003faeb40912",
-        "0d3521c059f97da596ab30d9a0d8845226f7e023c5ac2d14cdb770a0808663cc"
-      ]
+        "0d3521c059f97da596ab30d9a0d8845226f7e023c5ac2d14cdb770a0808663cc",
+        "eef279898bf97f11e280200252b105d20bfa94411e13ab9409438fded6c81e9f"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/roadmap.mdc": {
-      "version": 2,
-      "sha256": "596bcc8ad2d98bdcf6a804cb7968e5caeedf7490ae2053c96dc0c4025d8fc6f1",
+      "version": 3,
+      "sha256": "39a6c4da4c55acd31119b45e561abdee3dde032a09e0f1d9b65ab2875a5742c5",
       "history": [
-        "180f7064efbfeb854ac20019fdc86c575b5cea07ef91d3ef964bb049de367a40"
-      ]
+        "180f7064efbfeb854ac20019fdc86c575b5cea07ef91d3ef964bb049de367a40",
+        "596bcc8ad2d98bdcf6a804cb7968e5caeedf7490ae2053c96dc0c4025d8fc6f1"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/script-save.mdc": {
-      "version": 5,
-      "sha256": "d38d290eb2048c630fb8e09abd52753788562cd1cde34559684031b4bf5bb0dd",
+      "version": 6,
+      "sha256": "ed80dbcb605eaa61ded3bc3370e4c6d4ffd0ff8d82bba6fe4b132e1dfc6a3a76",
       "history": [
         "bf15b48f9bcedc1a7eb2ed9205924bca549934e0d9fe4533619fa7b7422f8e32",
         "201539a713ea911932056a3f7c04a7377a67f95eff546be38b7592af6178a948",
         "db444b47d00a6ed334952505f940da876737d92ddfcf636f6a3d7bc29edeed42",
-        "c81da3953daed1316ae892cc892146643c763a689cf980cd4e4796b437755bec"
-      ]
+        "c81da3953daed1316ae892cc892146643c763a689cf980cd4e4796b437755bec",
+        "d38d290eb2048c630fb8e09abd52753788562cd1cde34559684031b4bf5bb0dd"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/security.mdc": {
-      "version": 1,
-      "sha256": "4226fc5fef08a9a6195b6d632b65da567b36edfbee4dbf515f0722a5cac315f4",
-      "history": []
+      "version": 2,
+      "sha256": "9e5a519397fcedbf2cfb1426504167a36bc458d3bb931fb6b7ab9327cfbb5ee1",
+      "history": [
+        "4226fc5fef08a9a6195b6d632b65da567b36edfbee4dbf515f0722a5cac315f4"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/spec-first.mdc": {
-      "version": 4,
-      "sha256": "c21548b6ce6b2583ecf72e6ed0efd770b11ec5c4a68bd9c505d90212c0d9916b",
+      "version": 5,
+      "sha256": "65dd27ea7c19361ac35d19087a166d5afab628021730a012d1a3cf7b17486d0b",
       "history": [
         "35fc757d7dffbe89994108c2ffa91b60149bb8914fdb2f1dbb26862e5ca2bccc",
         "254fcb2b71705940ed8f74eb5635f660dbc714eea74bd3f50c2290f675a74184",
-        "ac547e0fba6aaaeddddef71ffccb0eacde18170801975130ab86a7f16993c57a"
-      ]
+        "ac547e0fba6aaaeddddef71ffccb0eacde18170801975130ab86a7f16993c57a",
+        "c21548b6ce6b2583ecf72e6ed0efd770b11ec5c4a68bd9c505d90212c0d9916b"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/ui-kit.mdc": {
-      "version": 2,
-      "sha256": "264ddd7edb240f8868a6e58bafb564186637f7903cab49da7b113357a0c57f2c",
+      "version": 3,
+      "sha256": "8664a28d06196c3ea982e8187dad43aea398d69101a448bb7c2bc8e3392718e9",
       "history": [
-        "30b8e8ab9e940e68544bd8b8af460848c3275579ee35937c80feacc05277881b"
-      ]
+        "30b8e8ab9e940e68544bd8b8af460848c3275579ee35937c80feacc05277881b",
+        "264ddd7edb240f8868a6e58bafb564186637f7903cab49da7b113357a0c57f2c"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/verification.mdc": {
-      "version": 2,
-      "sha256": "7e337bf4c8dd90a6be18378a79c002377b9dcfee3b58bcade7f9e748a5ff6a77",
+      "version": 3,
+      "sha256": "6ef6585561c2d7a223ca5e060a640fc92403876115159ab11e395012b5e7c845",
       "history": [
-        "5129417712a44865a354f78757ef394d3151d457273b6a087b6c87baf525585d"
-      ]
+        "5129417712a44865a354f78757ef394d3151d457273b6a087b6c87baf525585d",
+        "7e337bf4c8dd90a6be18378a79c002377b9dcfee3b58bcade7f9e748a5ff6a77"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/versioning.mdc": {
-      "version": 2,
-      "sha256": "1178ea52213143f7c097d2ed01d174eee26ebdcf6fbc1faf9a26daca43d55814",
+      "version": 3,
+      "sha256": "2a7d6588f79ad26fa81c3fb385056feb29a6e2c5cabc91dd226e9a5b28d885bf",
       "history": [
-        "ca84ee6dbe8f6aeb22e89d001e0a5ad07fdeed88469c34b6c396f2ce09b4027b"
-      ]
+        "ca84ee6dbe8f6aeb22e89d001e0a5ad07fdeed88469c34b6c396f2ce09b4027b",
+        "1178ea52213143f7c097d2ed01d174eee26ebdcf6fbc1faf9a26daca43d55814"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "rules/watch-media.mdc": {
-      "version": 2,
-      "sha256": "2ceff0048b021ba1a9481310bf2765fb817809417d178c4272b354886af14fb6",
+      "version": 3,
+      "sha256": "d02fc50c7e3dd176b56930af3b00cb90f37ea47b3a006f6fcd72a341e7a7b777",
       "history": [
-        "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672"
-      ]
+        "4b05585c90a13a9ea018adec54573925530b9294d919f6f02f65ae54b086f672",
+        "2ceff0048b021ba1a9481310bf2765fb817809417d178c4272b354886af14fb6"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "seedBaseSpec.md": {
-      "version": 1,
-      "sha256": "11c3c2d1802f562813c614d3365ff10399a63a2f2c64c0945f4bc77077accbf1",
-      "history": []
+      "version": 2,
+      "sha256": "09734fa2ec852312caf3d7dd2efd2026352c05e6efccf63ebf8f923bcb5b4a46",
+      "history": [
+        "11c3c2d1802f562813c614d3365ff10399a63a2f2c64c0945f4bc77077accbf1"
+      ]
     },
     "servers.json": {
       "version": 1,
@@ -692,7 +737,8 @@
       "sha256": "cdb141cb5a69870fc0143516480847690ebc643886066bef6ce97312097eee94",
       "history": [
         "61882eff0b30957f94ed737ad4568da2e8d48a1a514951ca167470524c056825"
-      ]
+      ],
+      "vibeVersion": "1.0.1"
     },
     "skills/anti-slop/evals/draft.md": {
       "version": 1,
@@ -720,12 +766,14 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 3,
-      "sha256": "82c53993ffbc5a5289d63866da758828e083f562830e623d29320a24b9fab838",
+      "version": 4,
+      "sha256": "816ccb2733f3cc78030a7c502d368e7d4e0801101d11321197bb50bd56e97e76",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
-        "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a"
-      ]
+        "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
+        "82c53993ffbc5a5289d63866da758828e083f562830e623d29320a24b9fab838"
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/brigadier/worker/README.md": {
       "version": 7,
@@ -790,7 +838,8 @@
       "sha256": "5d8ccceb6a771a35bf2a9c07fdcd657845d1464299ee5d4299e7c04d58d67f50",
       "history": [
         "86684f734040f01cdf371fd78a0d56a5cad0b249dc8c8619611a647a49d18c7e"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/codebase-design/evals/evals.json": {
       "version": 1,
@@ -802,7 +851,8 @@
       "sha256": "d86dc8609be00bbb9e0100e7e9f6ed5c2251e7159710656f323d6139d36d4e00",
       "history": [
         "d0f06dc0c3b8711b2d20120a53f2d0cb2bd58ac84cb5b01e4dbb81c2cff5bdc4"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/concept-brief/assets/build.py": {
       "version": 1,
@@ -834,7 +884,8 @@
       "sha256": "d59fd8741597a9f518fcd4096a4e3b894c2454b5a7a37dc2db23706d7110b9d2",
       "history": [
         "6c15c84caa237b33946ed637b147ba8203b2b76555f2c0cb799cf60bf8b84170"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/demo/evals/evals.json": {
       "version": 2,
@@ -856,7 +907,8 @@
         "06d96379209346442ec84597f37cfbd34a4295c124250142ef19681401106750",
         "39cc567f1aa28151cfc6461230fc41cd030a7e56eb1dfc353dec419b36e9d2bf",
         "f3eeec54bb17f92fcc9a83d40544d019cfe0995724909c475125691b945c135e"
-      ]
+      ],
+      "vibeVersion": "1.3.0"
     },
     "skills/diagnosing-bugs/LICENSE": {
       "version": 1,
@@ -868,7 +920,8 @@
       "sha256": "e4b78b65d9e0e2887ee54be89d2fa128b7745fa77d6ba1ae4e3a29ecabc93249",
       "history": [
         "ec5375990d055cb127555bf51c75e2901ff8259af6bc0b9253b09df32e2de1b8"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/diagnosing-bugs/evals/evals.json": {
       "version": 1,
@@ -887,7 +940,8 @@
         "7d53df652924ac6a3efb078802e274befdf7f4120868dd69dd81e5e88e5b0d5a",
         "b1a170e5c89f9742b52ab9ac04fc6c59cc51841be341234835fdb5aeed61d86d",
         "e69efccaf4ee5934b42838b7b31be068828f4660f49127154453772381cc5f22"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/example/evals/evals.json": {
       "version": 1,
@@ -905,7 +959,8 @@
       "history": [
         "4c711b23602e3eca4d4fbec29d67a45638e74a4edd7a1dec9af029e5b2a483e9",
         "b4d387cba683cf36bab4b3061085af7539cface8bd087ad98f8d97bbf5c93cb4"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/grilling/LICENSE": {
       "version": 1,
@@ -917,7 +972,8 @@
       "sha256": "45cc8a92918b670d315764ad2b1ff37a5109e68fcdf537258c90ea1ee47bae48",
       "history": [
         "cf1ae4d87ed4383d369fa024296381c33ca9993e3d2550c245500df027d984a8"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/grilling/evals/evals.json": {
       "version": 1,
@@ -932,17 +988,20 @@
         "985c9f69020faf73bccab38c75a38bb3041a0efd47fe2efe5180ccdc7efcdb63",
         "656a731cbcd90133d4c77779d360bbe6a09382a88018c701be68c52f36dfda8c",
         "43e03b56bb6ffb43ab879cbc0179dcb2db938bf269a157f15240e018d92aebc3"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/incident-review/SKILL.md": {
       "version": 1,
       "sha256": "b99d44335b4949445c70ef7b338a4bb52e93ea2b8f28c2c3a94e4f3526dd11b7",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/na-paltsah/SKILL.md": {
       "version": 1,
       "sha256": "5b91a232e4a058ad4104d5e2092415be3e1a0f16a1108d95c013a81697707900",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/na-paltsah/evals/evals.json": {
       "version": 1,
@@ -959,26 +1018,32 @@
       "sha256": "458db670909365cd5287c743f55f0f8ad44298fbae57bebf336c7e6f05daa600",
       "history": [
         "b50dbeb6c98189111adf5ae24dd60fc2ca074cae3a563357e140daab798f395a"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/optimize-by-metric/SKILL.md": {
       "version": 2,
       "sha256": "98c78d56cda526ef44a32b0fa60d4093515474a869a218e8820ccf4773ba4951",
       "history": [
         "13973698c31616de03af8892ac15db16ff2ad369514dde0f732cbabb640b3870"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/party/SKILL.md": {
-      "version": 1,
-      "sha256": "56f4a1d6da07f8b2a27e4b99f7c6bd3c63b6ca916a300549b5aa3aadf76760cc",
-      "history": []
+      "version": 2,
+      "sha256": "cf61680e9f489748b0bb6719f71a0c0473bf5d6bf193972583dff411a041a7d5",
+      "history": [
+        "56f4a1d6da07f8b2a27e4b99f7c6bd3c63b6ca916a300549b5aa3aadf76760cc"
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/rescue-session/SKILL.md": {
       "version": 2,
       "sha256": "24ec7eb37d4caf5a4e3328637a852cb497752e794587032de9a1024b9c53ad44",
       "history": [
         "28d0718967f2fc1b577e8541dca8b8fee11261facaf90a51b919822710bbc068"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/rescue-session/evals/evals.json": {
       "version": 1,
@@ -991,7 +1056,8 @@
       "history": [
         "1c3b44b07ba624c5819f8a8e546a93c064cbb4a5a8a460a2df98e19ea1a2f9b5",
         "2044a56fec4df8213d1f4e3825fef0627839764c2d05ce2ee942820edfa8a3db"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/resolve-merge-conflicts/scripts/extract_conflict_context.py": {
       "version": 1,
@@ -1008,7 +1074,8 @@
       "sha256": "0c8f2aae942ee1746a47221bdcb6860b88e664cd77fb428b82b239e8d9b9b06e",
       "history": [
         "66436c486e165a5d1e1b450e72de2cdff78c5f91728dab45c98a1625eb2d6e10"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/retro/evals/evals.json": {
       "version": 1,
@@ -1021,7 +1088,8 @@
       "history": [
         "5c0bb312330dfb02d9ca4feebaa13689c3a7fc5d70dc1676060a0aa36b9f8f3c",
         "f9bbd8cf723ba2250c5fc780621c6f3059f1b4b4577d540c0d067d53e7d0499d"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/roadmap-autopilot/SKILL.md": {
       "version": 4,
@@ -1030,17 +1098,20 @@
         "cf08aed02d8cc8b9affe96b4ecca81d0fb6124dc4f862a3e0463ff331595754d",
         "101d4be414f3f70f3c41971e4ff1d7b5cc8b5149946c59ff965f08b76ca2e78d",
         "7fdfa0dbcbf5ecf74c94f1d95f5a347030ac49cf8b8e91828cf5f5c9470a3b52"
-      ]
+      ],
+      "vibeVersion": "2.0.0"
     },
     "skills/screenshot-review/SKILL.md": {
       "version": 1,
       "sha256": "df022b51f1c2cc9f4d5f32425a4cf98cc5c8e7c79f7815f79ce5d7d3de5ad276",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/security-audit/SKILL.md": {
       "version": 1,
       "sha256": "0d2d132f5ff2bdc361f36ec33849deaef46353174995db5f3b5a4497327e120f",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/security-audit/evals/evals.json": {
       "version": 1,
@@ -1052,7 +1123,8 @@
       "sha256": "15f0af781c00dbdd7bbd947c4ce9cc1934c3f5db9c62bb613094c853645b978a",
       "history": [
         "72845c9cf3083ab2cdf6cce8f8ff2a2419d1f8376df7617c7ca566f2a564a346"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/self-excuses/evals/evals.json": {
       "version": 1,
@@ -1067,7 +1139,8 @@
         "6f6e898e5010214275c1c516aac9574284b8fd2d32bf2cc8a4dd424f70af9883",
         "3fdd6ec6ab9266c311624ed09f10bdd05bdd4e56e76da227db3526e74ca0ab20",
         "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/tdd/LICENSE": {
       "version": 1,
@@ -1077,7 +1150,8 @@
     "skills/tdd/SKILL.md": {
       "version": 1,
       "sha256": "a36c30999dcf79409f4600df8d9e85a23b156b76cec2e88f726cc76a1637bad5",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/tdd/evals/evals.json": {
       "version": 1,
@@ -1097,7 +1171,8 @@
     "skills/teach/SKILL.md": {
       "version": 1,
       "sha256": "6f19ad23f40f46b1f2b732706b9b6d40fb88d95c5403ba8eaedf96da981ab22a",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/to-questionnaire/LICENSE": {
       "version": 1,
@@ -1109,7 +1184,8 @@
       "sha256": "43df68e8b0501bf5788362abfc96d6b9594dfdc3d2fa1aa9ca75c48332dbd3d2",
       "history": [
         "1024f69b8977e0557058bdea5e51c86cfd498581bc2d1d70d0b6a33813b71157"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/to-questionnaire/evals/evals.json": {
       "version": 1,
@@ -1119,15 +1195,18 @@
     "skills/triage-failing-test/SKILL.md": {
       "version": 1,
       "sha256": "3f647b3b708b32b9ac1afe53680b16c20f970e1eea19537fd769f67954ee8145",
-      "history": []
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/update-skill/SKILL.md": {
-      "version": 3,
-      "sha256": "6a73988c6c8d13ae9bb2ff53ad7f1d6a2b32029080afcc1ae973d9db18cb1004",
+      "version": 4,
+      "sha256": "471ba82c0b94eeeaaa3b8ad69ec722f5b2a939c726e1a0c95d39a12f300ea78e",
       "history": [
         "3dd876276aef0652208e28e8adb6b2a9223f166138b1961c4cfd005912319068",
-        "1ede18428ec2482e8ce842ee72cbd2ad4ea3e742db81e2c6fe35b95f2830d928"
-      ]
+        "1ede18428ec2482e8ce842ee72cbd2ad4ea3e742db81e2c6fe35b95f2830d928",
+        "6a73988c6c8d13ae9bb2ff53ad7f1d6a2b32029080afcc1ae973d9db18cb1004"
+      ],
+      "vibeVersion": "1.2.0"
     },
     "skills/update-skill/references/best-practices.md": {
       "version": 1,
@@ -1144,7 +1223,8 @@
       "sha256": "b5f2499a3489602581c7f67e9b97852d19f485afa46bca85de81950d45675b83",
       "history": [
         "56085c8a230eda9c40cefb534d2d60e59ee19ef22344ceb6de37a91dea191d37"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/wait-what/evals/evals.json": {
       "version": 1,
@@ -1161,7 +1241,8 @@
       "sha256": "9bec2e96a87b07a71df136a43ef310802a676c4599210fa98f520f6b008cdabf",
       "history": [
         "9056aa326870a173cdc9ec181c64fed1f61db3b6f6ab821a30d3f49f155e1319"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/wizard/evals/evals.json": {
       "version": 1,
@@ -1183,7 +1264,8 @@
         "5f2045146dbec11ee3eac118ac9370e06489e8511976a8acf033a1cbfdf37d5f",
         "230f70531953bf7293d82944a0cd177ea155a7008da93aa58b00899b4129849c",
         "0c24eea4c9562efacb4033c4c8c56ad648b5d955c595489b727cfa95224bf551"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/write-product-spec/references/PRODUCT.skeleton.md": {
       "version": 4,
@@ -1201,7 +1283,8 @@
         "2bee2626171fc9c1575715e7e4345cfbfd7f089762d41b486c99a8850bc357c4",
         "51b1913a46f918a2f59d3e80830721dd106aa8d19500580f71fc100f8f690eaf",
         "88f3abdc03532d662df92b77b4521de0c58df0318c10d390783bdfc4c7030c2f"
-      ]
+      ],
+      "vibeVersion": "1.1.0"
     },
     "skills/write-tech-spec/references/TECH.skeleton.md": {
       "version": 2,
@@ -1225,7 +1308,8 @@
       "sha256": "24fc6ec5a915e8e31da78538b569cedc50a0166752e8ab74d5476247055f8721",
       "history": [
         "ae9388e0aa0392868ffec29eabded0338b9d8783b6c69f963f69d798ca125f98"
-      ]
+      ],
+      "vibeVersion": "1.0.0"
     },
     "skills/writing-for-agents/evals/evals.json": {
       "version": 1,
