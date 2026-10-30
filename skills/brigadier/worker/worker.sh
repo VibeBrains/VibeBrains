@@ -8,9 +8,9 @@
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
-#                 --dir <путь> --brief <файл или -> [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree]
+#                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree]
 #   (потолок цены запуска — maxRunUsd из профиля; --budget переопределяет его вручную)
-#   (write в основном дереве git: скрипт сам создаёт worktree и ветку brigadier/<время>, правки коммитит туда)
+#   (write в основном дереве git: скрипт сам создаёт worktree и ветку brigadier/<время> от --base, по умолчанию HEAD)
 #
 # Ключ в аргументы командной строки не попадает никогда: ни в свои, ни в чужие процессы
 
@@ -25,6 +25,8 @@ CHECK_MAX_TOKENS=64
 PRICES_STALE_DAYS=30
 # Знаков на токен для оценки выхода по тексту потока (usage в потоке отдаёт output_tokens=0); берётся с запасом вниз
 CHARS_PER_TOKEN=2.5
+# Вход в токенах без единого вызова записи (Edit/Write/MultiEdit) выше порога — признак чтения по кругу
+READ_LOOP_INPUT_TOKENS=2000000
 # Секунд между SIGTERM и SIGKILL при обрыве по потолку
 KILL_GRACE_SEC=5
 CLAUDE_BIN="${BRIGADIER_WORKER_CLAUDE:-claude}"
@@ -371,16 +373,17 @@ except Exception:
 # Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
 # потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
 # Итог пишется в файл JSON; потолок пуст — запуск идёт без потолка
-# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, команда claude…
+# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, порог входа без записи, команда claude…
 run_stream() {
   python3 -I -c '
 import json, os, signal, subprocess, sys, threading
 
-out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg = sys.argv[1:9]
-argv = sys.argv[9:]
+out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg, loop_arg = sys.argv[1:10]
+argv = sys.argv[10:]
 cap = float(cap_arg) if cap_arg else None
 chars_per_token = float(cpt_arg)
 grace = float(grace_arg)
+loop_threshold = int(loop_arg)
 
 try:
     price = json.load(open(profile_file, encoding="utf-8"))["prices"][model]
@@ -392,6 +395,7 @@ texts = {}       # id сообщения -> куски текста ответа
 seen = set()     # (id, блок): один и тот же блок не считается дважды
 out_chars = 0
 think_tokens = 0
+wrote = False    # был ли хоть один вызов инструмента записи
 result = None
 
 
@@ -459,6 +463,8 @@ try:
                     out_chars += len(str(c.get("text") or ""))
                 elif c.get("type") == "tool_use":
                     out_chars += len(json.dumps(c.get("input"), ensure_ascii=False))
+                    if c.get("name") in ("Edit", "Write", "MultiEdit"):
+                        wrote = True
         elif kind == "system" and ev.get("subtype") == "thinking_tokens":
             think_tokens += int(ev.get("estimated_tokens_delta") or 0)
         else:
@@ -504,10 +510,13 @@ else:
     verdict = "успех"
 # Частичный результат: обрыв, либо поток кончился без итогового события и текст взят из последнего сообщения
 partial = over or result is None
+# Чтение по кругу: вход перевалил порог, а записи не было ни одной
+read_loop = (miss + hit) > loop_threshold and not wrote
 
 json.dump({
     "result": text, "verdict": verdict, "partial": partial, "tokMiss": miss, "tokHit": hit, "tokOut": out,
     "exact": exact, "costUsd": cost_of(miss, hit, out), "claudeCounterUsd": counter, "subtype": subtype, "claudeRc": rc,
+    "readLoop": read_loop,
 }, open(out_file, "w", encoding="utf-8"), ensure_ascii=False)
 ' "$@"
 }
@@ -533,7 +542,7 @@ finish_worktree() {
 }
 
 cmd_run() {
-  local provider="" tier="" effort="" mode="" dir="" budget="" brief=""
+  local provider="" tier="" effort="" mode="" dir="" budget="" brief="" base_ref=""
   local allow_main=0
   local -a bash_allow=()
   while [ $# -gt 0 ]; do
@@ -543,6 +552,7 @@ cmd_run() {
       --effort) effort="${2:-}"; shift 2 ;;
       --mode) mode="${2:-}"; shift 2 ;;
       --dir) dir="${2:-}"; shift 2 ;;
+      --base) base_ref="${2:-}"; shift 2 ;;
       --budget) budget="${2:-}"; shift 2 ;;
       --brief) brief="${2:-}"; shift 2 ;;
       --bash-allow) bash_allow+=("Bash(${2:-})"); shift 2 ;;
@@ -627,11 +637,16 @@ cmd_run() {
 
   local wt_path="" wt_branch="" wt_base=""
   if [ "$make_worktree" -eq 1 ]; then
-    wt_base="$(git -C "$dir" rev-parse --short HEAD 2>/dev/null)" || die "в репозитории $dir нет коммитов: нечего брать за основу worktree"
-    wt_branch="$BRANCH_PREFIX/$(date +%Y%m%d-%H%M%S)"
+    # База worktree: --base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
+    [ -n "$base_ref" ] || base_ref="HEAD"
+    git -C "$dir" rev-parse --verify --quiet "$base_ref^{commit}" >/dev/null ||
+      die "в репозитории $dir нет ref «$base_ref»: worktree не от чего создавать"
+    wt_base="$(git -C "$dir" rev-parse --short "$base_ref^{commit}" 2>/dev/null)" || die "в репозитории $dir нет коммитов: нечего брать за основу worktree"
+    # Суффикс процесса: исполнители, запущенные в одну секунду, иначе получают одно имя ветки
+    wt_branch="$BRANCH_PREFIX/$(date +%Y%m%d-%H%M%S)-$$"
     mkdir -p "$WORKTREES_ROOT" || die "не создать каталог $WORKTREES_ROOT"
     wt_path="$(mktemp -d "$WORKTREES_ROOT/wt.XXXXXX")" || die "не создать каталог worktree"
-    git -C "$dir" worktree add -q -b "$wt_branch" "$wt_path" HEAD >&2 || { rmdir "$wt_path" 2>/dev/null; die "git worktree add не удался"; }
+    git -C "$dir" worktree add -q -b "$wt_branch" "$wt_path" "$base_ref" >&2 || { rmdir "$wt_path" 2>/dev/null; die "git worktree add не удался"; }
     dir="$wt_path"
   fi
 
@@ -656,7 +671,7 @@ cmd_run() {
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)
-    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" \
+    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" \
       "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format stream-json --verbose --model "$model" \
       --permission-mode dontAsk \
       --allowedTools "$allowed" --disallowedTools "$denied" \
@@ -666,10 +681,10 @@ cmd_run() {
   if [ "$brief" = "-" ]; then rm -f "$brief_file"; fi
 
   # Отчёт и строка журнала; текста брифа в журнале нет
-  python3 -I - "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" <<'PY'
+  python3 -I - "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" <<'PY'
 import json, os, sys, time
 
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note = sys.argv[1:14]
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg = sys.argv[1:15]
 raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if os.path.exists(out_file) else ""
 err = open(err_file, encoding="utf-8", errors="replace").read().strip()
 try:
@@ -687,6 +702,7 @@ counter = data.get("claudeCounterUsd")  # None — claude не успел выд
 tokens_in = int(data.get("tokMiss") or 0) + int(data.get("tokHit") or 0)
 tokens_out = int(data.get("tokOut") or 0)
 exact = bool(data.get("exact"))
+read_loop = bool(data.get("readLoop"))
 cap = float(cap_arg) if cap_arg else None
 if not result and verdict == "упёрся в бюджет":
     result = "(обрыв по потолку до первого текстового ответа исполнителя)"
@@ -703,7 +719,7 @@ line = {
     "costUsd": None if real_cost is None else round(real_cost, 6),
     "costExact": exact, "capUsd": cap,
     "claudeCounterUsd": None if counter is None else round(counter, 6),
-    "seconds": elapsed, "verdict": verdict, "partial": partial,
+    "seconds": elapsed, "verdict": verdict, "partial": partial, "readLoop": read_loop,
 }
 try:
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -720,6 +736,8 @@ if real_cost is None:
 else:
     cost_text = ("$%.4f" if exact else "~$%.4f (оценка: выход по длине текста, итога от claude нет)") % real_cost
 print("токены: вход=%d выход=%d; время: %dс" % (tokens_in, tokens_out, elapsed))
+if read_loop:
+    print("внимание: вход %d токенов перевалил порог %s без единого вызова записи — признак чтения по кругу" % (tokens_in, loop_arg))
 counter_text = "нет итогового события" if counter is None else "$%.4f" % counter
 print("стоимость: %s; счётчик claude (справочно, по ценам Claude): %s" % (cost_text, counter_text))
 if cap is not None:

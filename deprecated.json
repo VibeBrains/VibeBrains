@@ -169,6 +169,20 @@
         "d8b1d8225e10bf6d0aa4fa5aed19ded32df2b0c0c2c5f1fd281edc782b19a141",
         "4034bdc00759b136eba29937a9b9e99b9e97814b5a52cb563249077204e3241b"
       ]
+    },
+    {
+      "path": "skills/save-tokens/SKILL.md",
+      "sha256": [
+        "e015805cad86527392dd42909a45bb51321948e643f428b635bf9519f3c30890",
+        "0ce62f1ff82fe7728f7ef1fe1b3fac0a7c32245dadd19d1e72922fb38ce72663"
+      ],
+      "replacedBy": "skills/brigadier/SKILL.md"
+    },
+    {
+      "path": "skills/save-tokens/evals/evals.json",
+      "sha256": [
+        "e114ee878e65840074e00c20a7c4d9e8cca8c89e07755050322b52d9833231d0"
+      ]
     }
   ]
 }

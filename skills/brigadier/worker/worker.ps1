@@ -6,8 +6,9 @@
 #   worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]
 #   worker.ps1 check [провайдер]
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
-#                  -Dir <путь> -Brief <файл или -> [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree]
+#                  -Dir <путь> -Brief <файл или -> [-Base <ref>] [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree]
 #   (потолок цены запуска — maxRunUsd из профиля; -Budget переопределяет его вручную)
+#   (write в основном дереве git: worktree и ветка brigadier/<время> создаются от -Base, по умолчанию HEAD)
 #
 # Ключ хранится в Диспетчере учётных данных Windows (Credential Manager), в аргументы процессов не попадает
 
@@ -20,6 +21,7 @@ param(
     [string] $Effort,
     [ValidateSet('read', 'write')] [string] $Mode,
     [string] $Dir,
+    [string] $Base,
     [string] $Budget,
     [string] $Brief,
     [string] $FromFile,
@@ -39,6 +41,8 @@ $CheckMaxTokens = 64
 $PricesStaleDays = 30
 # Знаков на токен для оценки выхода по тексту потока (usage в потоке отдаёт output_tokens=0); берётся с запасом вниз
 $CharsPerToken = 2.5
+# Вход в токенах без единого вызова записи (Edit/Write/MultiEdit) выше порога — признак чтения по кругу
+$ReadLoopInputTokens = 2000000
 $DefaultEnvFile = if ($env:BRIGADIER_WORKER_ENV_FILE) { $env:BRIGADIER_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
 $LegacyServicePrefix = 'brigadir-'
 $CurrentServicePrefix = 'brigadier-'
@@ -309,6 +313,7 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
     $seen = @{}
     $outChars = 0
     $thinkTokens = 0
+    $wrote = $false    # был ли хоть один вызов инструмента записи
     $result = $null
     $over = $false
     function Get-Spent {
@@ -338,6 +343,7 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
                         $outChars += ([string]$c.text).Length
                     } elseif ($c.type -eq 'tool_use') {
                         $outChars += ($c.input | ConvertTo-Json -Compress -Depth 20).Length
+                        if ($c.name -in @('Edit', 'Write', 'MultiEdit')) { $wrote = $true }
                     }
                 }
             } elseif ($ev.type -eq 'system' -and $ev.subtype -eq 'thinking_tokens') {
@@ -375,11 +381,13 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
         if ($result.result) { $text = [string]$result.result }
     }
     $verdict = if ($over) { 'упёрся в бюджет' } elseif (-not $result -or $isError) { 'ошибка' } else { 'успех' }
+    # Чтение по кругу: вход перевалил порог, а записи не было ни одной
+    $readLoop = (($miss + $hit) -gt $ReadLoopInputTokens) -and -not $wrote
     $cost = $null
     if ($Price) { $cost = ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6 }
     return @{
         result = $text; verdict = $verdict; partial = ($over -or -not $result); tokMiss = $miss; tokHit = $hit; tokOut = $out
-        exact = $exact; costUsd = $cost; counter = $counter; exitCode = $proc.ExitCode
+        exact = $exact; costUsd = $cost; counter = $counter; exitCode = $proc.ExitCode; readLoop = $readLoop
     }
 }
 
@@ -453,12 +461,17 @@ function Invoke-Run {
 
     $wtPath = ''; $wtBranch = ''; $wtBase = ''
     if ($makeWorktree) {
-        $wtBase = (& git -C $workDir rev-parse --short HEAD 2>$null)
+        # База worktree: -Base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
+        $baseRef = if ($Base) { $Base } else { 'HEAD' }
+        $null = & git -C $workDir rev-parse --verify --quiet "$baseRef^{commit}" 2>$null
+        if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет ref «$baseRef»: worktree не от чего создавать" }
+        $wtBase = (& git -C $workDir rev-parse --short "$baseRef^{commit}" 2>$null)
         if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет коммитов: нечего брать за основу worktree" }
-        $wtBranch = "$BranchPrefix/" + (Get-Date).ToString('yyyyMMdd-HHmmss')
+        # Суффикс процесса: исполнители, запущенные в одну секунду, иначе получают одно имя ветки
+        $wtBranch = "$BranchPrefix/" + (Get-Date).ToString('yyyyMMdd-HHmmss') + "-$PID"
         New-Item -ItemType Directory -Path $WorktreesRoot -Force | Out-Null
         $wtPath = Join-Path $WorktreesRoot ('wt.' + [Guid]::NewGuid().ToString('N').Substring(0, 6))
-        & git -C $workDir worktree add -q -b $wtBranch $wtPath HEAD 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
+        & git -C $workDir worktree add -q -b $wtBranch $wtPath $baseRef 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
         if ($LASTEXITCODE -ne 0) { Stop-Worker 'git worktree add не удался' }
         $workDir = $wtPath
     }
@@ -510,7 +523,7 @@ function Invoke-Run {
     Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
 
     $result = [string]$run.result; $verdict = $run.verdict; $partial = $run.partial
-    $realCost = $run.costUsd; $counter = $run.counter; $exact = $run.exact
+    $realCost = $run.costUsd; $counter = $run.counter; $exact = $run.exact; $readLoop = [bool]$run.readLoop
     $tokensIn = $run.tokMiss + $run.tokHit; $tokensOut = $run.tokOut
     if (-not $result -and $verdict -eq 'упёрся в бюджет') { $result = '(обрыв по потолку до первого текстового ответа исполнителя)' }
     elseif ($verdict -ne 'успех' -and -not $result) {
@@ -525,7 +538,7 @@ function Invoke-Run {
         mode = $Mode; dir = $workDir; tokensIn = $tokensIn; tokensOut = $tokensOut
         costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); costExact = $exact; capUsd = $cap
         claudeCounterUsd = $(if ($null -eq $counter) { $null } else { [math]::Round($counter, 6) })
-        seconds = $seconds; verdict = $verdict; partial = $partial
+        seconds = $seconds; verdict = $verdict; partial = $partial; readLoop = $readLoop
     } | ConvertTo-Json -Compress
     try {
         $logDir = Split-Path -Parent $LogFile
@@ -541,6 +554,9 @@ function Invoke-Run {
     else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
     $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
     Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
+    if ($readLoop) {
+        Write-Output ("внимание: вход {0} токенов перевалил порог {1} без единого вызова записи — признак чтения по кругу" -f $tokensIn, $ReadLoopInputTokens)
+    }
     Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
     if ($null -ne $cap) { Write-Output ('потолок: ${0:N4} (в настоящих долларах провайдера)' -f $cap) }
     elseif ($capNote) { Write-Output $capNote }
