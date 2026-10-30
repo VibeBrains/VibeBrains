@@ -109,7 +109,8 @@
         //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } },
         //   // GPT-6.1 Terra (developers.openai.com/api/docs/models/gpt-6.1-terra, сверено 28.10.2026): контекст и выход
         //   // как у Sol, цена вдвое ниже — $1 / $5, кэш $0.05, запись $1.25. В отличие от Sol принимает "none":
-        //   // рассуждение выключается. Инструменты — тоже только на Responses
+        //   // рассуждение выключается. Инструменты — тоже только на Responses. Кодинг-бенчмарков вендор не
+        //   // публиковал: запись держим выключенной до независимых замеров.
         //   { "id": "gpt-6.1-terra", "name": "GPT-6.1 Terra (рутина)", "protocol": "openai-responses",
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     "reasoning": { "canTurnOff": true, "effort": ["low", "medium", "high", "xhigh", "max"] },

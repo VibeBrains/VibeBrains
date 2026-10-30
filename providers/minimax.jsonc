@@ -146,12 +146,13 @@
           // M2.5 и M2.7 уходят: с 19.10.2026 они закрыты для новых пользователей, 18.11.2026 выключаются. На подписке
           // (M Plan, Token Plan) с 19.10.2026 запросы к ним сами перенаправляются на M3.1 Flash под прежним
           // именем модели; при поштучной оплате они работают до 18.11.2026, потом запросы падают
-          // (platform.minimax.io/docs/guides/models-intro, сверено 14.10.2026).
+          // (platform.minimax.io/docs/guides/models-intro, сверено 14.10.2026). В записях ниже sunsetDate — 19.10.2026:
+          // с этой даты модель для нового пользователя уже не новая, хотя подписка ещё отвечает чужой моделью.
           // M2.1 вендор держит в разделе Legacy: в списке ухода его нет, цена у него пока есть (pricing-paygo, сверено 14.10.2026).
           // Раскомментируйте нужные вместе с ведущей запятой.
-          // ,{ "id": "MiniMax-M2.7", "name": "MiniMax M2.7 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
-          // ,{ "id": "MiniMax-M2.7-highspeed", "name": "MiniMax M2.7 highspeed (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
-          // ,{ "id": "MiniMax-M2.5", "name": "MiniMax M2.5 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
+          // ,{ "id": "MiniMax-M2.7", "name": "MiniMax M2.7 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic", "sunsetDate": "2026-10-19" }
+          // ,{ "id": "MiniMax-M2.7-highspeed", "name": "MiniMax M2.7 highspeed (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic", "sunsetDate": "2026-10-19" }
+          // ,{ "id": "MiniMax-M2.5", "name": "MiniMax M2.5 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic", "sunsetDate": "2026-10-19" }
           // ,{ "id": "MiniMax-M2.1", "name": "MiniMax M2.1 (Anthropic)", "contextWindow": 204800, "toolFormat": "anthropic" }
         ]
       }
