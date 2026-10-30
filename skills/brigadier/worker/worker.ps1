@@ -6,8 +6,9 @@
 #   worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]
 #   worker.ps1 check [провайдер]
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
-#                  -Dir <путь> -Brief <файл или -> [-Base <ref>] [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree]
+#                  -Dir <путь> -Brief <файл или -> [-Base <ref>] [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree] [-OwnerApproved]
 #   (потолок цены запуска — maxRunUsd из профиля; -Budget переопределяет его вручную)
+#   (strong — только с -OwnerApproved: без него скрипт отказывает до любого запуска)
 #   (write в основном дереве git: worktree и ветка brigadier/<время> создаются от -Base, по умолчанию HEAD)
 #
 # Ключ хранится в Диспетчере учётных данных Windows (Credential Manager), в аргументы процессов не попадает
@@ -27,7 +28,8 @@ param(
     [string] $FromFile,
     [switch] $FromLegacy,
     [string[]] $BashAllow = @(),
-    [switch] $AllowMainTree
+    [switch] $AllowMainTree,
+    [switch] $OwnerApproved
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,6 +45,8 @@ $PricesStaleDays = 30
 $CharsPerToken = 2.5
 # Вход в токенах без единого вызова записи (Edit/Write/MultiEdit) выше порога — признак чтения по кругу
 $ReadLoopInputTokens = 2000000
+# Секунд без единого события usage: провайдер мог списать деньги, а счёт по потоку не идёт — дальше ждать нечего
+$NoUsageSec = 180
 $DefaultEnvFile = if ($env:BRIGADIER_WORKER_ENV_FILE) { $env:BRIGADIER_WORKER_ENV_FILE } else { Join-Path $HOME '.vibe\.env' }
 $LegacyServicePrefix = 'brigadir-'
 $CurrentServicePrefix = 'brigadier-'
@@ -51,6 +55,11 @@ $ClaudeBin = if ($env:BRIGADIER_WORKER_CLAUDE) { $env:BRIGADIER_WORKER_CLAUDE } 
 # Каталог временных worktree режима write; ветка исполнителя — brigadier/<время>
 $WorktreesRoot = if ($env:BRIGADIER_WORKER_WORKTREES) { $env:BRIGADIER_WORKER_WORKTREES } else { Join-Path ([IO.Path]::GetTempPath()) 'brigadier-worktrees' }
 $BranchPrefix = 'brigadier'
+
+# Состояние запуска и признак записи в журнал — в script scope: обработчик Ctrl+C живёт вне Invoke-Run
+# Без признака снятие добавило бы вторую строку к уже записанной
+$script:JournalWritten = $false
+$script:RunState = $null
 
 $ReadAllowed = 'Read,Grep,Glob,Bash(ls *),Bash(pwd),Bash(wc *),Bash(rg *),Bash(grep *),Bash(git status*),Bash(git log*),Bash(git diff*),Bash(git show*),Bash(git ls-files*),Bash(git blame*)'
 $ReadDenied = 'Edit,Write,NotebookEdit,WebFetch,WebSearch,Agent,Task'
@@ -291,7 +300,7 @@ function Write-WorktreeResult($wt, $branch, $base, $title, $repo) {
 # Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
 # потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
 # Обрыв — taskkill всего дерева процессов (SIGTERM на Windows нет)
-function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFile, $Price, $Cap, [string] $ErrFile) {
+function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFile, $Price, $Cap, [string] $ErrFile, [hashtable] $State) {
     $psi = New-Object Diagnostics.ProcessStartInfo
     $psi.FileName = $Exe
     $psi.Arguments = $ArgLine
@@ -303,6 +312,8 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
     $psi.StandardOutputEncoding = [Text.Encoding]::UTF8
     $psi.StandardErrorEncoding = [Text.Encoding]::UTF8
     $proc = [Diagnostics.Process]::Start($psi)
+    # Процесс и счётчики видны обработчику снятия: по ним считается цена на момент сигнала
+    $State.proc = $proc
     $errTask = $proc.StandardError.ReadToEndAsync()
     $briefBytes = [IO.File]::ReadAllBytes($BriefFile)
     $proc.StandardInput.BaseStream.Write($briefBytes, 0, $briefBytes.Length)
@@ -315,6 +326,11 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
     $thinkTokens = 0
     $wrote = $false    # был ли хоть один вызов инструмента записи
     $result = $null
+    $usageSeen = $false  # было ли событие с usage: без него стоимость неизвестна, а не нулевая
+    $noUsage = $false    # сторож не дождался usage и оборвал запуск
+    $usageDeadline = (Get-Date).AddSeconds($NoUsageSec)
+    $State.msgs = $msgs
+    $State.usageSeen = $false
     $over = $false
     function Get-Spent {
         $miss = 0; $hit = 0
@@ -324,14 +340,35 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
         return ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6
     }
     try {
-        while ($null -ne ($ln = $proc.StandardOutput.ReadLine())) {
+        while ($true) {
+            # Читаем строку короткими шагами: так сторож срабатывает и тогда, когда поток молчит
+            try { $readTask = $proc.StandardOutput.ReadLineAsync() } catch { break }
+            # Wait бросает при оборванном потоке: это конец чтения, а не ошибка запуска
+            try {
+                while (-not $readTask.Wait(200)) {
+                    if (-not $usageSeen -and (Get-Date) -ge $usageDeadline) {
+                        $noUsage = $true
+                        & taskkill /T /F /PID $proc.Id 2>&1 | Out-Null
+                        break
+                    }
+                }
+            } catch { break }
+            if ($noUsage) { break }
+            if ($readTask.IsFaulted -or $readTask.IsCanceled) { break }
+            $ln = $readTask.Result
+            if ($null -eq $ln) { break }
             try { $ev = $ln | ConvertFrom-Json } catch { continue }
             if (-not $ev) { continue }
-            if ($ev.type -eq 'result') { $result = $ev; continue }
+            if ($ev.type -eq 'result') {
+                if ($ev.usage) { $usageSeen = $true; $State.usageSeen = $true }
+                $result = $ev
+                continue
+            }
             if ($ev.type -eq 'assistant') {
                 $m = $ev.message
                 $mid = if ($m.id) { [string]$m.id } else { '?' }
                 $u = $m.usage
+                if ($u) { $usageSeen = $true; $State.usageSeen = $true }
                 $msgs[$mid] = @(([int]$u.input_tokens + [int]$u.cache_creation_input_tokens), [int]$u.cache_read_input_tokens)
                 foreach ($c in @($m.content)) {
                     $key = $mid + '|' + ($c | ConvertTo-Json -Compress -Depth 20)
@@ -349,6 +386,10 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
             } elseif ($ev.type -eq 'system' -and $ev.subtype -eq 'thinking_tokens') {
                 $thinkTokens += [int]$ev.estimated_tokens_delta
             } else { continue }
+            # Снимок для обработчика снятия: сигнал может прийти в любой момент
+            $State.outChars = $outChars
+            $State.thinkTokens = $thinkTokens
+            $State.wrote = $wrote
             if ($null -ne $Cap -and -not $over -and -not $result) {
                 $spent = Get-Spent
                 if ($null -ne $spent -and $spent -gt $Cap) {
@@ -380,18 +421,63 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
         $isError = [bool]$result.is_error
         if ($result.result) { $text = [string]$result.result }
     }
-    $verdict = if ($over) { 'упёрся в бюджет' } elseif (-not $result -or $isError) { 'ошибка' } else { 'успех' }
+    $verdict = if ($over) { 'упёрся в бюджет' } elseif ($noUsage -and -not $usageSeen) { 'нет счёта токенов' } elseif (-not $result -or $isError) { 'ошибка' } else { 'успех' }
     # Чтение по кругу: вход перевалил порог, а записи не было ни одной
     $readLoop = (($miss + $hit) -gt $ReadLoopInputTokens) -and -not $wrote
+    # Нет ни одного usage — стоимость неизвестна: нулём её писать нельзя, провайдер мог списать деньги
     $cost = $null
-    if ($Price) { $cost = ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6 }
+    if ($usageSeen -and $Price) { $cost = ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6 }
     return @{
-        result = $text; verdict = $verdict; partial = ($over -or -not $result); tokMiss = $miss; tokHit = $hit; tokOut = $out
-        exact = $exact; costUsd = $cost; counter = $counter; exitCode = $proc.ExitCode; readLoop = $readLoop
+        result = $text; verdict = $verdict; partial = ($over -or ($noUsage -and -not $usageSeen) -or -not $result); tokMiss = $miss; tokHit = $hit; tokOut = $out
+        exact = $exact; costUsd = $cost; costKnown = ($null -ne $cost); noUsage = (-not $usageSeen)
+        counter = $counter; exitCode = $proc.ExitCode; readLoop = $readLoop
     }
 }
 
+# Строка журнала без текста брифа; общая для обычного итога и снятого запуска
+# State хранит снимок счётчиков и всё для строки, поэтому обработчик Ctrl+C обходится без Invoke-Run
+function Write-RunLog {
+    param([hashtable] $State, [string] $Verdict, [bool] $Partial, $Run)
+    if ($script:JournalWritten) { return }
+    $script:JournalWritten = $true
+    if ($Run) {
+        $tokensIn = $Run.tokMiss + $Run.tokHit; $tokensOut = $Run.tokOut
+        $realCost = $Run.costUsd; $costKnown = [bool]$Run.costKnown; $exact = [bool]$Run.exact; $counter = $Run.counter; $readLoop = [bool]$Run.readLoop
+    } else {
+        # Снятие: вход точный по уже прочитанному, выход — оценка по длине текста, как и в обычном пути
+        $miss = 0; $hit = 0
+        if ($State.msgs) { foreach ($v in $State.msgs.Values) { $miss += $v[0]; $hit += $v[1] } }
+        $tokensIn = $miss + $hit
+        $tokensOut = [int]($State.outChars / $CharsPerToken) + $State.thinkTokens
+        # Нет ни одного usage — цену не пишем: нулём она соврёт про расход у провайдера
+        $realCost = $null
+        if ($State.usageSeen -and $State.price) { $realCost = ($miss * [double]$State.price.inputMiss + $hit * [double]$State.price.inputHit + $tokensOut * [double]$State.price.output) / 1e6 }
+        $costKnown = ($null -ne $realCost)
+        $exact = $false; $counter = $null
+        $readLoop = ($tokensIn -gt $ReadLoopInputTokens) -and -not $State.wrote
+    }
+    $seconds = [int]((Get-Date) - $State.started).TotalSeconds
+    $line = [ordered]@{
+        ts = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); provider = $State.provider; tier = $State.tier
+        model = $State.model; effort = $State.effort; mode = $State.mode; dir = $State.dir
+        tokensIn = $tokensIn; tokensOut = $tokensOut
+        costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); costKnown = $costKnown; costExact = $exact; capUsd = $State.cap
+        claudeCounterUsd = $(if ($null -eq $counter) { $null } else { [math]::Round($counter, 6) })
+        seconds = $seconds; verdict = $Verdict; partial = $Partial; readLoop = $readLoop
+        ownerApproved = [bool]$State.ownerApproved
+    } | ConvertTo-Json -Compress
+    try {
+        $logDir = Split-Path -Parent $State.logFile
+        if ($logDir -and -not (Test-Path -LiteralPath $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+        [IO.File]::AppendAllText($State.logFile, $line + "`n", (New-Object Text.UTF8Encoding($false)))
+    } catch { [Console]::Error.WriteLine("журнал не записан: $($_.Exception.Message)") }
+}
+
 function Invoke-Run {
+    # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
+    if ($Tier -eq 'strong' -and -not $OwnerApproved) {
+        Stop-Worker 'strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате'
+    }
     foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Brief', $Brief))) {
         if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Brief' }
     }
@@ -494,6 +580,31 @@ function Invoke-Run {
 
     $errFile = [IO.Path]::GetTempFileName()
     $started = Get-Date
+    $state = @{
+        logFile = $LogFile; provider = $Provider; tier = $Tier; model = $model; effort = $Effort; mode = $Mode
+        dir = $workDir; price = $price; cap = $cap; ownerApproved = [bool]$OwnerApproved; started = $started
+        msgs = @{}; outChars = 0; thinkTokens = 0; wrote = $false; usageSeen = $false; proc = $null
+    }
+    $script:RunState = $state
+    # Снятие с клавиатуры: выход делаем сами, чтобы журнал успел получить строку с verdict «снят»
+    # Повторный Ctrl+C вторую строку не добавляет — Write-RunLog смотрит на script:JournalWritten
+    $interruptHandler = [ConsoleCancelEventHandler]{
+        param($sender, $e)
+        $e.Cancel = $true
+        try {
+            $st = $script:RunState
+            if ($st) {
+                if ($st.proc -and -not $st.proc.HasExited) { & taskkill /T /F /PID $st.proc.Id 2>&1 | Out-Null }
+                Write-RunLog -State $st -Verdict 'снят' -Partial $true
+            }
+        } finally {
+            # Выход обязателен: иначе отменённый Ctrl+C оставит запуск работать
+            [Environment]::Exit(130)
+        }
+    }
+    try { [Console]::add_CancelKeyPress($interruptHandler) } catch {
+        # Без консоли (перенаправленный ввод, служба) Ctrl+C не приходит — обычный путь не меняется
+    }
     try {
         foreach ($n in @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')) {
             [Environment]::SetEnvironmentVariable($n, $null, 'Process')
@@ -518,7 +629,7 @@ function Invoke-Run {
         $claudeExe = (Get-Command $ClaudeBin).Source
         Push-Location $workDir
         try {
-            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile
+            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state
         } finally { Pop-Location }
     } finally {
         foreach ($n in $names) { [Environment]::SetEnvironmentVariable($n, $saved[$n], 'Process') }
@@ -529,41 +640,39 @@ function Invoke-Run {
     Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
 
     $result = [string]$run.result; $verdict = $run.verdict; $partial = $run.partial
-    $realCost = $run.costUsd; $counter = $run.counter; $exact = $run.exact; $readLoop = [bool]$run.readLoop
+    $realCost = $run.costUsd; $noUsage = [bool]$run.noUsage; $counter = $run.counter; $exact = $run.exact; $readLoop = [bool]$run.readLoop
     $tokensIn = $run.tokMiss + $run.tokHit; $tokensOut = $run.tokOut
     if (-not $result -and $verdict -eq 'упёрся в бюджет') { $result = '(обрыв по потолку до первого текстового ответа исполнителя)' }
+    elseif (-not $result -and $verdict -eq 'нет счёта токенов') { $result = '(обрыв: в потоке не было счёта токенов, провайдер мог списать деньги)' }
     elseif ($verdict -ne 'успех' -and -not $result) {
         $tail = if ($err) { $err.Substring(0, [Math]::Min(500, $err.Length)) } else { 'пусто' }
         $result = "(пустой ответ; stderr: $tail)"
     } elseif ($partial -and $result) { $result = "[частичный результат: последний ответ исполнителя до обрыва]`n" + $result }
     $seconds = [int]((Get-Date) - $started).TotalSeconds
 
-    # Строка журнала без текста брифа
-    $line = [ordered]@{
-        ts = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); provider = $Provider; tier = $Tier; model = $model; effort = $Effort
-        mode = $Mode; dir = $workDir; tokensIn = $tokensIn; tokensOut = $tokensOut
-        costUsd = $(if ($null -eq $realCost) { $null } else { [math]::Round($realCost, 6) }); costExact = $exact; capUsd = $cap
-        claudeCounterUsd = $(if ($null -eq $counter) { $null } else { [math]::Round($counter, 6) })
-        seconds = $seconds; verdict = $verdict; partial = $partial; readLoop = $readLoop
-    } | ConvertTo-Json -Compress
-    try {
-        $logDir = Split-Path -Parent $LogFile
-        if ($logDir -and -not (Test-Path -LiteralPath $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
-        [IO.File]::AppendAllText($LogFile, $line + "`n", (New-Object Text.UTF8Encoding($false)))
-    } catch { [Console]::Error.WriteLine("журнал не записан: $($_.Exception.Message)") }
+    # Строка журнала без текста брифа; снятие сюда не доходит — его пишет обработчик Ctrl+C
+    Write-RunLog -State $state -Verdict $verdict -Partial $partial -Run $run
 
     Write-Output $result
     Write-Output '---'
     Write-Output "исполнитель: провайдер=$Provider ступень=$Tier модель=$model уровень=$Effort режим=$Mode"
-    $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' }
-    elseif ($exact) { ('${0:N4}' -f $realCost) }
-    else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
-    $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
+    # Чужая модель: claude не знает её и может не присылать usage, тогда счёт по потоку не сходится с кабинетом провайдера
+    if ($err -match 'unrecognized_model') {
+        Write-Output "внимание: claude не знает модель $model (stderr: unrecognized_model) — счёта токенов по потоку может не быть"
+    }
     Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
     if ($readLoop) {
         Write-Output ("внимание: вход {0} токенов перевалил порог {1} без единого вызова записи — признак чтения по кругу" -f $tokensIn, $ReadLoopInputTokens)
     }
-    Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
+    if ($noUsage) {
+        Write-Output 'стоимость: неизвестна — провайдер мог списать деньги, сверить по его кабинету'
+    } else {
+        $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' }
+        elseif ($exact) { ('${0:N4}' -f $realCost) }
+        else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
+        $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
+        Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
+    }
     if ($null -ne $cap) { Write-Output ('потолок: ${0:N4} (в настоящих долларах провайдера)' -f $cap) }
     elseif ($capNote) { Write-Output $capNote }
     if ($partial) { Write-Output 'результат частичный' }
@@ -577,5 +686,5 @@ switch ($Command) {
     'import-key' { Invoke-ImportKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'check' { Invoke-Check $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'run' { Invoke-Run }
-    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 14 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
+    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 15 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
 }

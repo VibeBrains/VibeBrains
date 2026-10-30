@@ -8,8 +8,9 @@
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
-#                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree]
+#                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree] [--owner-approved]
 #   (потолок цены запуска — maxRunUsd из профиля; --budget переопределяет его вручную)
+#   (strong — только с --owner-approved: без него скрипт отказывает до любого запуска)
 #   (write в основном дереве git: скрипт сам создаёт worktree и ветку brigadier/<время> от --base, по умолчанию HEAD)
 #
 # Ключ в аргументы командной строки не попадает никогда: ни в свои, ни в чужие процессы
@@ -29,6 +30,8 @@ CHARS_PER_TOKEN=2.5
 READ_LOOP_INPUT_TOKENS=2000000
 # Секунд между SIGTERM и SIGKILL при обрыве по потолку
 KILL_GRACE_SEC=5
+# Секунд без единого события usage: провайдер мог списать деньги, а счёт по потоку не идёт — дальше ждать нечего
+NO_USAGE_SEC=180
 CLAUDE_BIN="${BRIGADIER_WORKER_CLAUDE:-claude}"
 DEFAULT_ENV_FILE="${BRIGADIER_WORKER_ENV_FILE:-$HOME/.vibe/.env}"
 # Прежнее имя записей хранилища (до переименования навыка): префикс сервиса меняется, остальное то же
@@ -52,7 +55,7 @@ WORKER_PROMPT='Ты внешний исполнитель: делай задач
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-  sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -373,17 +376,18 @@ except Exception:
 # Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
 # потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
 # Итог пишется в файл JSON; потолок пуст — запуск идёт без потолка
-# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, порог входа без записи, команда claude…
+# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, порог входа без записи, секунд без usage, команда claude…
 run_stream() {
   python3 -I -c '
 import json, os, signal, subprocess, sys, threading
 
-out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg, loop_arg = sys.argv[1:10]
-argv = sys.argv[10:]
+out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg, loop_arg, no_usage_arg = sys.argv[1:11]
+argv = sys.argv[11:]
 cap = float(cap_arg) if cap_arg else None
 chars_per_token = float(cpt_arg)
 grace = float(grace_arg)
 loop_threshold = int(loop_arg)
+no_usage_limit = float(no_usage_arg)
 
 try:
     price = json.load(open(profile_file, encoding="utf-8"))["prices"][model]
@@ -397,6 +401,8 @@ out_chars = 0
 think_tokens = 0
 wrote = False    # был ли хоть один вызов инструмента записи
 result = None
+usage_seen = threading.Event()  # было ли событие с usage: без него стоимость неизвестна, а не нулевая
+no_usage = False                # сторож не дождался usage и оборвал запуск
 
 
 def totals():
@@ -415,7 +421,45 @@ def est_out():
     return int(out_chars / chars_per_token) + think_tokens
 
 
+def save(data):
+    # Замена через rename: основной процесс никогда не прочтёт половину JSON
+    tmp = out_file + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+    os.replace(tmp, out_file)
+
+
+def snapshot():
+    # Снимок счётчиков на текущий момент: по нему пишется журнал, если python не успел дописать итог
+    # Оценка выхода — та же, что в обычном пути: usage в потоке отдаёт output_tokens=0
+    miss, hit = totals()
+    out = est_out()
+    # Нет ни одного usage — счёт нулевой только на бумаге: цену не пишем, иначе владелец примет её за факт
+    cost = cost_of(miss, hit, out) if usage_seen.is_set() else None
+    text = "".join(texts[list(texts)[-1]]) if texts else ""
+    try:
+        save({
+            "result": text, "verdict": "ошибка", "partial": True, "tokMiss": miss, "tokHit": hit, "tokOut": out,
+            "exact": False, "costUsd": cost, "costKnown": cost is not None, "noUsage": not usage_seen.is_set(),
+            "claudeCounterUsd": None, "subtype": "", "claudeRc": None,
+            "readLoop": (miss + hit) > loop_threshold and not wrote, "procPid": proc.pid,
+        })
+    except OSError:
+        pass
+
+
 proc = subprocess.Popen(argv, stdin=open(brief_file, "rb"), stdout=subprocess.PIPE, stderr=open(err_file, "wb"), start_new_session=True)
+# Сторож сироты: claude живёт в своей сессии и переживает SIGKILL обёртки или python
+# Отдельный процесс следит за обоими и гасит группу claude, как только хозяина нет
+# Сам выходит, когда группы claude уже нет, поэтому после обычного конца не висит
+_owner = os.environ.get("BRIGADIER_OWNER_PID", "")
+_guard = (
+    "while kill -0 \"$1\" 2>/dev/null && { [ -z \"$2\" ] || kill -0 \"$2\" 2>/dev/null; }; do"
+    " kill -0 -\"$3\" 2>/dev/null || exit 0; sleep 2; done;"
+    " kill -TERM -\"$3\" 2>/dev/null; sleep \"$4\"; kill -KILL -\"$3\" 2>/dev/null"
+)
+subprocess.Popen(["sh", "-c", _guard, "guard", str(os.getpid()), _owner, str(proc.pid), str(int(grace))],
+                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
 over = False
 killer = None
 
@@ -434,6 +478,43 @@ def stop():
     killer.start()
 
 
+def on_no_usage():
+    # Счётчик claude молчит о чужой модели: без usage и потолок цены считать не из чего
+    global no_usage
+    if usage_seen.is_set() or no_usage:
+        return
+    no_usage = True
+    stop()
+
+
+class _Interrupted(Exception):
+    pass
+
+
+interrupted = None
+
+
+def on_signal(signum, frame):
+    global interrupted
+    # Повторный сигнал молчит: иначе он прервёт запись итога и в журнале не будет токенов
+    if interrupted is not None:
+        return
+    interrupted = signum
+    stop()
+    raise _Interrupted()
+
+
+# Снятие приходит и в этот процесс (сигнал worker.sh или всей группе): итог считается по тому, что уже прочитано
+signal.signal(signal.SIGTERM, on_signal)
+signal.signal(signal.SIGINT, on_signal)
+signal.signal(signal.SIGHUP, on_signal)
+# Сторож «нет счёта»: поток может молчать и без событий, поэтому обрыв не зависит от разбора строк
+usage_timer = threading.Timer(no_usage_limit, on_no_usage)
+usage_timer.daemon = True
+usage_timer.start()
+# Снимок сразу после старта: в нём pid сессии claude, по нему основной процесс добьёт потомков
+snapshot()
+
 try:
     for raw in proc.stdout:
         try:
@@ -445,11 +526,15 @@ try:
         kind = ev.get("type")
         if kind == "result":
             result = ev
+            if isinstance(ev.get("usage"), dict) and ev.get("usage"):
+                usage_seen.set()
             continue
         if kind == "assistant":
             m = ev.get("message") or {}
             mid = m.get("id") or "?"
             u = m.get("usage") or {}
+            if u:
+                usage_seen.set()
             msgs[mid] = (int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0), int(u.get("cache_read_input_tokens") or 0))
             for c in m.get("content") or []:
                 if not isinstance(c, dict):
@@ -468,6 +553,8 @@ try:
         elif kind == "system" and ev.get("subtype") == "thinking_tokens":
             think_tokens += int(ev.get("estimated_tokens_delta") or 0)
         else:
+            # Событие не наше, но снимок счётчиков обновляем: сигнал может прийти в любой момент
+            snapshot()
             continue
         if cap is not None and not over and result is None:
             miss, hit = totals()
@@ -475,9 +562,11 @@ try:
             if spent is not None and spent > cap:
                 over = True
                 stop()
+        snapshot()
 finally:
     proc.stdout.close()
     rc = proc.wait()
+    usage_timer.cancel()
     if killer is not None:
         killer.cancel()
     signal_group(signal.SIGKILL)
@@ -502,23 +591,124 @@ if isinstance(result, dict):
     if result.get("result"):
         text = str(result["result"])
 
+# Снятие: сигнал пришёл нам или claude убит снаружи (отрицательный код возврата)
+signaled = interrupted is not None or rc < 0
 if over:
     verdict = "упёрся в бюджет"
+elif no_usage and not usage_seen.is_set():
+    verdict = "нет счёта токенов"
+elif signaled and result is None:
+    verdict = "снят"
 elif result is None or is_error:
     verdict = "ошибка"
 else:
     verdict = "успех"
 # Частичный результат: обрыв, либо поток кончился без итогового события и текст взят из последнего сообщения
-partial = over or result is None
+partial = over or (no_usage and not usage_seen.is_set()) or result is None
 # Чтение по кругу: вход перевалил порог, а записи не было ни одной
 read_loop = (miss + hit) > loop_threshold and not wrote
+# Нет ни одного usage — стоимость неизвестна: нулём её писать нельзя, провайдер мог списать деньги
+cost = cost_of(miss, hit, out) if usage_seen.is_set() else None
 
-json.dump({
+save({
     "result": text, "verdict": verdict, "partial": partial, "tokMiss": miss, "tokHit": hit, "tokOut": out,
-    "exact": exact, "costUsd": cost_of(miss, hit, out), "claudeCounterUsd": counter, "subtype": subtype, "claudeRc": rc,
+    "exact": exact, "costUsd": cost, "costKnown": cost is not None, "noUsage": not usage_seen.is_set(),
+    "claudeCounterUsd": counter, "subtype": subtype, "claudeRc": rc,
     "readLoop": read_loop,
-}, open(out_file, "w", encoding="utf-8"), ensure_ascii=False)
+})
 ' "$@"
+}
+
+# Отчёт запуска и одна строка журнала; текста брифа в журнале нет
+# Общая для обычного итога и для снятого сигналом запуска: снятие передаёт force_verdict, чтобы итог и partial не зависели от того, успел ли поток дойти до result
+# Аргументы: итог, stderr, журнал, провайдер, ступень, уровень, режим, каталог, модель, код claude, начало, потолок, заметка о потолке, порог чтения по кругу, флаг владельца, verdict снятия
+emit_report() {
+  python3 -I - "$@" <<'PY'
+import json, os, sys, time
+
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg, approved_arg, force_verdict = sys.argv[1:17]
+raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if out_file and os.path.exists(out_file) else ""
+err = open(err_file, encoding="utf-8", errors="replace").read().strip() if err_file and os.path.exists(err_file) else ""
+try:
+    data = json.loads(raw) if raw else None
+except ValueError:
+    data = None
+if not isinstance(data, dict):
+    data = {}
+
+result = str(data.get("result") or "")
+verdict = data.get("verdict") or "ошибка"
+partial = bool(data.get("partial", True))
+real_cost = data.get("costUsd")  # None — цены нет или usage не было ни одного
+cost_known = bool(data.get("costKnown", real_cost is not None))
+no_usage = bool(data.get("noUsage"))
+counter = data.get("claudeCounterUsd")  # None — claude не успел выдать итоговое событие
+tokens_in = int(data.get("tokMiss") or 0) + int(data.get("tokHit") or 0)
+tokens_out = int(data.get("tokOut") or 0)
+exact = bool(data.get("exact"))
+read_loop = bool(data.get("readLoop"))
+owner_approved = approved_arg == "1"
+cap = float(cap_arg) if cap_arg else None
+# Снятый запуск: итог задаёт сигнал, а не недописанный поток
+if force_verdict:
+    verdict = force_verdict
+    partial = True
+if not result and verdict == "упёрся в бюджет":
+    result = "(обрыв по потолку до первого текстового ответа исполнителя)"
+elif not result and verdict == "нет счёта токенов":
+    result = "(обрыв: в потоке не было счёта токенов, провайдер мог списать деньги)"
+elif not result and verdict == "снят":
+    result = "(снят до ответа исполнителя)"
+elif verdict != "успех" and not result:
+    result = "(пустой ответ; stderr: %s)" % (err[:500] if err else "пусто")
+elif partial and result:
+    result = "[частичный результат: последний ответ исполнителя до обрыва]\n" + result
+
+elapsed = int(time.time()) - int(started)
+line = {
+    "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    "provider": provider, "tier": tier, "model": model, "effort": effort, "mode": mode,
+    "dir": workdir, "tokensIn": tokens_in, "tokensOut": tokens_out,
+    "costUsd": None if real_cost is None else round(real_cost, 6),
+    "costKnown": cost_known, "costExact": exact, "capUsd": cap,
+    "claudeCounterUsd": None if counter is None else round(counter, 6),
+    "seconds": elapsed, "verdict": verdict, "partial": partial, "readLoop": read_loop,
+    "ownerApproved": owner_approved,
+}
+try:
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(line, ensure_ascii=False) + "\n")
+except OSError as e:
+    sys.stderr.write("журнал не записан: %s\n" % e)
+
+print(result)
+print("---")
+print("исполнитель: провайдер=%s ступень=%s модель=%s уровень=%s режим=%s" % (provider, tier, model, effort, mode))
+# Чужая модель: claude не знает её и может не присылать usage, тогда счёт по потоку не сходится с кабинетом провайдера
+if "unrecognized_model" in err:
+    print("внимание: claude не знает модель %s (stderr: unrecognized_model) — счёта токенов по потоку может не быть" % model)
+print("токены: вход=%d выход=%d; время: %dс" % (tokens_in, tokens_out, elapsed))
+if read_loop:
+    print("внимание: вход %d токенов перевалил порог %s без единого вызова записи — признак чтения по кругу" % (tokens_in, loop_arg))
+if no_usage:
+    print("стоимость: неизвестна — провайдер мог списать деньги, сверить по его кабинету")
+else:
+    if real_cost is None:
+        cost_text = "неизвестна (нет prices в профиле)"
+    else:
+        cost_text = ("$%.4f" if exact else "~$%.4f (оценка: выход по длине текста, итога от claude нет)") % real_cost
+    counter_text = "нет итогового события" if counter is None else "$%.4f" % counter
+    print("стоимость: %s; счётчик claude (справочно, по ценам Claude): %s" % (cost_text, counter_text))
+if cap is not None:
+    print("потолок: $%.4f (в настоящих долларах провайдера)" % cap)
+elif cap_note:
+    print(cap_note)
+if partial:
+    print("результат частичный")
+print("итог: %s" % verdict)
+sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
+PY
 }
 
 # Итог write-запуска: правки исполнителя — одним коммитом в ветку worktree, затем путь, ветка, дифф и команда уборки
@@ -543,7 +733,7 @@ finish_worktree() {
 
 cmd_run() {
   local provider="" tier="" effort="" mode="" dir="" budget="" brief="" base_ref=""
-  local allow_main=0
+  local allow_main=0 owner_approved=0
   local -a bash_allow=()
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -557,9 +747,14 @@ cmd_run() {
       --brief) brief="${2:-}"; shift 2 ;;
       --bash-allow) bash_allow+=("Bash(${2:-})"); shift 2 ;;
       --allow-main-tree) allow_main=1; shift ;;
+      --owner-approved) owner_approved=1; shift ;;
       *) die "неизвестный аргумент: $1" ;;
     esac
   done
+  # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
+  if [ "$tier" = "strong" ] && [ "$owner_approved" -eq 0 ]; then
+    die "strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате"
+  fi
   [ -n "$provider" ] && [ -n "$tier" ] && [ -n "$mode" ] && [ -n "$dir" ] && [ -n "$brief" ] ||
     die "обязательны --provider --tier --mode --dir --brief"
   need_python
@@ -658,8 +853,45 @@ cmd_run() {
     dir="$wt_path"
   fi
 
-  local started
+  local started claude_rc=-1 run_pid="" report_done=0
   started="$(date +%s)"
+  # Снятие сигналом: сначала запись в журнал, затем гашение потомков
+  # Иначе при SIGTERM скрипт умирал молча и запуска в журнале не было вовсе
+  on_signal() {
+    local sig="$1"
+    # Повторный сигнал не должен прервать запись и уборку
+    trap '' TERM INT HUP
+    if [ "$report_done" -eq 1 ]; then exit "$((128 + sig))"; fi
+    report_done=1
+    # claude живёт в своей сессии, её pid записан в снимок: иначе потомок переживёт сигнал
+    local claude_pid=""
+    if [ -n "${out_file:-}" ] && [ -f "$out_file" ]; then
+      claude_pid="$(sed -n 's/.*"procPid": *\([0-9][0-9]*\).*/\1/p' "$out_file" | head -n 1)"
+    fi
+    if [ -n "$run_pid" ]; then
+      # python гасит claude в отдельной сессии сам; здесь — страховка, если сигнал до него не дошёл
+      kill -TERM "$run_pid" 2>/dev/null
+      if command -v pkill >/dev/null 2>&1; then pkill -TERM -P "$run_pid" 2>/dev/null; fi
+      # Ждём запись итога от python, но не дольше срока SIGKILL: зомби уже не живёт, его не ждём
+      local i
+      for i in $(seq 1 100); do
+        kill -0 "$run_pid" 2>/dev/null || break
+        case "$(ps -o stat= -p "$run_pid" 2>/dev/null | tr -d ' ')" in Z*) break ;; esac
+        sleep 0.1
+      done
+      kill -KILL "$run_pid" 2>/dev/null
+      if command -v pkill >/dev/null 2>&1; then pkill -KILL -P "$run_pid" 2>/dev/null; fi
+    fi
+    if [ -n "$claude_pid" ] && [ "$claude_pid" != "$$" ]; then kill -KILL -"$claude_pid" 2>/dev/null; fi
+    emit_report "${out_file:-}" "${err_file:-}" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" \
+      "$claude_rc" "${started:-$(date +%s)}" "${budget:-}" "${cap_note:-}" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "снят" || true
+    rm -f "${out_file:-}" "${err_file:-}"
+    exit "$((128 + sig))"
+  }
+  trap 'on_signal 15' TERM
+  trap 'on_signal 2' INT
+  # Закрытый терминал или снятая фоновая задача шлют HUP: без ловушки обёртка умирала, а claude оставался
+  trap 'on_signal 1' HUP
   # Подмена сервера — только внутри этой подоболочки; ключ идёт через окружение, не через аргументы
   (
     cd "$dir" || exit 1
@@ -676,88 +908,32 @@ cmd_run() {
     export CLAUDE_CODE_EFFORT_LEVEL="$effort"
     export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
     export BRIGADIER_WORKER=1
+    # Pid обёртки для сторожа сироты в python: умерла обёртка — гасится и claude
+    export BRIGADIER_OWNER_PID="$$"
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)
-    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" \
+    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" "$NO_USAGE_SEC" \
       "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format stream-json --verbose --model "$model" \
       --permission-mode dontAsk \
       --allowedTools "$allowed" --disallowedTools "$denied" \
       --append-system-prompt "$WORKER_PROMPT"
-  )
-  local claude_rc=$?
+  ) &
+  run_pid=$!
+  # Ждём в основном процессе: сигнал прерывает wait и сразу попадает в trap, не дожидаясь конца claude
+  wait "$run_pid"
+  claude_rc=$?
+  run_pid=""
   if [ "$brief" = "-" ]; then rm -f "$brief_file"; fi
 
-  # Отчёт и строка журнала; текста брифа в журнале нет
-  python3 -I - "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" <<'PY'
-import json, os, sys, time
-
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg = sys.argv[1:15]
-raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if os.path.exists(out_file) else ""
-err = open(err_file, encoding="utf-8", errors="replace").read().strip()
-try:
-    data = json.loads(raw) if raw else None
-except ValueError:
-    data = None
-if not isinstance(data, dict):
-    data = {}
-
-result = str(data.get("result") or "")
-verdict = data.get("verdict") or "ошибка"
-partial = bool(data.get("partial", True))
-real_cost = data.get("costUsd")  # None — цен модели в профиле нет
-counter = data.get("claudeCounterUsd")  # None — claude не успел выдать итоговое событие
-tokens_in = int(data.get("tokMiss") or 0) + int(data.get("tokHit") or 0)
-tokens_out = int(data.get("tokOut") or 0)
-exact = bool(data.get("exact"))
-read_loop = bool(data.get("readLoop"))
-cap = float(cap_arg) if cap_arg else None
-if not result and verdict == "упёрся в бюджет":
-    result = "(обрыв по потолку до первого текстового ответа исполнителя)"
-elif verdict != "успех" and not result:
-    result = "(пустой ответ; stderr: %s)" % (err[:500] if err else "пусто")
-elif partial and result:
-    result = "[частичный результат: последний ответ исполнителя до обрыва]\n" + result
-
-elapsed = int(time.time()) - int(started)
-line = {
-    "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-    "provider": provider, "tier": tier, "model": model, "effort": effort, "mode": mode,
-    "dir": workdir, "tokensIn": tokens_in, "tokensOut": tokens_out,
-    "costUsd": None if real_cost is None else round(real_cost, 6),
-    "costExact": exact, "capUsd": cap,
-    "claudeCounterUsd": None if counter is None else round(counter, 6),
-    "seconds": elapsed, "verdict": verdict, "partial": partial, "readLoop": read_loop,
-}
-try:
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    with open(log_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps(line, ensure_ascii=False) + "\n")
-except OSError as e:
-    sys.stderr.write("журнал не записан: %s\n" % e)
-
-print(result)
-print("---")
-print("исполнитель: провайдер=%s ступень=%s модель=%s уровень=%s режим=%s" % (provider, tier, model, effort, mode))
-if real_cost is None:
-    cost_text = "неизвестна (нет prices в профиле)"
-else:
-    cost_text = ("$%.4f" if exact else "~$%.4f (оценка: выход по длине текста, итога от claude нет)") % real_cost
-print("токены: вход=%d выход=%d; время: %dс" % (tokens_in, tokens_out, elapsed))
-if read_loop:
-    print("внимание: вход %d токенов перевалил порог %s без единого вызова записи — признак чтения по кругу" % (tokens_in, loop_arg))
-counter_text = "нет итогового события" if counter is None else "$%.4f" % counter
-print("стоимость: %s; счётчик claude (справочно, по ценам Claude): %s" % (cost_text, counter_text))
-if cap is not None:
-    print("потолок: $%.4f (в настоящих долларах провайдера)" % cap)
-elif cap_note:
-    print(cap_note)
-if partial:
-    print("результат частичный")
-print("итог: %s" % verdict)
-sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
-PY
+  # Код 128+ значит, что python убит сигналом: до итога он не дошёл, но запись нужна
+  local force=""
+  if [ "$claude_rc" -ge 128 ]; then force="снят"; fi
+  # Флаг ставится до записи: сигнал после этого не должен добавить вторую строку
+  report_done=1
+  emit_report "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "$force"
   local rc=$?
+  trap - TERM INT HUP
   rm -f "$out_file" "$err_file"
   if [ -n "$wt_path" ]; then finish_worktree "$wt_path" "$wt_branch" "$wt_base" "$brief_title" "$repo_root"; fi
   return $rc
