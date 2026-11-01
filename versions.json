@@ -562,14 +562,15 @@
       "vibeVersion": "1.0.0"
     },
     "rules/dev-engine.mdc": {
-      "version": 4,
-      "sha256": "fac2095d9fc580148f536fab51b5331f46b1a3d2cfe1bd25f56f6c830e888cc7",
+      "version": 5,
+      "sha256": "9469eb10d1285c314c7a20bb498960965d1bf7a3f61ebcd9466c957d85b72ee8",
       "history": [
         "9df1f33060c133ffabc55f0158c9a3e2aa1bcd9f1c16e5ae5324b7e8f6204891",
         "6c00af49f895afd3d8da1d563da85e4f92de41c4b043a889c8baf4d91af7eb05",
-        "202dd9bae340937c8791cafb2b4487561a54cd220c32f5d6f2f628efea443a34"
+        "202dd9bae340937c8791cafb2b4487561a54cd220c32f5d6f2f628efea443a34",
+        "fac2095d9fc580148f536fab51b5331f46b1a3d2cfe1bd25f56f6c830e888cc7"
       ],
-      "vibeVersion": "1.0.0"
+      "vibeVersion": "1.1.0"
     },
     "rules/knowledge.mdc": {
       "version": 5,
