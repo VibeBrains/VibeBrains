@@ -912,6 +912,47 @@
         "4cfafacad7e139fff0d393adfd48699f2136602ea560b8d007256a971ba13211"
       ]
     },
+    "skills/design-identity/SKILL.md": {
+      "version": 1,
+      "sha256": "cb2da3a5687034f49b17eff24aeb1ea755529051b2d33845df6171505c66daf8",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
+    "skills/design-identity/assetsPack.md": {
+      "version": 1,
+      "sha256": "384bd5f357755a17658af98b46914d1a64ef1c1aabe1983684ef1cec39c9424b",
+      "history": []
+    },
+    "skills/design-identity/brandbook.md": {
+      "version": 1,
+      "sha256": "ac5829ddc6c90b046c7a2449d4a993dc4d9021b174cdda7005995b1fa28e47ff",
+      "history": []
+    },
+    "skills/design-identity/derivedElements.md": {
+      "version": 1,
+      "sha256": "bd92fd884ae83762bdde302400e9377dad4edf46ecce3d027184b1f285a28c5b",
+      "history": []
+    },
+    "skills/design-identity/evals/evals.json": {
+      "version": 1,
+      "sha256": "868ee5f3b9d76a208f6030af53affe4bbe380f16cad266cb3164466ee8234dea",
+      "history": []
+    },
+    "skills/design-identity/markGeometry.md": {
+      "version": 1,
+      "sha256": "b8a4dd15a27c635ca1a8ec92b79819c0e248688c55c81ab6d4bbc79d7815c63f",
+      "history": []
+    },
+    "skills/design-identity/prototype.md": {
+      "version": 1,
+      "sha256": "9eb3c6e0382fd36812dc588b53b276dae5133d6caee1fdaf2f8e0a54df8305bf",
+      "history": []
+    },
+    "skills/design-identity/tokensPackage.md": {
+      "version": 1,
+      "sha256": "574cfe44af07a3545cf0cbc313d6283f022c8a2a0dec19e547ae81b25a3f6821",
+      "history": []
+    },
     "skills/design-vocabulary/SKILL.md": {
       "version": 10,
       "sha256": "84ea134a38eda0f2c408fb5809174f37d8b917738c3a7b728d61e7e3c34482f4",
@@ -1054,12 +1095,13 @@
       "vibeVersion": "1.0.0"
     },
     "skills/page-design/SKILL.md": {
-      "version": 2,
-      "sha256": "d961f4f504720d4e996028e2efd5453ae0bd3d0bcb095d67276a588c9cba8489",
+      "version": 3,
+      "sha256": "c5c32476b662abda9a71dbed8dacc32c45a8f8df8704c8461644843998301e9f",
       "history": [
-        "fcf9e1d97e8728a9febead534a5d439dbf6a0d6851ca76aa70c088c40101db3e"
+        "fcf9e1d97e8728a9febead534a5d439dbf6a0d6851ca76aa70c088c40101db3e",
+        "d961f4f504720d4e996028e2efd5453ae0bd3d0bcb095d67276a588c9cba8489"
       ],
-      "vibeVersion": "1.0.1"
+      "vibeVersion": "1.0.2"
     },
     "skills/page-design/evals/evals.json": {
       "version": 1,
