@@ -1054,10 +1054,17 @@
       "vibeVersion": "1.0.0"
     },
     "skills/page-design/SKILL.md": {
+      "version": 2,
+      "sha256": "d961f4f504720d4e996028e2efd5453ae0bd3d0bcb095d67276a588c9cba8489",
+      "history": [
+        "fcf9e1d97e8728a9febead534a5d439dbf6a0d6851ca76aa70c088c40101db3e"
+      ],
+      "vibeVersion": "1.0.1"
+    },
+    "skills/page-design/evals/evals.json": {
       "version": 1,
-      "sha256": "fcf9e1d97e8728a9febead534a5d439dbf6a0d6851ca76aa70c088c40101db3e",
-      "history": [],
-      "vibeVersion": "1.0.0"
+      "sha256": "25fd7e2ac3d667ac2b5c23314bb46141a334b11b0d17e8e0a2274cbe008921fc",
+      "history": []
     },
     "skills/party/SKILL.md": {
       "version": 2,
