@@ -1053,6 +1053,12 @@
       ],
       "vibeVersion": "1.0.0"
     },
+    "skills/page-design/SKILL.md": {
+      "version": 1,
+      "sha256": "fcf9e1d97e8728a9febead534a5d439dbf6a0d6851ca76aa70c088c40101db3e",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
     "skills/party/SKILL.md": {
       "version": 2,
       "sha256": "cf61680e9f489748b0bb6719f71a0c0473bf5d6bf193972583dff411a041a7d5",
