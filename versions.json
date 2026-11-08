@@ -1076,18 +1076,21 @@
       "history": []
     },
     "skills/night-work/SKILL.md": {
-      "version": 3,
-      "sha256": "c47a9dd25c7129fa14f4f2f0b21be6bac17345502a5361dafc06a9cdc3b3f8aa",
+      "version": 4,
+      "sha256": "813c859527e14bdc775173d9c73dc86ea4d794b91e1f3656a590750c1dedaed1",
       "history": [
         "b50dbeb6c98189111adf5ae24dd60fc2ca074cae3a563357e140daab798f395a",
-        "458db670909365cd5287c743f55f0f8ad44298fbae57bebf336c7e6f05daa600"
+        "458db670909365cd5287c743f55f0f8ad44298fbae57bebf336c7e6f05daa600",
+        "c47a9dd25c7129fa14f4f2f0b21be6bac17345502a5361dafc06a9cdc3b3f8aa"
       ],
-      "vibeVersion": "1.0.1"
+      "vibeVersion": "1.1.0"
     },
     "skills/night-work/evals/evals.json": {
-      "version": 1,
-      "sha256": "14cbd58477725da2dfa5a04393bf5b1d6541798f4365e1aa2cbfa92822adb7f2",
-      "history": []
+      "version": 2,
+      "sha256": "5dadbfa22e1c2fad7514f222f8e9b374dcbc5917a615715a925d3e57c9813e30",
+      "history": [
+        "14cbd58477725da2dfa5a04393bf5b1d6541798f4365e1aa2cbfa92822adb7f2"
+      ]
     },
     "skills/optimize-by-metric/SKILL.md": {
       "version": 2,
