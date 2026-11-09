@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+# Очередь на тяжёлое для всех агентов машины: один слот, память проверяется перед стартом
+# Тяжёлое — сборки docker, нейросети, release-сборки, e2e с браузером, стенды, прогоны видео
+#
+# heavy run [--mem ГБ] [--name "проект: что"] -- команда …   ждёт слот и память, потом запускает
+# heavy status                                               кто держит слот и кто в очереди
+#
+# Слот и очередь — файлы в $HEAVY_DIR, запись одного агента не мешает другим
+# Слот умершего процесса освобождается сам: проверка по pid при каждом обращении
+set -euo pipefail
+
+# Состояние — несколько байт на задачу, поэтому живёт в обычном кэше пользователя
+HEAVY_DIR="${HEAVY_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/heavy}"
+# Сколько тяжёлых задач одновременно: на 16 ГБ больше одной уводит машину в своп
+HEAVY_SLOTS="${HEAVY_SLOTS:-1}"
+# Давление памяти macOS: 1 — норма, 2 — предупреждение, 4 — критично
+# На 16 ГБ «предупреждение» — обычное состояние, поэтому на нём старт решает свободная память
+# На «критично» старт ждёт всегда
+HEAVY_CRITICAL_PRESSURE="${HEAVY_CRITICAL_PRESSURE:-4}"
+# Сколько памяти, ГБ, должно быть свободно на «предупреждении», если задача не назвала свою в --mem
+HEAVY_WARN_MIN_GB="${HEAVY_WARN_MIN_GB:-3}"
+# Пауза между проверками, секунды
+HEAVY_POLL="${HEAVY_POLL:-20}"
+# Потолок ожидания, минуты; 0 — ждать без конца
+HEAVY_MAX_WAIT_MIN="${HEAVY_MAX_WAIT_MIN:-0}"
+
+SLOTS="$HEAVY_DIR/slots"
+QUEUE="$HEAVY_DIR/queue"
+LOCK="$HEAVY_DIR/.lock"
+mkdir -p "$SLOTS" "$QUEUE"
+
+die() { echo "heavy: $*" >&2; exit 2; }
+
+# Доступная память в ГБ
+# macOS — свободные, неактивные и спекулятивные страницы, Linux — MemAvailable
+avail_gb() {
+  if [ -r /proc/meminfo ]; then
+    awk '/^MemAvailable:/ {printf "%.1f", $2/1048576}' /proc/meminfo
+    return
+  fi
+  vm_stat | awk -v ps="$(sysctl -n hw.pagesize)" '
+    /Pages free/ {f=$3} /Pages inactive/ {i=$3} /Pages speculative/ {s=$3}
+    END {gsub(/\./,"",f); gsub(/\./,"",i); gsub(/\./,"",s); printf "%.1f", (f+i+s)*ps/1073741824}'
+}
+
+# Давление памяти macOS; на Linux его нет, там решает только доступная память
+pressure() { sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null || echo 1; }
+
+# Взаимоисключение на время чтения и записи файлов слота: mkdir атомарен
+lock() {
+  local n=0
+  until mkdir "$LOCK" 2>/dev/null; do
+    # Замок старше минуты — его держатель умер посреди записи
+    if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +1 2>/dev/null)" ]; then rmdir "$LOCK" 2>/dev/null || true; fi
+    n=$((n + 1)); [ $n -gt 600 ] && die "не взять замок $LOCK"
+    sleep 0.1
+  done
+}
+unlock() { rmdir "$LOCK" 2>/dev/null || true; }
+
+field() { sed -n "s/^$2=//p" "$1" | head -1; }
+
+# Убрать записи процессов, которых уже нет
+reap() {
+  local f
+  for f in "$SLOTS"/* "$QUEUE"/*; do
+    [ -f "$f" ] || continue
+    kill -0 "$(field "$f" pid)" 2>/dev/null || rm -f "$f"
+  done
+}
+
+describe() {
+  local f="$1" started
+  started="$(field "$f" started)"
+  printf '  %s — %s, pid %s, с %s (%s мин)\n' "$(field "$f" name)" "$(field "$f" cmd)" "$(field "$f" pid)" \
+    "$(date -r "$started" '+%H:%M')" "$(( ($(date +%s) - started) / 60 ))"
+}
+
+cmd_status() {
+  lock; reap; unlock
+  echo "Память: доступно $(avail_gb) ГБ, давление $(pressure) (1 — норма, 2 — предупреждение, 4 — критично)"
+  echo "Слот ($HEAVY_SLOTS):"
+  local any=0 f
+  for f in "$SLOTS"/*; do [ -f "$f" ] && { describe "$f"; any=1; }; done
+  [ $any = 1 ] || echo "  свободен"
+  echo "Очередь:"
+  any=0
+  for f in $(ls "$QUEUE" 2>/dev/null | sort); do describe "$QUEUE/$f"; any=1; done
+  [ $any = 1 ] || echo "  пусто"
+}
+
+cmd_run() {
+  local mem=0 name=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --mem) mem="${2%[Gg]}"; shift 2 ;;
+      --name) name="$2"; shift 2 ;;
+      --) shift; break ;;
+      *) die "неизвестный ключ $1; команда идёт после --" ;;
+    esac
+  done
+  [ $# -gt 0 ] || die "нет команды: heavy run --name \"проект: что\" -- команда"
+  [ -n "$name" ] || name="$(basename "$PWD"): $1"
+
+  local me=$$ now cmdline
+  # ticket и slot глобальные: их читает trap EXIT уже после выхода из функции
+  now=$(date +%s)
+  cmdline="$(printf '%s ' "$@" | cut -c1-160)"
+  # Номер в очереди: время старта и pid, сортировка по имени даёт порядок прихода
+  ticket="$QUEUE/$(printf '%012d-%08d' "$now" "$me")"
+  slot="$SLOTS/$me"
+  printf 'pid=%s\nname=%s\ncmd=%s\nstarted=%s\nmem=%s\n' "$me" "$name" "$cmdline" "$now" "$mem" > "$ticket"
+  trap 'rm -f "$ticket" "$slot"' EXIT
+  trap 'exit 130' INT TERM HUP
+
+  local said="" waited=0 why
+  while :; do
+    lock; reap
+    local busy first need
+    busy=$(find "$SLOTS" -type f | wc -l | tr -d ' ')
+    first="$QUEUE/$(ls "$QUEUE" | sort | head -1)"
+    why=""
+    if [ "$busy" -ge "$HEAVY_SLOTS" ]; then why="слот занят"
+    elif [ "$first" != "$ticket" ]; then why="впереди очередь"
+    elif [ "$(pressure)" -ge "$HEAVY_CRITICAL_PRESSURE" ]; then why="давление памяти критичное"
+    else
+      need="$mem"
+      if [ "$(pressure)" -gt 1 ]; then need=$(awk -v m="$mem" -v w="$HEAVY_WARN_MIN_GB" 'BEGIN{print (m > w ? m : w)}'); fi
+      if awk -v a="$(avail_gb)" -v n="$need" 'BEGIN{exit !(a < n)}'; then why="доступно $(avail_gb) ГБ из нужных $need"; fi
+    fi
+    if [ -z "$why" ]; then
+      sed "s/^started=.*/started=$(date +%s)/" "$ticket" > "$slot"
+      rm -f "$ticket"
+      unlock
+      break
+    fi
+    unlock
+    # Сообщение повторяется только при смене причины, а не при каждом новом замере памяти
+    if [ "${why%% *}" != "$said" ]; then
+      echo "heavy: жду — $why"
+      [ "$why" = "слот занят" ] && for f in "$SLOTS"/*; do [ -f "$f" ] && describe "$f"; done
+      said="${why%% *}"
+    fi
+    if [ "$HEAVY_MAX_WAIT_MIN" -gt 0 ] && [ $((waited / 60)) -ge "$HEAVY_MAX_WAIT_MIN" ]; then
+      die "не дождался слота за $HEAVY_MAX_WAIT_MIN мин: $why"
+    fi
+    sleep "$HEAVY_POLL"; waited=$((waited + HEAVY_POLL))
+  done
+
+  echo "heavy: слот взят — $name"
+  # Команда — дочерний процесс: слот держит этот pid и снимается в trap при любом выходе
+  local rc=0
+  "$@" || rc=$?
+  return $rc
+}
+
+case "${1:-}" in
+  run) shift; cmd_run "$@" ;;
+  status) cmd_status ;;
+  *) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

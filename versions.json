@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 16,
-      "sha256": "e31827b2d815681bb997e6858dd34b892a70957d8974eec004d262926073ca92",
+      "version": 17,
+      "sha256": "7d251b202708204ddd67bdf6bdc134659d58e3bf5da6d4adb2789106fef3ba41",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -25,7 +25,8 @@
         "3e2d8cd8cafe74628d339247c7002233484d8a15d2288456509b514eacba5239",
         "e5bdc6ba88a36cb3f7d500ec8cb13e7c3a8315fdf9ee7620cf7f670b1da0aa7b",
         "14ccef246e77a6c31b08e603f0a79a67d42a1729e668c3cb4cb832a0c04a5cae",
-        "f421efc556127fc786079bc2167ab2abf288dcd6a779e61148c5f3f69f243300"
+        "f421efc556127fc786079bc2167ab2abf288dcd6a779e61148c5f3f69f243300",
+        "e31827b2d815681bb997e6858dd34b892a70957d8974eec004d262926073ca92"
       ]
     },
     "agents.json": {
@@ -593,6 +594,12 @@
       ],
       "vibeVersion": "1.0.0"
     },
+    "rules/ochered-na-tyazheloe.mdc": {
+      "version": 1,
+      "sha256": "1a85aa46573f754a33d9beab25b516123c0e9d46f438f04ff963381093839b67",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
     "rules/pipeline.mdc": {
       "version": 4,
       "sha256": "1e82ebb14680f13d8ae91a0b8364eff047feb72ae733502c309cd1d6cc9565f3",
@@ -780,19 +787,25 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 5,
-      "sha256": "d6cbcbd7e1fa57cce75caeb0f32c1718973cfe105a78ded97ff6ef1f87ad99a7",
+      "version": 6,
+      "sha256": "35446f24feaf2e6aa92aef1dc46059037be6aeecfed6a8cb01da184686fef0da",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
         "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
         "82c53993ffbc5a5289d63866da758828e083f562830e623d29320a24b9fab838",
-        "816ccb2733f3cc78030a7c502d368e7d4e0801101d11321197bb50bd56e97e76"
+        "816ccb2733f3cc78030a7c502d368e7d4e0801101d11321197bb50bd56e97e76",
+        "d6cbcbd7e1fa57cce75caeb0f32c1718973cfe105a78ded97ff6ef1f87ad99a7"
       ],
-      "vibeVersion": "1.1.1"
+      "vibeVersion": "1.2.0"
     },
     "skills/brigadier/evals/evals.json": {
       "version": 1,
       "sha256": "4d468e2e97c81f2793014381dc9bf9ba83a5f4e777ead1af0eef510318ab20a8",
+      "history": []
+    },
+    "skills/brigadier/heavy/heavy": {
+      "version": 1,
+      "sha256": "b514c29189bf64d692683f831f7adf2c59a9fc652aca3104f8f58ad8378932f1",
       "history": []
     },
     "skills/brigadier/worker/README.md": {
