@@ -19,6 +19,12 @@ HEAVY_SLOTS="${HEAVY_SLOTS:-1}"
 HEAVY_CRITICAL_PRESSURE="${HEAVY_CRITICAL_PRESSURE:-4}"
 # Сколько памяти, ГБ, должно быть свободно на «предупреждении», если задача не назвала свою в --mem
 HEAVY_WARN_MIN_GB="${HEAVY_WARN_MIN_GB:-3}"
+# Сколько минут первый в очереди ждёт памяти при свободном слоте, потом стартует
+# Слот один, значит он и так работает один, а доступная память занята не тяжёлым: IDE, браузер, агенты
+# Без этого запрос больше доступного вставал навсегда и держал всю очередь за собой
+HEAVY_HEAD_WAIT_MIN="${HEAVY_HEAD_WAIT_MIN:-10}"
+# Доля всей памяти машины, больше которой --mem не освободится никогда: запрос снижается до неё
+HEAVY_MAX_MEM_SHARE="${HEAVY_MAX_MEM_SHARE:-0.75}"
 # Пауза между проверками, секунды
 HEAVY_POLL="${HEAVY_POLL:-20}"
 # Потолок ожидания, минуты; 0 — ждать без конца
@@ -41,6 +47,12 @@ avail_gb() {
   vm_stat | awk -v ps="$(sysctl -n hw.pagesize)" '
     /Pages free/ {f=$3} /Pages inactive/ {i=$3} /Pages speculative/ {s=$3}
     END {gsub(/\./,"",f); gsub(/\./,"",i); gsub(/\./,"",s); printf "%.1f", (f+i+s)*ps/1073741824}'
+}
+
+# Вся память машины в ГБ
+total_gb() {
+  if [ -r /proc/meminfo ]; then awk '/^MemTotal:/ {printf "%.1f", $2/1048576}' /proc/meminfo; return; fi
+  sysctl -n hw.memsize | awk '{printf "%.1f", $1/1073741824}'
 }
 
 # Давление памяти macOS; на Linux его нет, там решает только доступная память
@@ -72,8 +84,10 @@ reap() {
 describe() {
   local f="$1" started
   started="$(field "$f" started)"
-  printf '  %s — %s, pid %s, с %s (%s мин)\n' "$(field "$f" name)" "$(field "$f" cmd)" "$(field "$f" pid)" \
-    "$(date -r "$started" '+%H:%M')" "$(( ($(date +%s) - started) / 60 ))"
+  printf '  %s — %s, pid %s, память %s ГБ, с %s (%s мин)\n' "$(field "$f" name)" "$(field "$f" cmd)" \
+    "$(field "$f" pid)" "$(field "$f" mem)" "$(date -r "$started" '+%H:%M')" "$(( ($(date +%s) - started) / 60 ))"
+  local why; why="$(field "$f" why)"
+  [ -z "$why" ] || printf '    ждёт: %s\n' "$why"
 }
 
 cmd_status() {
@@ -101,6 +115,12 @@ cmd_run() {
   done
   [ $# -gt 0 ] || die "нет команды: heavy run --name \"проект: что\" -- команда"
   [ -n "$name" ] || name="$(basename "$PWD"): $1"
+  local cap
+  cap=$(awk -v t="$(total_gb)" -v s="$HEAVY_MAX_MEM_SHARE" 'BEGIN{printf "%.0f", t*s}')
+  if awk -v m="$mem" -v c="$cap" 'BEGIN{exit !(m > c)}'; then
+    echo "heavy: --mem $mem ГБ не освободится никогда (всего $(total_gb) ГБ), запрос снижен до $cap"
+    mem="$cap"
+  fi
 
   local me=$$ now cmdline
   # ticket и slot глобальные: их читает trap EXIT уже после выхода из функции
@@ -113,7 +133,7 @@ cmd_run() {
   trap 'rm -f "$ticket" "$slot"' EXIT
   trap 'exit 130' INT TERM HUP
 
-  local said="" waited=0 why
+  local said="" waited=0 why head_since=0
   while :; do
     lock; reap
     local busy first need
@@ -126,14 +146,25 @@ cmd_run() {
     else
       need="$mem"
       if [ "$(pressure)" -gt 1 ]; then need=$(awk -v m="$mem" -v w="$HEAVY_WARN_MIN_GB" 'BEGIN{print (m > w ? m : w)}'); fi
-      if awk -v a="$(avail_gb)" -v n="$need" 'BEGIN{exit !(a < n)}'; then why="доступно $(avail_gb) ГБ из нужных $need"; fi
+      if awk -v a="$(avail_gb)" -v n="$need" 'BEGIN{exit !(a < n)}'; then
+        [ "$head_since" -gt 0 ] || head_since=$(date +%s)
+        if [ $(( $(date +%s) - head_since )) -ge $((HEAVY_HEAD_WAIT_MIN * 60)) ]; then
+          echo "heavy: памяти $(avail_gb) ГБ из нужных $need, но слот свободен $HEAVY_HEAD_WAIT_MIN мин — стартую"
+        else
+          why="доступно $(avail_gb) ГБ из нужных $need, старт не позже чем через $HEAVY_HEAD_WAIT_MIN мин"
+        fi
+      fi
     fi
+    # Отсчёт ожидания первого идёт, только пока слот свободен и он первый
+    case "$why" in "слот занят"|"впереди очередь") head_since=0 ;; esac
     if [ -z "$why" ]; then
-      sed "s/^started=.*/started=$(date +%s)/" "$ticket" > "$slot"
+      sed -e "s/^started=.*/started=$(date +%s)/" -e '/^why=/d' "$ticket" > "$slot"
       rm -f "$ticket"
       unlock
       break
     fi
+    # Причина видна в heavy status; черновик вне каталога очереди, чтобы не попасть в её порядок
+    { grep -v '^why=' "$ticket"; echo "why=$why"; } > "$HEAVY_DIR/.why.$me" && mv "$HEAVY_DIR/.why.$me" "$ticket"
     unlock
     # Сообщение повторяется только при смене причины, а не при каждом новом замере памяти
     if [ "${why%% *}" != "$said" ]; then

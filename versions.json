@@ -576,10 +576,12 @@
       "vibeVersion": "1.1.0"
     },
     "rules/heavy-queue.mdc": {
-      "version": 1,
-      "sha256": "e3b8662616441cd6d06e98381f4190af0d0089e065240ecaf45a4b86d196a12f",
-      "history": [],
-      "vibeVersion": "1.0.0"
+      "version": 2,
+      "sha256": "20c4c6b5e18adb083ce255356567461f54a5af9ec45ef8c48e4a030ffe2fc00c",
+      "history": [
+        "e3b8662616441cd6d06e98381f4190af0d0089e065240ecaf45a4b86d196a12f"
+      ],
+      "vibeVersion": "1.0.1"
     },
     "rules/knowledge.mdc": {
       "version": 5,
@@ -788,17 +790,18 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 7,
-      "sha256": "ca253a644836eb8be0e0cf92c002f793ff7cb5f3c1061b7810c109414f6e95f7",
+      "version": 8,
+      "sha256": "1c25d6319f09c37f693108d619eef45a922167e957c708f2498b7879b5337816",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
         "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
         "82c53993ffbc5a5289d63866da758828e083f562830e623d29320a24b9fab838",
         "816ccb2733f3cc78030a7c502d368e7d4e0801101d11321197bb50bd56e97e76",
         "d6cbcbd7e1fa57cce75caeb0f32c1718973cfe105a78ded97ff6ef1f87ad99a7",
-        "35446f24feaf2e6aa92aef1dc46059037be6aeecfed6a8cb01da184686fef0da"
+        "35446f24feaf2e6aa92aef1dc46059037be6aeecfed6a8cb01da184686fef0da",
+        "ca253a644836eb8be0e0cf92c002f793ff7cb5f3c1061b7810c109414f6e95f7"
       ],
-      "vibeVersion": "1.2.1"
+      "vibeVersion": "1.2.2"
     },
     "skills/brigadier/evals/evals.json": {
       "version": 1,
@@ -806,9 +809,11 @@
       "history": []
     },
     "skills/brigadier/heavy/heavy": {
-      "version": 1,
-      "sha256": "b514c29189bf64d692683f831f7adf2c59a9fc652aca3104f8f58ad8378932f1",
-      "history": []
+      "version": 2,
+      "sha256": "351414e13465e2e1ad641ad6c99fd5f14597dfbe13279f7e0881948a1db1dd12",
+      "history": [
+        "b514c29189bf64d692683f831f7adf2c59a9fc652aca3104f8f58ad8378932f1"
+      ]
     },
     "skills/brigadier/worker/README.md": {
       "version": 7,
