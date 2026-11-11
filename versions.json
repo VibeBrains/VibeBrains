@@ -679,12 +679,13 @@
       "vibeVersion": "1.0.0"
     },
     "rules/security.mdc": {
-      "version": 2,
-      "sha256": "9e5a519397fcedbf2cfb1426504167a36bc458d3bb931fb6b7ab9327cfbb5ee1",
+      "version": 3,
+      "sha256": "a4fe83d41a7893ec0df29345b80d4a7e7ae400c2aa366de152b3427fcfe61042",
       "history": [
-        "4226fc5fef08a9a6195b6d632b65da567b36edfbee4dbf515f0722a5cac315f4"
+        "4226fc5fef08a9a6195b6d632b65da567b36edfbee4dbf515f0722a5cac315f4",
+        "9e5a519397fcedbf2cfb1426504167a36bc458d3bb931fb6b7ab9327cfbb5ee1"
       ],
-      "vibeVersion": "1.0.0"
+      "vibeVersion": "1.0.1"
     },
     "rules/spec-first.mdc": {
       "version": 5,
