@@ -8,8 +8,8 @@
       "history": []
     },
     "README.md": {
-      "version": 19,
-      "sha256": "d236b9fc317ac310cc2aa5b9773dd76f77c98d25aad9f5b7bd31ffca64c9a557",
+      "version": 20,
+      "sha256": "95bb6b0524ed7b323b0afec6e813b611ddbf79992449d8752df256c9a66c1cc6",
       "history": [
         "66163d07e6be83fddbe2dc4d8ffada1e0b59fe7b9b06481a86c61ab941885aaa",
         "f49d00e81147a9fa5015cb04e9be29df8169833262ba28264d921219dfcd2dbb",
@@ -28,7 +28,8 @@
         "f421efc556127fc786079bc2167ab2abf288dcd6a779e61148c5f3f69f243300",
         "e31827b2d815681bb997e6858dd34b892a70957d8974eec004d262926073ca92",
         "7d251b202708204ddd67bdf6bdc134659d58e3bf5da6d4adb2789106fef3ba41",
-        "d4180c72b966f8c9bec5dfb002e0790bc59777c7866517f5b40e8de9ee00c029"
+        "d4180c72b966f8c9bec5dfb002e0790bc59777c7866517f5b40e8de9ee00c029",
+        "d236b9fc317ac310cc2aa5b9773dd76f77c98d25aad9f5b7bd31ffca64c9a557"
       ]
     },
     "agents.json": {
@@ -1250,6 +1251,12 @@
       "version": 1,
       "sha256": "699eaf030d2127c01e5966567f9abe9f703d3bb4d863eefc757dd9fd788a9179",
       "history": []
+    },
+    "skills/skzi-review/SKILL.md": {
+      "version": 1,
+      "sha256": "fafc10870552912b2e15a809f67214cb67afb9f7e6cccb9d4eceb0d1e89e2afc",
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/spec-driven-implementation/SKILL.md": {
       "version": 5,
