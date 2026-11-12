@@ -36,6 +36,7 @@ test('векторы разбора из testVectors/commandPathsOutside.json', 
 				roots: vector.roots,
 				caseInsensitive: vector.caseInsensitive,
 				home: vector.home,
+				cwd: vector.cwd,
 			});
 			assert.deepStrictEqual(found, vector.expected);
 		});

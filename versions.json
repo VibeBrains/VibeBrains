@@ -1482,10 +1482,11 @@
       "history": []
     },
     "testVectors/commandPathsOutside.json": {
-      "version": 2,
-      "sha256": "58097323ff738fdc65fcc89e9770eb0ca667bbddc348b1f7fda21af3306f9e51",
+      "version": 3,
+      "sha256": "ea1e23a59b622aeaa1ff57c5b93b1abbe52c2792d48e68805f22f4b290e06109",
       "history": [
-        "96c66f6b6077058005b2a0ab45869cceb6f62599e395815cafecd670379518a5"
+        "96c66f6b6077058005b2a0ab45869cceb6f62599e395815cafecd670379518a5",
+        "58097323ff738fdc65fcc89e9770eb0ca667bbddc348b1f7fda21af3306f9e51"
       ]
     },
     "testVectors/diffNavigation.json": {

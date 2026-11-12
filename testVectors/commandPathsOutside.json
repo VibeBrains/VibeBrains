@@ -480,5 +480,73 @@
 				"readOnly": false
 			}
 		]
+	},
+	{
+		"name": "cd в соседний каталог — только смена каталога",
+		"command": "cd /p/front && cd ../back && git fetch",
+		"roots": [
+			"/p/front"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "../back",
+				"critical": false,
+				"readOnly": true
+			}
+		],
+		"cwd": "/p/front"
+	},
+	{
+		"name": "cd .. из подкаталога остаётся в проекте",
+		"command": "cd /p/wt; cd server && bun test; cd .. && bun test tools",
+		"roots": [
+			"/p"
+		],
+		"caseInsensitive": true,
+		"expected": [],
+		"cwd": "/p"
+	},
+	{
+		"name": ".. от известного каталога внутри проекта — свой",
+		"command": "cp a ../b",
+		"roots": [
+			"/p"
+		],
+		"caseInsensitive": true,
+		"expected": [],
+		"cwd": "/p/src"
+	},
+	{
+		"name": ".. от корня проекта наружу — запись вне",
+		"command": "cp a ../b",
+		"roots": [
+			"/p"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "../b",
+				"critical": false,
+				"readOnly": false
+			}
+		],
+		"cwd": "/p"
+	},
+	{
+		"name": "после неясного cd каталог неизвестен — .. внешний",
+		"command": "cd $X && cp a ../b",
+		"roots": [
+			"/p"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "../b",
+				"critical": false,
+				"readOnly": false
+			}
+		],
+		"cwd": "/p/src"
 	}
 ]
