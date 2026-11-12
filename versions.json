@@ -794,8 +794,8 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 8,
-      "sha256": "1c25d6319f09c37f693108d619eef45a922167e957c708f2498b7879b5337816",
+      "version": 9,
+      "sha256": "1f8d3dde96fd62c5bf920d847784778b623cb1147b4c49c210d849dee16b1f22",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
         "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
@@ -803,9 +803,10 @@
         "816ccb2733f3cc78030a7c502d368e7d4e0801101d11321197bb50bd56e97e76",
         "d6cbcbd7e1fa57cce75caeb0f32c1718973cfe105a78ded97ff6ef1f87ad99a7",
         "35446f24feaf2e6aa92aef1dc46059037be6aeecfed6a8cb01da184686fef0da",
-        "ca253a644836eb8be0e0cf92c002f793ff7cb5f3c1061b7810c109414f6e95f7"
+        "ca253a644836eb8be0e0cf92c002f793ff7cb5f3c1061b7810c109414f6e95f7",
+        "1c25d6319f09c37f693108d619eef45a922167e957c708f2498b7879b5337816"
       ],
-      "vibeVersion": "1.2.2"
+      "vibeVersion": "1.3.0"
     },
     "skills/brigadier/evals/evals.json": {
       "version": 1,
@@ -820,15 +821,16 @@
       ]
     },
     "skills/brigadier/worker/README.md": {
-      "version": 7,
-      "sha256": "c6376a19689d34360940581bb8dc6d128ab820c836bc74fcbef4b779f1777879",
+      "version": 8,
+      "sha256": "464c8b0da05cee05cbb9efdb4c3dff1dfda31cc5ea79e62977fd236ea898e98a",
       "history": [
         "82f00708c56dbe503230c840e1effdffb01d7c2845f83b106c17bb231f4e0146",
         "a56241a1c84fe7509bcba6c6947dc20a30d98b704b67f21f18ffa18ed379974d",
         "01489de8f76e3db05d94ad27c7bce749203b9a939e11da16be787ff911ad696c",
         "1a60a040607dcc469849c1a62e43fe7ea3f593dbf5884d705c0b31f9507d6825",
         "7cff73147f933d75155adb41e1e67e8fb4dee796ec4eb42f08cead83f95641c0",
-        "0393817e2f35fd70694f56ac1e1e9ff12f178b9a406bb386b7c3bafb706b86e9"
+        "0393817e2f35fd70694f56ac1e1e9ff12f178b9a406bb386b7c3bafb706b86e9",
+        "c6376a19689d34360940581bb8dc6d128ab820c836bc74fcbef4b779f1777879"
       ]
     },
     "skills/brigadier/worker/providers/deepseek.json": {
@@ -840,27 +842,29 @@
       ]
     },
     "skills/brigadier/worker/worker.ps1": {
-      "version": 7,
-      "sha256": "fedbe89b0c67ac675f812a57e682cd15410a5a3a4a7b2f41d6a99629ec84dbc1",
+      "version": 8,
+      "sha256": "6f4345dba6ff94da1560f5c2e33972de3269447d9eca42e08a6c7d332cf75286",
       "history": [
         "6e4299b5cb636217a15275cd9020525855fa5898dfabf37e4278daadb41f1792",
         "17ae17ccec8e1682f93f98ec8a70751d962adb99e8ae69340d84a37c2f7ea6e8",
         "264fdc6666e4702f247bacba733e38214bb432bc0785188164e06988b20cb694",
         "2bd4a03e46aa038752b21323cea54aecefd5f571dd1eb9bc049f8bd4963b479e",
         "5fe633a6790f53d86bd4cf575363f536e43884f8ec6a29925b0ad763dc67676c",
-        "215274354008482b0edb7596329b7a75efd27235e8c8f54246cea6383ab2b7f0"
+        "215274354008482b0edb7596329b7a75efd27235e8c8f54246cea6383ab2b7f0",
+        "fedbe89b0c67ac675f812a57e682cd15410a5a3a4a7b2f41d6a99629ec84dbc1"
       ]
     },
     "skills/brigadier/worker/worker.sh": {
-      "version": 7,
-      "sha256": "4a36e19efc464694d555879e34c70055888b4a28cd03800efa7af25765fb73be",
+      "version": 8,
+      "sha256": "a4d7485e9fa8379184c1665a44081e4f44b138f40d5332ca5e4ea26e4f07a7f6",
       "history": [
         "10f0ca3dfb911c8cb75bf3f5c18a1d5580f48aefbac52e9e8da2495db35a1fd5",
         "f08da0eee72ae47551fd1574d07366ede6f532b7e4edf100a310350bdf2f6805",
         "bbf69abbd80ee768f53ec7779a862f6cfc2042c9e985fe3c233273f6ecef960f",
         "fe6c11fe78486c872c2890155b2638c5e6a8e0222de6db913bd8a20001e0691b",
         "95416460ec0e4bb00a4cea270c885454cf039d1c205230ad2e5e500be5d71730",
-        "942929691f15935cd6826fcd2a27c813a9d4384af5385ed7c8b0802498451ca5"
+        "942929691f15935cd6826fcd2a27c813a9d4384af5385ed7c8b0802498451ca5",
+        "4a36e19efc464694d555879e34c70055888b4a28cd03800efa7af25765fb73be"
       ]
     },
     "skills/codebase-design/DEEPENING.md": {

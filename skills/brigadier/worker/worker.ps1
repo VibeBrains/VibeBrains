@@ -5,6 +5,7 @@
 #   worker.ps1 set-key <провайдер>
 #   worker.ps1 import-key <провайдер> [-FromFile <путь> | -FromLegacy]
 #   worker.ps1 check [провайдер]
+#   worker.ps1 watch [путь к журналу хода] — печатать ход исполнителя вживую
 #   worker.ps1 run -Provider <имя> -Tier cheap|strong -Effort <уровень> -Mode read|write `
 #                  -Dir <путь> -Brief <файл или -> [-Base <ref>] [-Budget <usd>] [-BashAllow "<шаблон>",…] [-AllowMainTree] [-OwnerApproved]
 #   (потолок цены запуска — maxRunUsd из профиля; -Budget переопределяет его вручную)
@@ -129,6 +130,54 @@ function Find-Profile([string] $Name) {
 
 function Read-Profile([string] $Path) {
     Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+}
+
+# Каталог журналов хода: переменная сильнее, затем liveDir профиля, затем соседний с каталогом worktree
+# Пустой профиль допустим: тогда остаются переменная и тот же запасной путь
+function Get-LiveRoot([string] $ProfileName) {
+    if ($env:BRIGADIER_WORKER_LIVE) { return $env:BRIGADIER_WORKER_LIVE }
+    $prof = $null
+    if ($ProfileName) {
+        $user = Join-Path $UserProvidersDir "$ProfileName.json"
+        $own = Join-Path (Join-Path $ScriptDir 'providers') "$ProfileName.json"
+        if (Test-Path -LiteralPath $user) { $prof = Read-Profile $user }
+        elseif (Test-Path -LiteralPath $own) { $prof = Read-Profile $own }
+    }
+    $live = $null
+    $wt = $WorktreesRoot
+    if ($prof) {
+        if ($prof.liveDir) {
+            $live = [Environment]::ExpandEnvironmentVariables([string]$prof.liveDir)
+            if ($live -match '^~[\\/]') { $live = Join-Path $HOME $live.Substring(2) }
+        }
+        if (-not $env:BRIGADIER_WORKER_WORKTREES -and $prof.worktreesDir) {
+            $wt = [Environment]::ExpandEnvironmentVariables([string]$prof.worktreesDir)
+            if ($wt -match '^~[\\/]') { $wt = Join-Path $HOME $wt.Substring(2) }
+        }
+    }
+    if ($live) { return $live }
+    return (Join-Path (Split-Path -Parent $wt) 'live')
+}
+
+# Не чистим корень, домашний каталог и верхние каталоги тома: там могут лежать чужие журналы
+function Test-LiveRootSafe([string] $Root) {
+    if (-not $Root) { return $false }
+    $full = [IO.Path]::GetFullPath($Root).TrimEnd([char[]]@('\', '/'))
+    $rootPath = [IO.Path]::GetPathRoot($Root).TrimEnd([char[]]@('\', '/'))
+    if ($full -eq $rootPath) { return $false }
+    if ($full -eq [IO.Path]::GetFullPath([string]$HOME).TrimEnd([char[]]@('\', '/'))) { return $false }
+    if ($full -match '^/Volumes/[^/]+$') { return $false }
+    return $true
+}
+
+# Уборка журналов хода старше недели: только в своём каталоге и только по своей маске
+function Clear-OldLive([string] $Root) {
+    if (-not (Test-LiveRootSafe $Root)) { return }
+    if (-not (Test-Path -LiteralPath $Root)) { return }
+    $limit = (Get-Date).AddDays(-7)
+    Get-ChildItem -LiteralPath $Root -Filter '2*-*.log' -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -lt $limit } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
 # Ключ: переменная окружения, затем Credential Manager
@@ -300,7 +349,7 @@ function Write-WorktreeResult($wt, $branch, $base, $title, $repo) {
 # Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
 # потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
 # Обрыв — taskkill всего дерева процессов (SIGTERM на Windows нет)
-function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFile, $Price, $Cap, [string] $ErrFile, [hashtable] $State) {
+function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFile, $Price, $Cap, [string] $ErrFile, [hashtable] $State, [string] $LiveFile) {
     $psi = New-Object Diagnostics.ProcessStartInfo
     $psi.FileName = $Exe
     $psi.Arguments = $ArgLine
@@ -314,6 +363,17 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
     $proc = [Diagnostics.Process]::Start($psi)
     # Процесс и счётчики видны обработчику снятия: по ним считается цена на момент сигнала
     $State.proc = $proc
+    $startTime = Get-Date
+    # Журнал хода: одна строка на событие и сразу на диск, чтобы читался хвостом во время запуска
+    $liveWriter = $null
+    if ($LiveFile) {
+        try { $liveWriter = [IO.File]::AppendText($LiveFile) } catch { $liveWriter = $null }
+    }
+    function Write-LiveLine([string] $Line) {
+        # Ошибка записи журнала не должна ронять запуск
+        if (-not $liveWriter) { return }
+        try { $liveWriter.WriteLine($Line); $liveWriter.Flush() } catch { }
+    }
     $errTask = $proc.StandardError.ReadToEndAsync()
     $briefBytes = [IO.File]::ReadAllBytes($BriefFile)
     $proc.StandardInput.BaseStream.Write($briefBytes, 0, $briefBytes.Length)
@@ -378,9 +438,24 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
                         if (-not $texts.Contains($mid)) { $texts[$mid] = '' }
                         $texts[$mid] += [string]$c.text
                         $outChars += ([string]$c.text).Length
+                        $lineText = ([string]$c.text -split "`r?`n")[0]
+                        if ($lineText) {
+                            $lineText = $lineText.Trim()
+                            if ($lineText.Length -gt 160) { $lineText = $lineText.Substring(0, 160) + '…' }
+                            Write-LiveLine ((Get-Date).ToString('HH:mm:ss') + ' · ' + $lineText)
+                        }
                     } elseif ($c.type -eq 'tool_use') {
                         $outChars += ($c.input | ConvertTo-Json -Compress -Depth 20).Length
                         if ($c.name -in @('Edit', 'Write', 'MultiEdit')) { $wrote = $true }
+                        # Аргумент — первое из знакомых полей; тела файлов и вывод инструментов сюда не попадают
+                        $arg = ''
+                        foreach ($f in @('file_path', 'path', 'pattern', 'command')) {
+                            if ($null -ne $c.input.$f -and "$($c.input.$f)") { $arg = [string]$c.input.$f; break }
+                        }
+                        $arg = ($arg -replace '\s+', ' ').Trim()
+                        if ($arg.Length -gt 120) { $arg = $arg.Substring(0, 120) + '…' }
+                        $name = if ($c.name) { [string]$c.name } else { '?' }
+                        Write-LiveLine ((Get-Date).ToString('HH:mm:ss') + " → $name $arg")
                     }
                 }
             } elseif ($ev.type -eq 'system' -and $ev.subtype -eq 'thinking_tokens') {
@@ -427,6 +502,14 @@ function Invoke-ClaudeStream([string] $Exe, [string] $ArgLine, [string] $BriefFi
     # Нет ни одного usage — стоимость неизвестна: нулём её писать нельзя, провайдер мог списать деньги
     $cost = $null
     if ($usageSeen -and $Price) { $cost = ($miss * [double]$Price.inputMiss + $hit * [double]$Price.inputHit + $out * [double]$Price.output) / 1e6 }
+    if ($liveWriter) {
+        $finish = if ($verdict -eq 'успех') { 'успех' } else { 'ошибка' }
+        $costText = if ($null -eq $cost) { 'цена неизвестна' } elseif ($exact) { ('${0:N4}' -f $cost) } else { ('~${0:N4}' -f $cost) }
+        $secs = [int]((Get-Date) - $startTime).TotalSeconds
+        Write-LiveLine ((Get-Date).ToString('HH:mm:ss') + " ■ итог: $finish · $costText · $secs с")
+        try { $liveWriter.Dispose() } catch { }
+        $liveWriter = $null
+    }
     return @{
         result = $text; verdict = $verdict; partial = ($over -or ($noUsage -and -not $usageSeen) -or -not $result); tokMiss = $miss; tokHit = $hit; tokOut = $out
         exact = $exact; costUsd = $cost; costKnown = ($null -ne $cost); noUsage = (-not $usageSeen)
@@ -551,6 +634,15 @@ function Invoke-Run {
     if (-not $briefTitle) { $briefTitle = 'задача исполнителя' }
     if ($briefTitle.Length -gt 100) { $briefTitle = $briefTitle.Substring(0, 100) }
 
+    # Журнал хода: каталог и имя считаются заранее, штамп тот же, что у ветки worktree
+    $LiveRoot = Get-LiveRoot $Provider
+    $runStamp = (Get-Date).ToString('yyyyMMdd-HHmmss') + "-$PID"
+    $LiveFile = Join-Path $LiveRoot "$runStamp.log"
+    try { New-Item -ItemType Directory -Path $LiveRoot -Force | Out-Null } catch { Stop-Worker "не создать каталог журналов $LiveRoot" }
+    try { [IO.File]::WriteAllText($LiveFile, '', (New-Object Text.UTF8Encoding($false))) } catch { Stop-Worker "не создать журнал хода $LiveFile" }
+    Clear-OldLive $LiveRoot
+    [Console]::Error.WriteLine("ход вживую: $LiveFile")
+
     $wtPath = ''; $wtBranch = ''; $wtBase = ''
     if ($makeWorktree) {
         # База worktree: -Base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
@@ -559,8 +651,8 @@ function Invoke-Run {
         if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет ref «$baseRef»: worktree не от чего создавать" }
         $wtBase = (& git -C $workDir rev-parse --short "$baseRef^{commit}" 2>$null)
         if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет коммитов: нечего брать за основу worktree" }
-        # Суффикс процесса: исполнители, запущенные в одну секунду, иначе получают одно имя ветки
-        $wtBranch = "$BranchPrefix/" + (Get-Date).ToString('yyyyMMdd-HHmmss') + "-$PID"
+        # Штамп с суффиксом процесса общий с журналом хода: исполнители в одну секунду не совпадают именами
+        $wtBranch = "$BranchPrefix/$runStamp"
         New-Item -ItemType Directory -Path $WorktreesRoot -Force | Out-Null
         $wtPath = Join-Path $WorktreesRoot ('wt.' + [Guid]::NewGuid().ToString('N').Substring(0, 6))
         & git -C $workDir worktree add -q -b $wtBranch $wtPath $baseRef 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
@@ -629,7 +721,7 @@ function Invoke-Run {
         $claudeExe = (Get-Command $ClaudeBin).Source
         Push-Location $workDir
         try {
-            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state
+            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state $LiveFile
         } finally { Pop-Location }
     } finally {
         foreach ($n in $names) { [Environment]::SetEnvironmentVariable($n, $saved[$n], 'Process') }
@@ -677,14 +769,34 @@ function Invoke-Run {
     elseif ($capNote) { Write-Output $capNote }
     if ($partial) { Write-Output 'результат частичный' }
     Write-Output "итог: $verdict"
+    Write-Output "журнал хода: $LiveFile"
     if ($wtPath) { Write-WorktreeResult $wtPath $wtBranch $wtBase $briefTitle $repoRoot }
     switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
+}
+
+# Показ журнала хода вживую: путь или самый свежий в каталоге журналов
+# Конец — строка итога, тогда ожидание чтения больше не нужно и команда выходит с кодом 0
+function Invoke-Watch([string] $Path) {
+    $LiveRoot = Get-LiveRoot 'deepseek'
+    if (-not $Path) {
+        $latest = Get-ChildItem -LiteralPath $LiveRoot -Filter '*.log' -File -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if (-not $latest) { Stop-Worker "нет журналов хода в $LiveRoot — сначала запустите worker.ps1 run" }
+        $Path = $latest.FullName
+    }
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { Stop-Worker "нет журнала хода $Path" }
+    Get-Content -LiteralPath $Path -Wait -Encoding UTF8 | ForEach-Object {
+        Write-Output $_
+        if ($_ -match '■ итог:') { break }
+    }
+    exit 0
 }
 
 switch ($Command) {
     'set-key' { Invoke-SetKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'import-key' { Invoke-ImportKey $(if ($Provider) { $Provider } else { $ProviderPos }) }
     'check' { Invoke-Check $(if ($Provider) { $Provider } else { $ProviderPos }) }
+    'watch' { Invoke-Watch $ProviderPos }
     'run' { Invoke-Run }
-    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 15 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
+    default { Get-Content -LiteralPath $MyInvocation.MyCommand.Path -TotalCount 16 | ForEach-Object { $_ -replace '^# ?', '' } | Write-Error; exit 1 }
 }

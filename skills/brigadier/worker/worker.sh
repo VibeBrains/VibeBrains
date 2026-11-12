@@ -7,6 +7,7 @@
 #   worker.sh set-key <провайдер>
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
+#   worker.sh watch [путь к журналу хода] — печатать ход исполнителя вживую
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree] [--owner-approved]
 #   (потолок цены запуска — maxRunUsd из профиля; --budget переопределяет его вручную)
@@ -55,7 +56,7 @@ WORKER_PROMPT='Ты внешний исполнитель: делай задач
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-  sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -104,6 +105,41 @@ find_profile() {
   else
     die "нет профиля провайдера «$1» (искал в $USER_PROVIDERS_DIR и $SCRIPT_DIR/providers)"
   fi
+}
+
+# Каталог журналов хода: переменная сильнее, затем liveDir профиля, затем соседний с каталогом worktree
+# Пустой профиль допустим: тогда остаются переменная и тот же запасной путь
+live_dir() {
+  local profile="${1:-}" live="" wt="$WORKTREES_ROOT" pwt
+  if [ -n "${BRIGADIER_WORKER_LIVE:-}" ]; then printf '%s\n' "$BRIGADIER_WORKER_LIVE"; return 0; fi
+  if [ -n "$profile" ] && [ -f "$profile" ]; then
+    live="$(prof_get "$profile" liveDir 2>/dev/null || true)"
+    case "$live" in \~/*) live="$HOME/${live#\~/}" ;; esac
+    if [ -z "${BRIGADIER_WORKER_WORKTREES:-}" ]; then
+      pwt="$(prof_get "$profile" worktreesDir 2>/dev/null || true)"
+      case "$pwt" in \~/*) pwt="$HOME/${pwt#\~/}" ;; esac
+      if [ -n "$pwt" ]; then wt="$pwt"; fi
+    fi
+  fi
+  printf '%s\n' "${live:-$(dirname "$wt")/live}"
+}
+
+# Уборка журналов хода старше недели: только в своём каталоге, не в корне и не в домашнем
+clean_live_dir() {
+  local root="$1"
+  [ -n "$root" ] || return 0
+  # macOS не различает регистр: /VolumES — тот же /Volumes, поэтому сравнение по нижнему регистру
+  local low home_low
+  low="$(printf '%s' "${root%/}" | tr '[:upper:]' '[:lower:]')"
+  home_low="$(printf '%s' "${HOME%/}" | tr '[:upper:]' '[:lower:]')"
+  case "$low" in
+    "" | "$home_low") return 0 ;;
+    /volumes/* | /mnt/*)
+      case "${low#/*/}" in */*) ;; *) return 0 ;; esac
+      ;;
+  esac
+  [ -d "$root" ] || return 0
+  find "$root" -maxdepth 1 -name '2*-*.log' -mtime +7 -delete 2>/dev/null || true
 }
 
 # Значение записи из хранилища секретов ОС; пусто, если записи нет
@@ -376,13 +412,13 @@ except Exception:
 # Счётчик самого claude (--max-budget-usd) считает по ценам Claude и обрывает чужую модель в ~30 раз раньше, поэтому
 # потолок считается здесь: вход — точный usage сообщений, выход — оценка по длине текста (usage потока отдаёт 0)
 # Итог пишется в файл JSON; потолок пуст — запуск идёт без потолка
-# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, порог входа без записи, секунд без usage, команда claude…
+# Аргументы: файл итога, файл брифа, файл stderr, профиль, модель, потолок или "", знаков на токен, секунд до SIGKILL, порог входа без записи, секунд без usage, журнал хода, команда claude…
 run_stream() {
   python3 -I -c '
-import json, os, signal, subprocess, sys, threading
+import json, os, signal, subprocess, sys, threading, time
 
-out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg, loop_arg, no_usage_arg = sys.argv[1:11]
-argv = sys.argv[11:]
+out_file, brief_file, err_file, profile_file, model, cap_arg, cpt_arg, grace_arg, loop_arg, no_usage_arg, live_file = sys.argv[1:12]
+argv = sys.argv[12:]
 cap = float(cap_arg) if cap_arg else None
 chars_per_token = float(cpt_arg)
 grace = float(grace_arg)
@@ -403,6 +439,42 @@ wrote = False    # был ли хоть один вызов инструмент
 result = None
 usage_seen = threading.Event()  # было ли событие с usage: без него стоимость неизвестна, а не нулевая
 no_usage = False                # сторож не дождался usage и оборвал запуск
+started = time.time()
+
+# Журнал хода: одна строка на событие и сразу на диск, чтобы читался хвостом во время запуска
+live = None
+if live_file:
+    try:
+        live = open(live_file, "a", encoding="utf-8")
+    except OSError:
+        live = None
+
+
+def journal(text):
+    # Ошибка записи журнала не должна ронять запуск
+    if live is None:
+        return
+    try:
+        live.write(text + "\n")
+        live.flush()
+    except OSError:
+        pass
+
+
+def one_line(value, limit):
+    # Аргумент инструмента — одной строкой, длинное обрезаем
+    text = " ".join(str(value).split())
+    if len(text) > limit:
+        text = text[:limit] + "…"
+    return text
+
+
+def first_line(value, limit):
+    lines = str(value).splitlines()
+    text = lines[0].strip() if lines else ""
+    if len(text) > limit:
+        text = text[:limit] + "…"
+    return text
 
 
 def totals():
@@ -546,10 +618,22 @@ try:
                 if c.get("type") == "text":
                     texts.setdefault(mid, []).append(str(c.get("text") or ""))
                     out_chars += len(str(c.get("text") or ""))
+                    line = first_line(c.get("text") or "", 160)
+                    if line:
+                        journal("%s · %s" % (time.strftime("%H:%M:%S"), line))
                 elif c.get("type") == "tool_use":
                     out_chars += len(json.dumps(c.get("input"), ensure_ascii=False))
                     if c.get("name") in ("Edit", "Write", "MultiEdit"):
                         wrote = True
+                    # Аргумент — первое из знакомых полей; тела файлов и вывод инструментов сюда не попадают
+                    arg = ""
+                    inp = c.get("input")
+                    if isinstance(inp, dict):
+                        for field in ("file_path", "path", "pattern", "command"):
+                            if inp.get(field) not in (None, ""):
+                                arg = inp.get(field)
+                                break
+                    journal("%s → %s %s" % (time.strftime("%H:%M:%S"), c.get("name") or "?", one_line(arg, 120)))
         elif kind == "system" and ev.get("subtype") == "thinking_tokens":
             think_tokens += int(ev.get("estimated_tokens_delta") or 0)
         else:
@@ -610,6 +694,20 @@ read_loop = (miss + hit) > loop_threshold and not wrote
 # Нет ни одного usage — стоимость неизвестна: нулём её писать нельзя, провайдер мог списать деньги
 cost = cost_of(miss, hit, out) if usage_seen.is_set() else None
 
+if live is not None:
+    if cost is None:
+        cost_text = "цена неизвестна"
+    elif exact:
+        cost_text = "$%.4f" % cost
+    else:
+        cost_text = "~$%.4f" % cost
+    journal("%s ■ итог: %s · %s · %d с" % (
+        time.strftime("%H:%M:%S"), "успех" if verdict == "успех" else "ошибка", cost_text, int(time.time() - started)))
+    try:
+        live.close()
+    except OSError:
+        pass
+
 save({
     "result": text, "verdict": verdict, "partial": partial, "tokMiss": miss, "tokHit": hit, "tokOut": out,
     "exact": exact, "costUsd": cost, "costKnown": cost is not None, "noUsage": not usage_seen.is_set(),
@@ -621,12 +719,12 @@ save({
 
 # Отчёт запуска и одна строка журнала; текста брифа в журнале нет
 # Общая для обычного итога и для снятого сигналом запуска: снятие передаёт force_verdict, чтобы итог и partial не зависели от того, успел ли поток дойти до result
-# Аргументы: итог, stderr, журнал, провайдер, ступень, уровень, режим, каталог, модель, код claude, начало, потолок, заметка о потолке, порог чтения по кругу, флаг владельца, verdict снятия
+# Аргументы: итог, stderr, журнал, провайдер, ступень, уровень, режим, каталог, модель, код claude, начало, потолок, заметка о потолке, порог чтения по кругу, флаг владельца, verdict снятия, журнал хода
 emit_report() {
   python3 -I - "$@" <<'PY'
 import json, os, sys, time
 
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg, approved_arg, force_verdict = sys.argv[1:17]
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg, approved_arg, force_verdict, live_file = sys.argv[1:18]
 raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if out_file and os.path.exists(out_file) else ""
 err = open(err_file, encoding="utf-8", errors="replace").read().strip() if err_file and os.path.exists(err_file) else ""
 try:
@@ -707,6 +805,8 @@ elif cap_note:
 if partial:
     print("результат частичный")
 print("итог: %s" % verdict)
+if live_file:
+    print("журнал хода: %s" % live_file)
 sys.exit({"успех": 0, "упёрся в бюджет": 2}.get(verdict, 1))
 PY
 }
@@ -838,6 +938,16 @@ cmd_run() {
   brief_title="$(sed -n '/[^[:space:]]/{p;q;}' "$brief_file" | cut -c1-100)"
   [ -n "$brief_title" ] || brief_title="задача исполнителя"
 
+  # Журнал хода: каталог и имя считаются заранее, штамп тот же, что у ветки worktree
+  local LIVE_ROOT run_stamp live_file
+  LIVE_ROOT="$(live_dir "$profile")"
+  run_stamp="$(date +%Y%m%d-%H%M%S)-$$"
+  live_file="$LIVE_ROOT/$run_stamp.log"
+  mkdir -p "$LIVE_ROOT" || die "не создать каталог журналов $LIVE_ROOT"
+  : > "$live_file" || die "не создать журнал хода $live_file"
+  clean_live_dir "$LIVE_ROOT"
+  printf 'ход вживую: %s\n' "$live_file" >&2
+
   local wt_path="" wt_branch="" wt_base=""
   if [ "$make_worktree" -eq 1 ]; then
     # База worktree: --base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
@@ -845,8 +955,8 @@ cmd_run() {
     git -C "$dir" rev-parse --verify --quiet "$base_ref^{commit}" >/dev/null ||
       die "в репозитории $dir нет ref «$base_ref»: worktree не от чего создавать"
     wt_base="$(git -C "$dir" rev-parse --short "$base_ref^{commit}" 2>/dev/null)" || die "в репозитории $dir нет коммитов: нечего брать за основу worktree"
-    # Суффикс процесса: исполнители, запущенные в одну секунду, иначе получают одно имя ветки
-    wt_branch="$BRANCH_PREFIX/$(date +%Y%m%d-%H%M%S)-$$"
+    # Штамп с суффиксом процесса общий с журналом хода: исполнители в одну секунду не совпадают именами
+    wt_branch="$BRANCH_PREFIX/$run_stamp"
     mkdir -p "$WORKTREES_ROOT" || die "не создать каталог $WORKTREES_ROOT"
     wt_path="$(mktemp -d "$WORKTREES_ROOT/wt.XXXXXX")" || die "не создать каталог worktree"
     git -C "$dir" worktree add -q -b "$wt_branch" "$wt_path" "$base_ref" >&2 || { rmdir "$wt_path" 2>/dev/null; die "git worktree add не удался"; }
@@ -884,7 +994,7 @@ cmd_run() {
     fi
     if [ -n "$claude_pid" ] && [ "$claude_pid" != "$$" ]; then kill -KILL -"$claude_pid" 2>/dev/null; fi
     emit_report "${out_file:-}" "${err_file:-}" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" \
-      "$claude_rc" "${started:-$(date +%s)}" "${budget:-}" "${cap_note:-}" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "снят" || true
+      "$claude_rc" "${started:-$(date +%s)}" "${budget:-}" "${cap_note:-}" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "снят" "${live_file:-}" || true
     rm -f "${out_file:-}" "${err_file:-}"
     exit "$((128 + sig))"
   }
@@ -913,7 +1023,7 @@ cmd_run() {
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)
-    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" "$NO_USAGE_SEC" \
+    run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" "$NO_USAGE_SEC" "$live_file" \
       "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format stream-json --verbose --model "$model" \
       --permission-mode dontAsk \
       --allowedTools "$allowed" --disallowedTools "$denied" \
@@ -931,12 +1041,41 @@ cmd_run() {
   if [ "$claude_rc" -ge 128 ]; then force="снят"; fi
   # Флаг ставится до записи: сигнал после этого не должен добавить вторую строку
   report_done=1
-  emit_report "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "$force"
+  emit_report "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "$force" "$live_file"
   local rc=$?
   trap - TERM INT HUP
   rm -f "$out_file" "$err_file"
   if [ -n "$wt_path" ]; then finish_worktree "$wt_path" "$wt_branch" "$wt_base" "$brief_title" "$repo_root"; fi
   return $rc
+}
+
+# Показ журнала хода вживую: путь или самый свежий в каталоге журналов
+# Конец — строка итога, тогда tail больше не нужен и команда выходит с кодом 0
+cmd_watch() {
+  local file="${1:-}" LIVE_ROOT profile="" dir fifo tail_pid line
+  if [ -z "$file" ]; then
+    need_python
+    # Профиль по умолчанию — deepseek; нет его — остаются переменная и общий запасной путь
+    profile="$(find_profile deepseek 2>/dev/null)" || profile=""
+    LIVE_ROOT="$(live_dir "$profile")"
+    file="$(ls -t "$LIVE_ROOT"/*.log 2>/dev/null | head -n 1)"
+    [ -n "$file" ] || die "нет журналов хода в $LIVE_ROOT — сначала запустите worker.sh run"
+  fi
+  [ -f "$file" ] || die "нет журнала хода $file"
+  dir="$(mktemp -d)" || die "не создать временный каталог"
+  fifo="$dir/watch"
+  mkfifo "$fifo" || die "не создать канал для tail"
+  tail -n +1 -f "$file" >"$fifo" &
+  tail_pid=$!
+  # Убираем tail из списка задач: иначе оболочка сообщает о его завершении по сигналу
+  disown "$tail_pid" 2>/dev/null || true
+  while IFS= read -r line; do
+    printf '%s\n' "$line"
+    case "$line" in *'■ итог:'*) break ;; esac
+  done <"$fifo"
+  kill "$tail_pid" 2>/dev/null || true
+  rm -rf "$dir"
+  return 0
 }
 
 main() {
@@ -947,6 +1086,7 @@ main() {
     set-key) cmd_set_key "$@" ;;
     import-key) cmd_import_key "$@" ;;
     check) cmd_check "$@" ;;
+    watch) cmd_watch "$@" ;;
     run) cmd_run "$@" ;;
     *) usage ;;
   esac
