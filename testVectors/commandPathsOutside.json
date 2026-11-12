@@ -9,7 +9,8 @@
 		"expected": [
 			{
 				"path": "/VolumES",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -23,7 +24,8 @@
 		"expected": [
 			{
 				"path": "/Volumes/ExVint/work",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -37,7 +39,8 @@
 		"expected": [
 			{
 				"path": "/Volumes/ExVint/work",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -96,7 +99,8 @@
 		"expected": [
 			{
 				"path": "/USERS/A/PROJ/src",
-				"critical": false
+				"critical": false,
+				"readOnly": true
 			}
 		]
 	},
@@ -110,7 +114,8 @@
 		"expected": [
 			{
 				"path": "~",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -124,7 +129,8 @@
 		"expected": [
 			{
 				"path": "$HOME/x",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -147,7 +153,8 @@
 		"expected": [
 			{
 				"path": "D:\\",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -161,7 +168,8 @@
 		"expected": [
 			{
 				"path": "../other/file",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -175,7 +183,8 @@
 		"expected": [
 			{
 				"path": "/etc/hosts",
-				"critical": false
+				"critical": false,
+				"readOnly": true
 			}
 		]
 	},
@@ -189,7 +198,8 @@
 		"expected": [
 			{
 				"path": "/",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -203,7 +213,8 @@
 		"expected": [
 			{
 				"path": "/Volumes",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -217,7 +228,8 @@
 		"expected": [
 			{
 				"path": "/Volumes/Ext",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -231,7 +243,8 @@
 		"expected": [
 			{
 				"path": "/media/me/disk",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -245,7 +258,8 @@
 		"expected": [
 			{
 				"path": "/System",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -259,7 +273,8 @@
 		"expected": [
 			{
 				"path": "/usr/local/bin",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -273,11 +288,13 @@
 		"expected": [
 			{
 				"path": "/Volumes/x",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			},
 			{
 				"path": "../z",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -291,11 +308,13 @@
 		"expected": [
 			{
 				"path": "/VolumES",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			},
 			{
 				"path": "../other",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -328,7 +347,8 @@
 		"expected": [
 			{
 				"path": "~",
-				"critical": true
+				"critical": true,
+				"readOnly": false
 			}
 		]
 	},
@@ -343,7 +363,8 @@
 		"expected": [
 			{
 				"path": "~/x",
-				"critical": false
+				"critical": false,
+				"readOnly": false
 			}
 		]
 	},
@@ -357,5 +378,107 @@
 		"caseInsensitive": true,
 		"home": "/Users/a",
 		"expected": []
+	},
+	{
+		"name": "шаблон grep с обратной косой — не путь",
+		"command": "grep -rn -e a engine | grep -v \"\\.venv\\|test\"",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "шаблон grep с экранированными скобками — не путь",
+		"command": "sed -n 1,9p R.md | grep -n \"\\[ \\]\\|⚠\"",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "экранирование в тексте printf — не путь",
+		"command": "printf '\\n## Ночной режим\\n' >> docs/decisions.md",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "чтение корня тома — путь только для чтения",
+		"command": "ls /Volumes",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes",
+				"critical": true,
+				"readOnly": true
+			}
+		]
+	},
+	{
+		"name": "перенаправление вывода наружу — запись",
+		"command": "cat a > /Volumes/Ext/x",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/Ext/x",
+				"critical": false,
+				"readOnly": false
+			}
+		]
+	},
+	{
+		"name": "приклеенное перенаправление 2>/путь — запись",
+		"command": "ls 2>/Volumes/Ext/log",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/Ext/log",
+				"critical": false,
+				"readOnly": false
+			}
+		]
+	},
+	{
+		"name": "find с -delete — запись",
+		"command": "find /Volumes/Ext -name x -delete",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/Ext",
+				"critical": true,
+				"readOnly": false
+			}
+		]
+	},
+	{
+		"name": "путь Windows с обратной косой в кавычках — путь",
+		"command": "dir \"C:\\Program Files\\x\"",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "C:\\Program Files\\x",
+				"critical": false,
+				"readOnly": false
+			}
+		]
 	}
 ]

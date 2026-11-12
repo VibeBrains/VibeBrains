@@ -120,6 +120,7 @@ export function commandPathsOutsideScope(command, scope) {
 	const outside = [];
 	const seen = new Set();
 	for (const segment of splitShellSegments(slashedWindowsPaths(command))) {
+		const readOnly = isReadOnlySegment(segment.command, segment.args);
 		for (const arg of segment.args) {
 			const value = pathValueOf(arg);
 			if (value === undefined) {
@@ -130,7 +131,7 @@ export function commandPathsOutsideScope(command, scope) {
 				continue;
 			}
 			seen.add(found.key);
-			outside.push({ path: value, critical: found.critical });
+			outside.push({ path: value, critical: found.critical, readOnly });
 		}
 	}
 	return outside;
@@ -144,6 +145,41 @@ function slashedWindowsPaths(command) {
 		// Корень диска `D:\` разбор и так сохраняет: экранировать в нём нечего
 		return /^[A-Za-z]:\\$/.test(token) ? match : `${lead}${token.replace(/\\/g, '/')}`;
 	});
+}
+
+/**
+ * Программы, которые только читают и ничего не пишут: внешний путь у них ничего не потеряет
+ *
+ * Не входят программы, которые пишут ключом или своим языком: `sed -i`, `awk`, `sort -o`, `tee`
+ */
+const READ_ONLY_PROGRAMS = new Set([
+	'cat', 'head', 'tail', 'less', 'more', 'grep', 'egrep', 'fgrep', 'rg', 'wc', 'diff', 'cmp',
+	'ls', 'stat', 'file', 'readlink', 'realpath', 'bat', 'fd', 'du', 'df', 'tree', 'nl', 'od',
+	'hexdump', 'xxd', 'strings', 'zcat', 'bzcat', 'xzcat', 'tac', 'rev', 'cut', 'uniq', 'find',
+	'echo', 'printf', 'test', 'which', 'pwd',
+]);
+
+/** Ключи `find`, с которыми он удаляет, запускает или пишет */
+const FIND_WRITE_ACTIONS = /^-(?:delete|exec|execdir|ok|okdir|fprint|fprint0|fprintf|fls)$/;
+
+/** Перенаправление вывода: `>`, `>>`, `2>`, `&>` — запись в файл */
+const OUTPUT_REDIRECT = /^(?:\d*|&)>{1,2}/;
+
+/** Сегмент только читает: программа из списка, без записи ключом и без перенаправления вывода */
+function isReadOnlySegment(command, args) {
+	if (!READ_ONLY_PROGRAMS.has(programName(command))) {
+		return false;
+	}
+	if (args.some(arg => OUTPUT_REDIRECT.test(arg))) {
+		return false;
+	}
+	return programName(command) !== 'find' || !args.some(arg => FIND_WRITE_ACTIONS.test(arg));
+}
+
+/** Имя программы без пути и расширения Windows */
+function programName(command) {
+	const base = command.replace(/\\/g, '/').split('/').pop() ?? command;
+	return base.replace(/\.(?:exe|com)$/i, '').toLowerCase();
 }
 
 /** Значение аргумента, если оно похоже на путь: сама опция путём не считается */
@@ -160,6 +196,11 @@ function pathValueOf(arg) {
 		const starts = ['/', '~', '$'].map(marker => arg.indexOf(marker, 1)).filter(index => index > 0);
 		return starts.length === 0 ? undefined : asPath(arg.slice(Math.min(...starts)));
 	}
+	const redirect = OUTPUT_REDIRECT.exec(arg);
+	if (redirect !== null) {
+		// `2>/path`, `>/path`: цель перенаправления приклеена к оператору
+		return asPath(arg.slice(redirect[0].length));
+	}
 	const equals = arg.indexOf('=');
 	// `NAME=/path`: присвоение переменной перед программой или значение без пробела
 	return asPath(equals < 0 ? arg : arg.slice(equals + 1));
@@ -175,12 +216,19 @@ function asPath(value) {
 
 /** Абсолютный путь, домашний каталог или выход вверх — остальное аргумент, а не путь */
 function isPathCandidate(value) {
-	const slashed = slashedPath(value);
+	// Обратная косая — разделитель только в пути Windows; в остальном это экранирование
+	// в шаблоне или тексте (`grep "\.venv"`, `printf '\n'`), а не путь от корня
+	const slashed = isWindowsShaped(value) ? slashedPath(value) : value;
 	return slashed.startsWith('/')
 		|| /^[A-Za-z]:\//.test(slashed)
 		|| /^\/\/[^/]+\/[^/]+/.test(slashed)
 		|| slashed === '..' || slashed.startsWith('../')
 		|| isHomePath(slashed);
+}
+
+/** Путь Windows: буква диска или общий каталог `\\server` */
+function isWindowsShaped(value) {
+	return /^(?:[A-Za-z]:[\\/]|\\\\)/.test(value);
 }
 
 /** `~`, `$HOME` и их продолжения: без раскрытия они всегда вне проекта */

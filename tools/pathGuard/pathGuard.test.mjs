@@ -81,11 +81,19 @@ test('хук: --save на корень тома — deny', () => {
 	assert.ok(decision.hookSpecificOutput.permissionDecisionReason.includes(target));
 });
 
-test('хук: путь вне проекта без критичности — ask', () => {
+test('хук: чтение вне проекта и шаблон с обратной косой — пусто', () => {
+	for (const command of ['cat /opt/x', 'ls /Volumes', 'grep -v "\\.venv\\|test" a']) {
+		const result = runHook({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command }, cwd: PROJECT }, { CLAUDE_PROJECT_DIR: PROJECT });
+		assert.equal(result.status, 0);
+		assert.equal(result.stdout, '', command);
+	}
+});
+
+test('хук: запись вне проекта без критичности — ask', () => {
 	const result = runHook({
 		hook_event_name: 'PreToolUse',
 		tool_name: 'Bash',
-		tool_input: { command: 'cat /opt/x' },
+		tool_input: { command: 'cp a /opt/x' },
 		cwd: PROJECT,
 	}, { CLAUDE_PROJECT_DIR: PROJECT });
 	assert.equal(result.status, 0);

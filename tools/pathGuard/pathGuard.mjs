@@ -63,7 +63,9 @@ function decide(input) {
 		return undefined;
 	}
 	const caseInsensitive = process.platform === 'darwin' || process.platform === 'win32';
-	const paths = commandPathsOutsideScope(command, { roots: rootsOf(input), caseInsensitive, home: os.homedir() });
+	const found = commandPathsOutsideScope(command, { roots: rootsOf(input), caseInsensitive, home: os.homedir() });
+	// Чтение ничего не теряет, даже у корня тома (`ls /Volumes`), поэтому не спрашивается
+	const paths = found.filter(item => !item.readOnly);
 	if (paths.length === 0) {
 		return undefined;
 	}
