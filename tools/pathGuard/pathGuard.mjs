@@ -69,17 +69,19 @@ function decide(input) {
 		home: os.homedir(),
 		cwd: typeof input.cwd === 'string' && path.isAbsolute(input.cwd) ? input.cwd : undefined,
 	});
-	// Чтение ничего не теряет, даже у корня тома (`ls /Volumes`), поэтому не спрашивается
-	const paths = found.filter(item => !item.readOnly);
+	// Хук останавливает только запись в корень диска, тома или домашней папки — потерю всего
+	// Остальной внешний путь решает режим Claude Code: вопрос на каждый путь ломает режим «авто»,
+	// а разбор строки не отличит путь от шаблона sed или grep без ложных срабатываний
+	// Чтение ничего не теряет, даже у корня тома (`ls /Volumes`)
+	const paths = found.filter(item => item.critical && !item.readOnly);
 	if (paths.length === 0) {
 		return undefined;
 	}
-	const critical = paths.some(item => item.critical);
 	return {
 		hookSpecificOutput: {
 			hookEventName: 'PreToolUse',
-			permissionDecision: critical ? 'deny' : 'ask',
-			permissionDecisionReason: reasonOf(paths, critical),
+			permissionDecision: 'deny',
+			permissionDecisionReason: reasonOf(paths, true),
 		},
 	};
 }

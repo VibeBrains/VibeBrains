@@ -83,14 +83,14 @@ test('хук: --save на корень тома — deny', () => {
 });
 
 test('хук: чтение вне проекта и шаблон с обратной косой — пусто', () => {
-	for (const command of ['cat /opt/x', 'ls /Volumes', 'grep -v "\\.venv\\|test" a']) {
+	for (const command of ['cat /opt/x', 'ls /Volumes', "sed -n '/## Отклонения/,/^---/p' a.txt", "sed -n '/<<<<<<</,/>>>>>>>/p' Cargo.toml", 'grep -v "\\.venv\\|test" a']) {
 		const result = runHook({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command }, cwd: PROJECT }, { CLAUDE_PROJECT_DIR: PROJECT });
 		assert.equal(result.status, 0);
 		assert.equal(result.stdout, '', command);
 	}
 });
 
-test('хук: запись вне проекта без критичности — ask', () => {
+test('хук: запись вне проекта без критичности — пропускается, решает режим', () => {
 	const result = runHook({
 		hook_event_name: 'PreToolUse',
 		tool_name: 'Bash',
@@ -98,8 +98,7 @@ test('хук: запись вне проекта без критичности �
 		cwd: PROJECT,
 	}, { CLAUDE_PROJECT_DIR: PROJECT });
 	assert.equal(result.status, 0);
-	const decision = JSON.parse(result.stdout);
-	assert.equal(decision.hookSpecificOutput.permissionDecision, 'ask');
+	assert.equal(result.stdout, '');
 });
 
 test('хук: мусор на входе — код 0 и пустой stdout', () => {
