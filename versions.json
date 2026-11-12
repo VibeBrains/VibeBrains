@@ -1481,6 +1481,11 @@
       "sha256": "6b9a0e1b549f60e5fa2da8754e532c48a8d7c9b6e0f10d2486ff4d5dbe316fbd",
       "history": []
     },
+    "testVectors/commandPathsOutside.json": {
+      "version": 1,
+      "sha256": "96c66f6b6077058005b2a0ab45869cceb6f62599e395815cafecd670379518a5",
+      "history": []
+    },
     "testVectors/diffNavigation.json": {
       "version": 1,
       "sha256": "3c54110a761c96f8e1efcab41275834b4471978835e910bc03d3a4c87faf0fd3",

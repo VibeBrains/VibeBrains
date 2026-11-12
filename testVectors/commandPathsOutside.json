@@ -1,0 +1,361 @@
+[
+	{
+		"name": "инцидент: --save /VolumES при том же томе в другом регистре",
+		"command": "npm run compare:brandbook -- --save /VolumES",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/VolumES",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "значение длинной опции --save=/path",
+		"command": "npm run compare:brandbook --save=/Volumes/ExVint/work",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/ExVint/work",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "значение короткой опции приклеено к ней: -o/path",
+		"command": "tool -o/Volumes/ExVint/work",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/ExVint/work",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "путь в проекте остаётся своим",
+		"command": "cat /Users/a/proj/src/a.ts",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "временный каталог остаётся своим",
+		"command": "cp a /tmp/x",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "служебное устройство не является путём данных",
+		"command": "cat /dev/null",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "URL не является путём",
+		"command": "curl https://x.y/z",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "регистр без учёта (macOS): путь в проекте",
+		"command": "ls /USERS/A/PROJ/src",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "регистр с учётом (Linux): тот же путь уже внешний",
+		"command": "ls /USERS/A/PROJ/src",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": false,
+		"expected": [
+			{
+				"path": "/USERS/A/PROJ/src",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "домашний каталог всегда вне проекта и критичен",
+		"command": "rm -rf ~",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "~",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "вложенный путь в $HOME без известной домашней папки — внешний, но не корень",
+		"command": "cp a $HOME/x",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "$HOME/x",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "буква диска: путь в проекте",
+		"command": "dir C:\\Users\\a\\proj\\x",
+		"roots": [
+			"C:\\Users\\a\\proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "буква диска: корень диска критичен",
+		"command": "dir D:\\",
+		"roots": [
+			"C:\\Users\\a\\proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "D:\\",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "относительный выход вверх внешний, но не критичный",
+		"command": "cp a ../other/file",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "../other/file",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "чтение системного файла тоже вне проекта",
+		"command": "cat /etc/hosts",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/etc/hosts",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "корень файловой системы критичен",
+		"command": "rm -rf /",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "корень тома критичен",
+		"command": "rm -rf /Volumes",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "том целиком критичен",
+		"command": "rm -rf /Volumes/Ext",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/Ext",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "съёмный носитель Linux критичен",
+		"command": "rm -rf /media/me/disk",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/media/me/disk",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "системный каталог критичен сам",
+		"command": "rm -rf /System",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/System",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "вложенный путь системного каталога уже не критичен",
+		"command": "rm -rf /usr/local/bin",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/usr/local/bin",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "дубли путей убираются, порядок остаётся как в команде",
+		"command": "cp /Volumes/x /tmp/y --save=/Volumes/x ../z ../z",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/Volumes/x",
+				"critical": true
+			},
+			{
+				"path": "../z",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "несколько путей: описание перечисляет каждый",
+		"command": "npm run x -- --save /VolumES ../other",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/VolumES",
+				"critical": true
+			},
+			{
+				"path": "../other",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "безобидная цепочка: -la и перенаправление в /dev/null",
+		"command": "ls -la && npm test 2>/dev/null",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "путь проекта в опции -C своего не делает",
+		"command": "git -C /Users/a/proj status",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "с известной домашней папкой сам ~ — корень",
+		"command": "rm -rf ~",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"home": "/Users/a",
+		"expected": [
+			{
+				"path": "~",
+				"critical": true
+			}
+		]
+	},
+	{
+		"name": "с известной домашней папкой ~/x — внешний, не корень",
+		"command": "rm -rf ~/x",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"caseInsensitive": true,
+		"home": "/Users/a",
+		"expected": [
+			{
+				"path": "~/x",
+				"critical": false
+			}
+		]
+	},
+	{
+		"name": "каталог в домашней папке, разрешённый корнем, свой",
+		"command": "ls ~/.vibememory/store",
+		"roots": [
+			"/Users/a/proj",
+			"/Users/a/.vibememory"
+		],
+		"caseInsensitive": true,
+		"home": "/Users/a",
+		"expected": []
+	}
+]
