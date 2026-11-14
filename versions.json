@@ -71,6 +71,26 @@
         "9bc928b8fa26037f183a505539ea97bf4c73c6217d997de24d9f124ac48f5d92"
       ]
     },
+    "famulex/roles/analyst/role.md": {
+      "version": 1,
+      "sha256": "b5ae583294e1df642bc68f93058c0ca41d94182b4e487b9e777dae9d03949c27",
+      "history": []
+    },
+    "famulex/roles/rolesSpec.md": {
+      "version": 1,
+      "sha256": "5c39dc04bb8b3c5e03d9ad4f6a566decaa90deb22f887ec10bf161eb9e7dfcbe",
+      "history": []
+    },
+    "famulex/roles/support/role.md": {
+      "version": 1,
+      "sha256": "a45d55b74d0070ed4efc5978e0857d9398e795de987c2bf16f785fdb83d54bda",
+      "history": []
+    },
+    "famulex/roles/tech-lead/role.md": {
+      "version": 1,
+      "sha256": "8c3cf74d6b65989ed1745410bbf8e28192ab32333c034192a8150b08b9080105",
+      "history": []
+    },
     "gitignore.seed": {
       "version": 4,
       "sha256": "2b2e919461870c2feb6a30ca2a8816020d64908d4d28ecd7fb12355c0dab6d2a",
@@ -147,8 +167,8 @@
       ]
     },
     "products.json": {
-      "version": 22,
-      "sha256": "169f492067e4ff4b10435132870dd845d1ea83b7e7fa17aa6bb6f975704d133e",
+      "version": 23,
+      "sha256": "d6d4e8aaa308e2c69b8e8916fa9c8cb269dd0f240955b64018e97bfc55c8e817",
       "history": [
         "5b93a23c06216ef4e5fe2a49e32eb33c575c2c7d3f3dbe4dc3c313f13dc0541c",
         "9dee917f4dfaf21ad315b014af9206c51e5275442f60aa687097cb3ea8c9d6b1",
@@ -170,7 +190,8 @@
         "ef98cc565cacf53667aa5762f5078beda9c3b0c9141103eb5e6e46caa1e3afdc",
         "88ec2ecf828ad02fd41c7a94a359b6a76be5a261261a560d9954fdc85824f03d",
         "e9cba837d3f81b1c8dd06e358ba4699a4589c3f6488f4ce31ec6a262dfa6d058",
-        "f27cd56bd435cc50f77b46bf1e124007ee5534a32d35860e674a47d49e27f404"
+        "f27cd56bd435cc50f77b46bf1e124007ee5534a32d35860e674a47d49e27f404",
+        "169f492067e4ff4b10435132870dd845d1ea83b7e7fa17aa6bb6f975704d133e"
       ]
     },
     "prompts/CLAUDE-FABLE-5.md": {
