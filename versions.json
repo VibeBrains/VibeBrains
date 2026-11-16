@@ -1171,6 +1171,12 @@
       ],
       "vibeVersion": "1.0.0"
     },
+    "skills/release-flow/SKILL.md": {
+      "version": 1,
+      "sha256": "c1e4ca2a283960652891cf8dd17b0c777f30cb843c54082026a395fbf126751a",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
     "skills/rescue-session/SKILL.md": {
       "version": 2,
       "sha256": "24ec7eb37d4caf5a4e3328637a852cb497752e794587032de9a1024b9c53ad44",
