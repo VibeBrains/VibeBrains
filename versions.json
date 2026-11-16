@@ -1172,12 +1172,13 @@
       "vibeVersion": "1.0.0"
     },
     "skills/release-flow/SKILL.md": {
-      "version": 2,
-      "sha256": "d12a3ecba123738ba05b273f6641eb5a8b02661ca919764c8995607dbb87b98d",
+      "version": 3,
+      "sha256": "4f9f4fe1571aca5366768f3770d4f2488a15aafad01dbc02174c0a0263decd66",
       "history": [
-        "c1e4ca2a283960652891cf8dd17b0c777f30cb843c54082026a395fbf126751a"
+        "c1e4ca2a283960652891cf8dd17b0c777f30cb843c54082026a395fbf126751a",
+        "d12a3ecba123738ba05b273f6641eb5a8b02661ca919764c8995607dbb87b98d"
       ],
-      "vibeVersion": "1.1.0"
+      "vibeVersion": "1.2.0"
     },
     "skills/rescue-session/SKILL.md": {
       "version": 2,
