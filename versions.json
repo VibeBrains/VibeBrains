@@ -731,6 +731,12 @@
       ],
       "vibeVersion": "1.0.0"
     },
+    "rules/turn-end.mdc": {
+      "version": 1,
+      "sha256": "87f3318c2ada45e997f70fc11b9fd6459cf06979d07bfb71f49b764432414280",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
     "rules/ui-kit.mdc": {
       "version": 3,
       "sha256": "8664a28d06196c3ea982e8187dad43aea398d69101a448bb7c2bc8e3392718e9",
