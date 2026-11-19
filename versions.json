@@ -1232,13 +1232,14 @@
       "history": []
     },
     "skills/review-pr/SKILL.md": {
-      "version": 3,
-      "sha256": "966cbc7d3799d868af5c1cf8f265f9b1f0fb80222df5c17d8c92a72eae6aaf21",
+      "version": 4,
+      "sha256": "3590a88fd7ad092e50df5fc34e05c4de04bcaf5e97eb9a27d1c5086fa662f31e",
       "history": [
         "5c0bb312330dfb02d9ca4feebaa13689c3a7fc5d70dc1676060a0aa36b9f8f3c",
-        "f9bbd8cf723ba2250c5fc780621c6f3059f1b4b4577d540c0d067d53e7d0499d"
+        "f9bbd8cf723ba2250c5fc780621c6f3059f1b4b4577d540c0d067d53e7d0499d",
+        "966cbc7d3799d868af5c1cf8f265f9b1f0fb80222df5c17d8c92a72eae6aaf21"
       ],
-      "vibeVersion": "1.1.0"
+      "vibeVersion": "1.2.0"
     },
     "skills/roadmap-autopilot/SKILL.md": {
       "version": 4,
@@ -1293,6 +1294,12 @@
       "version": 1,
       "sha256": "699eaf030d2127c01e5966567f9abe9f703d3bb4d863eefc757dd9fd788a9179",
       "history": []
+    },
+    "skills/simplify-review/SKILL.md": {
+      "version": 1,
+      "sha256": "a1a339ce7000fa5808f5d6495ab0d4d8577da5fac06ca35a97bf2ed5c1bcf405",
+      "history": [],
+      "vibeVersion": "1.0.0"
     },
     "skills/skzi-review/SKILL.md": {
       "version": 1,
