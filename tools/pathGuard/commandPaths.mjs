@@ -121,7 +121,7 @@ export function commandPathsOutsideScope(command, scope) {
 	const seen = new Set();
 	// Каталог, от которого читаются `..`: меняется по `cd` в той же строке, а неясный `cd` его теряет
 	let cwd = scope.cwd;
-	for (const segment of splitShellSegments(slashedWindowsPaths(command))) {
+	for (const segment of splitShellSegments(slashedWindowsPaths(withoutDataHeredocs(command)))) {
 		const readOnly = isReadOnlySegment(segment.command, segment.args);
 		for (const arg of segment.args) {
 			const value = pathValueOf(arg);
@@ -142,6 +142,41 @@ export function commandPathsOutsideScope(command, scope) {
 	return outside;
 }
 
+
+/**
+ * Программы, которые читают тело heredoc как данные: текст в нём не команда, и пути в нём не трогаются
+ *
+ * Тело для оболочки, `ssh`, `sudo`, интерпретатора и любой незнакомой программы проверяется как команды:
+ * `bash <<EOF` исполнит каждую строку
+ */
+const HEREDOC_DATA_PROGRAMS = new Set(['cat', 'tee', 'git', 'gh', 'wc', 'grep', 'sort', 'base64', 'jq']);
+
+/** Начало heredoc: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`; `<<<` — строка-аргумент, не heredoc */
+const HEREDOC_START = /(?<!<)<<(?!<)(-?)\s*(['"]?)([A-Za-z_][\w-]*)\2/g;
+
+/** Убрать тела heredoc, которые программа читает как данные; строка-ограничитель уходит вместе с телом */
+function withoutDataHeredocs(command) {
+	const out = [];
+	const pending = [];
+	for (const line of command.split('\n')) {
+		if (pending.length > 0) {
+			const current = pending[0];
+			if ((current.stripTabs ? line.replace(/^\t+/, '') : line) === current.delimiter) {
+				pending.shift();
+			} else if (current.keep) {
+				out.push(line);
+			}
+			continue;
+		}
+		out.push(line);
+		for (const match of line.matchAll(HEREDOC_START)) {
+			const before = line.slice(0, match.index).split(/[;&|(]/).pop() ?? '';
+			const program = before.trim().split(/\s+/)[0] ?? '';
+			pending.push({ delimiter: match[3], stripTabs: match[1] === '-', keep: !HEREDOC_DATA_PROGRAMS.has(programName(program)) });
+		}
+	}
+	return out.join('\n');
+}
 /** `C:\Users` и `\\server\share` — разделители Windows, а разбор строки считает `\` экранированием */
 const WINDOWS_PATH_TOKEN = /(^|[\s=])((?:[A-Za-z]:|\\\\[^\\\s]+)[^\s]*)/g;
 

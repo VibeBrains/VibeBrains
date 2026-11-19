@@ -548,5 +548,47 @@
 			}
 		],
 		"cwd": "/p/src"
+	},
+	{
+		"name": "тело heredoc для cat — данные: одиночный слеш в тексте не корень",
+		"command": "cat > notes.md <<'EOF'\nнастройки (configOptions / session options)\nEOF",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"cwd": "/Users/a/proj",
+		"caseInsensitive": true,
+		"expected": []
+	},
+	{
+		"name": "тело heredoc для bash — команды: корень в нём виден",
+		"command": "bash <<'EOF'\nrm -rf /\nEOF",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"cwd": "/Users/a/proj",
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/",
+				"critical": true,
+				"readOnly": false
+			}
+		]
+	},
+	{
+		"name": "heredoc для cat не скрывает путь после ограничителя",
+		"command": "cat > x.md <<-EOF\n\t/ просто текст\n\tEOF\nrm -rf /VolumES",
+		"roots": [
+			"/Users/a/proj"
+		],
+		"cwd": "/Users/a/proj",
+		"caseInsensitive": true,
+		"expected": [
+			{
+				"path": "/VolumES",
+				"critical": true,
+				"readOnly": false
+			}
+		]
 	}
 ]
