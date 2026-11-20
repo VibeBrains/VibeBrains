@@ -1,0 +1,7 @@
+{
+	"$comment": "Контракт личного слоя правил: куда VibeMemory собирает личные правила для VibeIDE и VibeIDEA и откуда обе IDE их читают. Пути с ~ — от домашней папки. Меняется только здесь; продукты сверяют свои константы с этим файлом тестом",
+	"personalAgentsFile": "~/.vibe/AGENTS.md",
+	"personalRulesDir": "~/.vibe/rules",
+	"personalSkillsDir": "~/.vibe/skills",
+	"projectLocalAgentsFile": "AGENTS.local.md"
+}
