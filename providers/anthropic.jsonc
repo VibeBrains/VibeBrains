@@ -90,6 +90,14 @@
         //   { "id": "claude-haiku-5-5", "name": "Claude Haiku 5.5", "contextWindow": 1000000, "maxOutputTokens": 128000,
         //     "cost": { "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite": 0.125, "cacheWrite1h": 0.2, "currency": "USD",
         //       "longContext": { "overInputTokens": 100000, "input": 5, "cache": 5, "output": 5 } } }
+        //   // Claude Fable 5.2: $8 / $40 за 1M, окно 1M, усилие low / medium / high / xhigh / max
+        //   // (platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2, сводка 20.11.2026,
+        //   // живой пробой не проверено). Дешевле Fable 5.1 ($10 / $50 в записи выше); цену чтения
+        //   // и записи кэша сводка не называет — не задаём, чтобы не выдумывать. Верх до xhigh и max
+        //   // открывает строка "reasoning": без неё ползунок шлёт low / medium / high.
+        //   { "id": "claude-fable-5-2", "name": "Claude Fable 5.2", "contextWindow": 1000000,
+        //     "reasoning": { "effort": ["low", "medium", "high", "xhigh", "max"] },
+        //     "cost": { "input": 8, "output": 40, "currency": "USD" } }
         // ]
       }
     }

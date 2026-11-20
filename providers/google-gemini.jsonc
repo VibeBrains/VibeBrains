@@ -52,6 +52,21 @@
             "costValidUntil": "2026-11-30T23:59:59Z",
             "costAfter": { "input": 4.00, "output": 20.00 },
             "costNote": "вводная цена до 30.11.2026, ai.google.dev pricing 21.10.2026"
+          },
+          {
+            // Gemini 4 Carbon: окно 1M, мышление тарифицируется как выход (уровни low / medium / high).
+            // Цена вводная до 30.11.2026 включительно, с 01.12.2026 вдвое выше.
+            // Источник: docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-carbon
+            // (сводка 20.11.2026, живой пробой не проверено). Вводные цифры совпадают с 4 Argon выше —
+            // это разные модели, а не дубль записи.
+            "id": "gemini-4-carbon",
+            "name": "Gemini 4 Carbon",
+            "contextWindow": 1000000,
+            "cost": { "input": 2.00, "output": 10.00 },
+            "costValidUntil": "2026-11-30T23:59:59Z",
+            "costAfter": { "input": 4.00, "output": 20.00 },
+            "reasoning": { "effort": ["low", "medium", "high"] },
+            "costNote": "вводная цена до 30.11.2026, docs.cloud.google.com …/gemini/4-carbon"
           }
         ]
       }

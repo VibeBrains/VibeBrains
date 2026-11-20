@@ -261,8 +261,8 @@
       ]
     },
     "providers/anthropic.jsonc": {
-      "version": 14,
-      "sha256": "f4bfbfef200821799f05378d8feee26da0627fd959226c828b55f1483dac593c",
+      "version": 15,
+      "sha256": "857fdcf860622058a1b76627228e093ecd40f2cf64cf8c034d4f0c1ac24021db",
       "history": [
         "883a6a74be21d18e6f3370cb6bf450ca8fbf33d8dc7dc529396d7ba9e25af99e",
         "c0a9d852165de91b3e5d162ad86434556e291c84fa1988ff6a756e04e0acb5f3",
@@ -275,7 +275,8 @@
         "1a2cc17a89448d549f0e8c6cdacb30ec46f4baa1548ec9a642265ddbd493665f",
         "1228fd473b1ab35c0882a412512720303b66f3850e601610bd741bb740b28c18",
         "e821835f645c29ac6cdba3c5c3b297ca1871d19ea1fcdac96a7ff37ac9876319",
-        "0dbadaa725af7f3eb7ee5d123f87da6b445647c6ba914d94366f9babd35534b4"
+        "0dbadaa725af7f3eb7ee5d123f87da6b445647c6ba914d94366f9babd35534b4",
+        "f4bfbfef200821799f05378d8feee26da0627fd959226c828b55f1483dac593c"
       ]
     },
     "providers/arbr.jsonc": {
@@ -333,13 +334,14 @@
       "history": []
     },
     "providers/google-gemini.jsonc": {
-      "version": 5,
-      "sha256": "f68369736b12fd96f67828a9c98721d8286fcc6a714c10ff511b65fff41f9a7a",
+      "version": 6,
+      "sha256": "6ba5791ee14c4464aa1da213f028cd813e0ffa950101e2bf28fd962ad0daa155",
       "history": [
         "e99fdc24d0a41d56cc63f993b42e074c72d2bace7037dcfb6a272ad8b745b782",
         "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc",
         "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731",
-        "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300"
+        "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300",
+        "f68369736b12fd96f67828a9c98721d8286fcc6a714c10ff511b65fff41f9a7a"
       ]
     },
     "providers/google-vertex.jsonc": {
@@ -719,15 +721,16 @@
       "vibeVersion": "1.0.0"
     },
     "rules/security.mdc": {
-      "version": 5,
-      "sha256": "e7259da6e8a1e9aabb66b217895d818d7317951ec32239925f6f31ad312c69d7",
+      "version": 6,
+      "sha256": "993ab807f7a1c805ce69f3e7b9db7beafb1f1fce4578a7a848fffd24d047accf",
       "history": [
         "4226fc5fef08a9a6195b6d632b65da567b36edfbee4dbf515f0722a5cac315f4",
         "9e5a519397fcedbf2cfb1426504167a36bc458d3bb931fb6b7ab9327cfbb5ee1",
         "a4fe83d41a7893ec0df29345b80d4a7e7ae400c2aa366de152b3427fcfe61042",
-        "4482f966edea6958d995184c644ea6a19cdfe7fe58e2c5a7893c4d0a98ed93f1"
+        "4482f966edea6958d995184c644ea6a19cdfe7fe58e2c5a7893c4d0a98ed93f1",
+        "e7259da6e8a1e9aabb66b217895d818d7317951ec32239925f6f31ad312c69d7"
       ],
-      "vibeVersion": "1.0.3"
+      "vibeVersion": "1.0.4"
     },
     "rules/spec-first.mdc": {
       "version": 5,
