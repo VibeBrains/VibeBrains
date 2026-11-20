@@ -1191,13 +1191,19 @@
       "vibeVersion": "1.0.0"
     },
     "skills/release-flow/SKILL.md": {
-      "version": 3,
-      "sha256": "4f9f4fe1571aca5366768f3770d4f2488a15aafad01dbc02174c0a0263decd66",
+      "version": 4,
+      "sha256": "dc925d72f3d4a51669777850821b7ae17972c1c3c75165bf4df0debaff0ff3cb",
       "history": [
         "c1e4ca2a283960652891cf8dd17b0c777f30cb843c54082026a395fbf126751a",
-        "d12a3ecba123738ba05b273f6641eb5a8b02661ca919764c8995607dbb87b98d"
+        "d12a3ecba123738ba05b273f6641eb5a8b02661ca919764c8995607dbb87b98d",
+        "4f9f4fe1571aca5366768f3770d4f2488a15aafad01dbc02174c0a0263decd66"
       ],
-      "vibeVersion": "1.2.0"
+      "vibeVersion": "1.2.1"
+    },
+    "skills/release-flow/evals/evals.json": {
+      "version": 1,
+      "sha256": "f0b8a3b6aa22f606cdaf62ef71981837400eddd296fab0d76990a06ac08d240b",
+      "history": []
     },
     "skills/rescue-session/SKILL.md": {
       "version": 2,
@@ -1313,16 +1319,30 @@
       "history": []
     },
     "skills/simplify-review/SKILL.md": {
+      "version": 2,
+      "sha256": "10bfc5ed397da49ff76a692c946facaa0f464e8bbde63b20418c7beafb88e536",
+      "history": [
+        "a1a339ce7000fa5808f5d6495ab0d4d8577da5fac06ca35a97bf2ed5c1bcf405"
+      ],
+      "vibeVersion": "1.0.1"
+    },
+    "skills/simplify-review/evals/evals.json": {
       "version": 1,
-      "sha256": "a1a339ce7000fa5808f5d6495ab0d4d8577da5fac06ca35a97bf2ed5c1bcf405",
-      "history": [],
-      "vibeVersion": "1.0.0"
+      "sha256": "afddad55ed5b96d86738b304b9268330fa128828d8489355781e49fe74456461",
+      "history": []
     },
     "skills/skzi-review/SKILL.md": {
+      "version": 2,
+      "sha256": "5b191696e24cf354f6c96d2ed18d039f599ec78e5894977aeb70a5f83141f19c",
+      "history": [
+        "fafc10870552912b2e15a809f67214cb67afb9f7e6cccb9d4eceb0d1e89e2afc"
+      ],
+      "vibeVersion": "1.0.1"
+    },
+    "skills/skzi-review/evals/evals.json": {
       "version": 1,
-      "sha256": "fafc10870552912b2e15a809f67214cb67afb9f7e6cccb9d4eceb0d1e89e2afc",
-      "history": [],
-      "vibeVersion": "1.0.0"
+      "sha256": "d278c8cff32150a1fd795fa830f929db55bf4f28c312124bbab5f7533c8fe761",
+      "history": []
     },
     "skills/spec-driven-implementation/SKILL.md": {
       "version": 5,
