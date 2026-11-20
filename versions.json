@@ -1265,15 +1265,19 @@
       "vibeVersion": "2.0.0"
     },
     "skills/save-session/SKILL.md": {
-      "version": 1,
-      "sha256": "676fd17c5edaf54f7c635c5012923a7e9499ed6339427a0f03399b84e6ac3c35",
-      "history": [],
-      "vibeVersion": "1.0.0"
+      "version": 2,
+      "sha256": "1d464c2bfe6b924ea266b6dd6986338ca5976c962939a029d0bbd04eba730222",
+      "history": [
+        "676fd17c5edaf54f7c635c5012923a7e9499ed6339427a0f03399b84e6ac3c35"
+      ],
+      "vibeVersion": "1.0.1"
     },
     "skills/save-session/evals/evals.json": {
-      "version": 1,
-      "sha256": "76245f714ccbc120f1b96e6dfa3612cdee2da241c8bd8c376b4284772e953f80",
-      "history": []
+      "version": 2,
+      "sha256": "2ef309092114e2556a575bb93e88d72d1e0ac3a0e9afa9acd492f26441012cd4",
+      "history": [
+        "76245f714ccbc120f1b96e6dfa3612cdee2da241c8bd8c376b4284772e953f80"
+      ]
     },
     "skills/screenshot-review/SKILL.md": {
       "version": 1,
