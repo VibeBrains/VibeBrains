@@ -148,7 +148,8 @@
 ### Режим write — всегда в отдельном worktree
 
 Основное дерево репозитория скрипт не трогает (обойти — `--allow-main-tree`, без причины не нужно)
-`--dir` — основное дерево git-репозитория: скрипт сам делает `git worktree add` во временный каталог (`$BRIGADIER_WORKER_WORKTREES`, по умолчанию `<tmp>/brigadier-worktrees`) на ветке `brigadier/<время>` от `--base` (по умолчанию HEAD)
+`--dir` — основное дерево git-репозитория: скрипт сам делает `git worktree add` во временный каталог (`$BRIGADIER_WORKER_WORKTREES`, затем `worktreesDir` профиля, по умолчанию `<tmp>/brigadier-worktrees`) на ветке `brigadier/<время>` от `--base` (по умолчанию HEAD)
+На машине владельца `worktreesDir` стоит в личной копии профиля: `/Volumes/Storage/Caches/brigadier/worktrees`; в поставляемом профиле поля нет
 Базу задавать явно, когда основное дерево стоит на чужой фича-ветке: `--base origin/dev` (Windows: `-Base origin/dev`)
 `--dir` уже worktree: исполнитель работает в нём как раньше, ничего не создаётся
 `--dir` не в git-репозитории: отказ

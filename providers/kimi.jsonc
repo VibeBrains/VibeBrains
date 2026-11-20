@@ -77,7 +77,11 @@
         //     "contextWindow": 262144, "vision": true, "sunsetDate": "2026-12-31",
         //     "cost": { "input": 0.95, "output": 4.00, "cacheRead": 0.19, "currency": "USD" },
         //     "costNote": "снятие K2 к концу 2026; день 31.12.2026 — по агрегатору, страница вендора его не называет",
-        //     "extraBody": { "thinking": { "type": "enabled", "keep": "all" } } }
+        //     "extraBody": { "thinking": { "type": "enabled", "keep": "all" } } },
+        //   { "id": "kimi-k2.6", "name": "Kimi K2.6 (256K, снимается к концу 2026)",
+        //     "contextWindow": 262144, "vision": true, "sunsetDate": "2026-12-31",
+        //     "cost": { "input": 0.95, "output": 4.00, "cacheRead": 0.16, "currency": "USD" },
+        //     "costNote": "снятие K2 к концу 2026; день 31.12.2026 — по агрегатору, страница вендора его не называет" }
         // ]
       }
     }
@@ -163,7 +167,11 @@
     //   "docsUrl": "https://www.kimi.com/code/docs/en/kimi-code/whats-new.html",
     //   "models": { "fetch": false, "static": [
     //     { "id": "k3.1-pro", "name": "Kimi K3.1 Pro (Kimi Code)", "default": true,
-    //       "contextWindow": 1048576, "vision": true,
+    //       // На Moderato вендор даёт 256K; на Pro и Allegretto — 1M, поднимите вручную.
+    //       "contextWindow": 262144, "vision": true,
+    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+    //     { "id": "k3.1-pro-highspeed", "name": "Kimi K3.1 Pro HighSpeed (Kimi Code)",
+    //       "contextWindow": 262144, "vision": true,
     //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
     //     { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576, "vision": true,
     //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },

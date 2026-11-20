@@ -47,6 +47,9 @@ WRITE_ALLOWED="$READ_ALLOWED,Edit,Write"
 WRITE_DENIED='NotebookEdit,WebFetch,WebSearch,Agent,Task,Bash(git commit*),Bash(git push*),Bash(git reset*),Bash(git checkout*),Bash(git clean*),Bash(git rebase*),Bash(git merge*),Bash(rm *)'
 
 # Каталог временных worktree режима write; ветка исполнителя — BRANCH_PREFIX/<время>
+# На машине владельца копии лежат в /Volumes/Storage/Caches/brigadier/worktrees: путь приходит полем
+# worktreesDir личной копии профиля (в поставляемом профиле поля нет). Умолчание ниже — временный
+# каталог, чтобы набор не привязывался к чужому диску.
 WORKTREES_ROOT="${BRIGADIER_WORKER_WORKTREES:-${TMPDIR:-/tmp}/brigadier-worktrees}"
 BRANCH_PREFIX="brigadier"
 
