@@ -159,30 +159,30 @@
     // (запись "kimi" в .vibe/agents.json набора).
     // У K2.8 Preview нет цены за токены на платформе — модель есть только в подписке; цены K3.1 Pro на подписке в токенах
     // тоже нет (расход идёт кредитами), поэтому в записях ниже "cost" не задан.
-    // Раскомментируйте блок целиком — вместе с ведущей запятой и скобками.
-    // ,{
-    //   "id": "kimi-code", "name": "Kimi Code (подписка)",
-    //   "protocol": "openai", "baseURL": "https://api.kimi.ai/coding/v1",
-    //   "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
-    //   "docsUrl": "https://www.kimi.com/code/docs/en/kimi-code/whats-new.html",
-    //   "models": { "fetch": false, "static": [
-    //     { "id": "k3.1-pro", "name": "Kimi K3.1 Pro (Kimi Code)", "default": true,
-    //       // На Moderato вендор даёт 256K; на Pro и Allegretto — 1M, поднимите вручную.
-    //       "contextWindow": 262144, "vision": true,
-    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
-    //     { "id": "k3.1-pro-highspeed", "name": "Kimi K3.1 Pro HighSpeed (Kimi Code)",
-    //       "contextWindow": 262144, "vision": true,
-    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
-    //     { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576, "vision": true,
-    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
-    //     { "id": "k3-256k", "name": "Kimi K3 256K (Kimi Code)", "contextWindow": 262144, "vision": true,
-    //       "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
-    //     { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)",
-    //       "contextWindow": 1048576, "vision": true,
-    //       "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"] } },
-    //     { "id": "kimi-for-coding-highspeed", "name": "Kimi K2.7 Code HighSpeed (Kimi Code)",
-    //       "contextWindow": 262144, "vision": true }
-    //   ] }
-    // }
+    // Раскомментировано 21.11.2026 — ключ владельца из консоли Kimi Code (kimi.ai/code/console), провайдер заработал.
+    ,{
+      "id": "kimi-code", "name": "Kimi Code (подписка)",
+      "protocol": "openai", "baseURL": "https://api.kimi.ai/coding/v1",
+      "auth": "bearer", "apiKeyEnv": "KIMI_CODE_API_KEY", "order": 52,
+      "docsUrl": "https://www.kimi.com/code/docs/en/kimi-code/whats-new.html",
+      "models": { "fetch": false, "static": [
+        { "id": "k3.1-pro", "name": "Kimi K3.1 Pro (Kimi Code)", "default": true,
+          // На Moderato вендор даёт 256K; на Pro и Allegretto — 1M, поднимите вручную.
+          "contextWindow": 262144, "vision": true,
+          "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+        { "id": "k3.1-pro-highspeed", "name": "Kimi K3.1 Pro HighSpeed (Kimi Code)",
+          "contextWindow": 262144, "vision": true,
+          "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+        { "id": "k3", "name": "Kimi K3 (Kimi Code)", "contextWindow": 1048576, "vision": true,
+          "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+        { "id": "k3-256k", "name": "Kimi K3 256K (Kimi Code)", "contextWindow": 262144, "vision": true,
+          "reasoning": { "canTurnOff": false, "effort": ["low", "high", "max"] } },
+        { "id": "kimi-for-coding", "name": "Kimi K2.8 Preview (Kimi Code)",
+          "contextWindow": 1048576, "vision": true,
+          "reasoning": { "canTurnOff": true, "effort": ["low", "high", "max"] } },
+        { "id": "kimi-for-coding-highspeed", "name": "Kimi K2.7 Code HighSpeed (Kimi Code)",
+          "contextWindow": 262144, "vision": true }
+      ] }
+    }
   ]
 }
