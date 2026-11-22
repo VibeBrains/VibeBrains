@@ -18,6 +18,9 @@
 
 set -u
 
+# Хранилища ключей адресуют запись по аккаунту; в обрезанном окружении (без USER) чтение ключа молча пустое
+USER="${USER:-$(id -un 2>/dev/null || printf '%s' "${HOME##*/}")}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 USER_PROVIDERS_DIR="${BRIGADIER_WORKER_PROVIDERS:-$HOME/.config/brigadier-worker/providers}"
 # Журнал: переменная окружения BRIGADIER_WORKER_LOG, затем logFile профиля, затем этот путь
