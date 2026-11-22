@@ -8,6 +8,8 @@
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh watch [путь к журналу хода] — печатать ход исполнителя вживую
+#   worker.sh gates --dir <worktree> -- <команда гейтов…> — прогнать гейты и записать отпечаток дерева
+#   worker.sh merge --dir <основное дерево> --branch <ветка> — влить ветку, только если отпечаток совпал
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree] [--owner-approved]
 #   (потолок цены запуска — maxRunUsd из профиля; --budget переопределяет его вручную)
@@ -62,7 +64,7 @@ WORKER_PROMPT='Ты внешний исполнитель: делай задач
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-  sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -833,7 +835,8 @@ finish_worktree() {
   echo "полный дифф: $diff_file"
   git -C "$wt" diff --stat "$base" HEAD 2>/dev/null
   if [ ! -s "$diff_file" ]; then echo "изменений нет"; fi
-  echo "влить: git -C $repo merge $branch"
+  echo "гейты: $SCRIPT_DIR/worker.sh gates --dir $wt -- <команда гейтов проекта>"
+  echo "влить после гейтов: $SCRIPT_DIR/worker.sh merge --dir $repo --branch $branch"
   echo "убрать после приёмки: git -C $repo worktree remove --force $wt && git -C $repo branch -D $branch && rm -f $diff_file"
 }
 
@@ -1084,6 +1087,74 @@ cmd_watch() {
   return 0
 }
 
+# Отпечаток гейтов — дерево коммита, на котором они прошли; лежит в git-каталоге самого worktree
+# Вливание сверяет его с деревом ветки: правка после гейтов без перепрогона не вольётся
+gates_receipt_file() { printf '%s/brigadier-gates\n' "$(git -C "$1" rev-parse --absolute-git-dir)"; }
+
+# Правки отслеживаемых файлов вне коммита: гейты прошли бы на них, а вольётся коммит без них
+tracked_dirty() { ! git -C "$1" diff --quiet HEAD -- 2>/dev/null; }
+
+cmd_gates() {
+  local dir=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dir) dir="${2:-}"; shift 2 ;;
+      --) shift; break ;;
+      *) die "gates: неизвестный ключ $1; команда гейтов идёт после --" ;;
+    esac
+  done
+  [ -n "$dir" ] || die "gates: нужен --dir <worktree>"
+  [ $# -gt 0 ] || die "gates: нужна команда гейтов после --"
+  git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "gates: $dir не в git-репозитории"
+  local receipt tree head untracked rc=0
+  receipt="$(gates_receipt_file "$dir")"
+  rm -f "$receipt"
+  if tracked_dirty "$dir"; then
+    die "gates: в $dir есть правки вне коммита — закоммить их до гейтов, иначе отпечаток не про то, что вольётся"
+  fi
+  tree="$(git -C "$dir" rev-parse 'HEAD^{tree}')"
+  head="$(git -C "$dir" rev-parse HEAD)"
+  untracked="$(git -C "$dir" ls-files --others --exclude-standard | head -5)"
+  if [ -n "$untracked" ]; then
+    printf 'gates: неотслеживаемые файлы участвуют в гейтах, но не вольются:\n%s\n' "$untracked" >&2
+  fi
+  (cd "$dir" && "$@") || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    echo "gates: красные (код $rc) — отпечатка нет"
+    return "$rc"
+  fi
+  if [ "$(git -C "$dir" rev-parse HEAD)" != "$head" ] || tracked_dirty "$dir"; then
+    echo "gates: за время гейтов дерево изменилось — отпечатка нет, прогони заново" >&2
+    return 1
+  fi
+  printf 'tree=%s\nhead=%s\nat=%s\ncmd=%s\n' "$tree" "$head" "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >"$receipt"
+  echo "gates: зелёные, отпечаток ${tree:0:12} записан"
+}
+
+cmd_merge() {
+  local dir="" branch=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dir) dir="${2:-}"; shift 2 ;;
+      --branch) branch="${2:-}"; shift 2 ;;
+      *) die "merge: неизвестный ключ $1" ;;
+    esac
+  done
+  [ -n "$dir" ] && [ -n "$branch" ] || die "merge: нужны --dir <основное дерево> и --branch <ветка>"
+  local wt receipt want have
+  wt="$(git -C "$dir" worktree list --porcelain |
+    awk -v b="branch refs/heads/$branch" '/^worktree /{w=substr($0, 10)} $0 == b {print w}')"
+  [ -n "$wt" ] || die "merge: у ветки $branch нет worktree, а отпечаток гейтов лежит в нём — отказ"
+  receipt="$(gates_receipt_file "$wt")"
+  [ -f "$receipt" ] || die "merge: гейты на $branch не прогнаны через worker.sh gates — отказ"
+  want="$(sed -n 's/^tree=//p' "$receipt")"
+  have="$(git -C "$dir" rev-parse "refs/heads/$branch^{tree}")"
+  if [ "$want" != "$have" ]; then
+    die "merge: дерево $branch изменилось после гейтов (${want:0:12} → ${have:0:12}) — прогони гейты заново"
+  fi
+  git -C "$dir" merge --ff-only "refs/heads/$branch"
+}
+
 main() {
   [ $# -ge 1 ] || usage
   local sub="$1"
@@ -1094,6 +1165,8 @@ main() {
     check) cmd_check "$@" ;;
     watch) cmd_watch "$@" ;;
     run) cmd_run "$@" ;;
+    gates) cmd_gates "$@" ;;
+    merge) cmd_merge "$@" ;;
     *) usage ;;
   esac
 }
