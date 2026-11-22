@@ -19,9 +19,18 @@
 - `worker.ps1` — Windows (не прогнан: на машине автора нет PowerShell)
 - `providers/<имя>.json` — профиль провайдера; сейчас `deepseek.json`
 
+## Kimi без Claude Code
+
+Для Kimi есть самостоятельный `kimi_worker.py`: он обращается к OpenAI-совместимому `/chat/completions` DeepSeek напрямую, без Anthropic API и бинаря `claude`
+Проверка: `python3 <каталог исполнителя>/kimi_worker.py check`
+Запуск: те же понятия `--mode read|write`, `--dir`, `--base`, `--brief`, но уровни задаются `--effort low|high|max`, модель по умолчанию `deepseek-flash`
+В read доступны список файлов, чтение и поиск; write добавляет запись и всегда создаёт отдельный git worktree, а в конце печатает ветку и путь полного диффа
+Секретные каталоги и `.env*` закрыты; сетевых и shell-инструментов у исполнителя нет
+Приёмка, гейты и вливание остаются у Kimi-бригадира; для worktree можно использовать `worker.sh gates` и `worker.sh merge`
+
 ## Что нужно заранее
 
-- Claude Code: команда `claude` в терминале
+- Claude Code: команда `claude` в терминале — только для старого `worker.sh`; Kimi использует `kimi_worker.py` без неё
 - macOS и Linux: `bash` и `python3` — скрипт разбирает ими профиль и ответ `claude`
 - Linux: `secret-tool` (пакет `libsecret-tools`) — или ключ в переменной `BRIGADIER_WORKER_<ПРОВАЙДЕР>_KEY`
 - Windows: PowerShell 5.1 или новее
@@ -148,8 +157,7 @@
 ### Режим write — всегда в отдельном worktree
 
 Основное дерево репозитория скрипт не трогает (обойти — `--allow-main-tree`, без причины не нужно)
-`--dir` — основное дерево git-репозитория: скрипт сам делает `git worktree add` во временный каталог (`$BRIGADIER_WORKER_WORKTREES`, затем `worktreesDir` профиля, по умолчанию `<tmp>/brigadier-worktrees`) на ветке `brigadier/<время>` от `--base` (по умолчанию HEAD)
-На машине владельца `worktreesDir` стоит в личной копии профиля: `/Volumes/Storage/Caches/brigadier/worktrees`; в поставляемом профиле поля нет
+`--dir` — основное дерево git-репозитория: скрипт сам делает `git worktree add` во временный каталог (`$BRIGADIER_WORKER_WORKTREES`, по умолчанию `<tmp>/brigadier-worktrees`) на ветке `brigadier/<время>` от `--base` (по умолчанию HEAD)
 Базу задавать явно, когда основное дерево стоит на чужой фича-ветке: `--base origin/dev` (Windows: `-Base origin/dev`)
 `--dir` уже worktree: исполнитель работает в нём как раньше, ничего не создаётся
 `--dir` не в git-репозитории: отказ

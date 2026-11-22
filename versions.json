@@ -559,8 +559,8 @@
       "history": []
     },
     "rules/brigadier.mdc": {
-      "version": 14,
-      "sha256": "39eebdca07ae7bc2527706be9894fd4f70cc011ce08570750996b37594d5e635",
+      "version": 15,
+      "sha256": "794336fddcfa433ab2e4fec9811a784d08220525fd30f4c4f22da5dfe50f19fe",
       "history": [
         "c8387a821824bd71df637f35f4417b8f072b7fa87ab878f4f652a3e54c22094b",
         "170d97fb76c9008fa53afa6cb0a2fdffc5f69fc60bebc9c76d5cfdb385ff9200",
@@ -574,9 +574,10 @@
         "a1dd101d2d56a276201aab177f989b01305fd0712d31201164da1b67ddb74ffe",
         "01de9fee250e941bf3826a7fc6aa2b6543a5ad7d80653fecb57c155a204af8dc",
         "dd4b43b13aafdba14545c64e572de46516da4081c7faaea67d11853793be28a6",
-        "517c32ae6c95f49c015c470db8b7239a64ef535ba8d6ebf138a9bee7b6830bd7"
+        "517c32ae6c95f49c015c470db8b7239a64ef535ba8d6ebf138a9bee7b6830bd7",
+        "39eebdca07ae7bc2527706be9894fd4f70cc011ce08570750996b37594d5e635"
       ],
-      "vibeVersion": "1.1.0"
+      "vibeVersion": "1.2.0"
     },
     "rules/clean-rules.mdc": {
       "version": 8,
@@ -835,8 +836,8 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 10,
-      "sha256": "b232e14160b5e6b8320c586f63e57947d95c5e82a04c6e776b68852fd33307d7",
+      "version": 12,
+      "sha256": "757a3bb7ec908e7090a4a6f02422639215b2040f3d9e1bac508c7ab96e05b953",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
         "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
@@ -846,9 +847,11 @@
         "35446f24feaf2e6aa92aef1dc46059037be6aeecfed6a8cb01da184686fef0da",
         "ca253a644836eb8be0e0cf92c002f793ff7cb5f3c1061b7810c109414f6e95f7",
         "1c25d6319f09c37f693108d619eef45a922167e957c708f2498b7879b5337816",
-        "1f8d3dde96fd62c5bf920d847784778b623cb1147b4c49c210d849dee16b1f22"
+        "1f8d3dde96fd62c5bf920d847784778b623cb1147b4c49c210d849dee16b1f22",
+        "b232e14160b5e6b8320c586f63e57947d95c5e82a04c6e776b68852fd33307d7",
+        "68c059b4350abf44331fcd89f86dd103a745a91d796a4232a1ed96b3c085fd89"
       ],
-      "vibeVersion": "1.3.1"
+      "vibeVersion": "1.4.1"
     },
     "skills/brigadier/evals/evals.json": {
       "version": 1,
@@ -863,8 +866,8 @@
       ]
     },
     "skills/brigadier/worker/README.md": {
-      "version": 9,
-      "sha256": "96b565dc20a05b75c28a61b22149052c01d7eabe6ff7fe55034428dd0ca4e5bb",
+      "version": 10,
+      "sha256": "c0cd06a5c4a4abfd66e89360438556c77c326e530c3316e73a6e1e4e1c2fc1c3",
       "history": [
         "82f00708c56dbe503230c840e1effdffb01d7c2845f83b106c17bb231f4e0146",
         "a56241a1c84fe7509bcba6c6947dc20a30d98b704b67f21f18ffa18ed379974d",
@@ -873,8 +876,14 @@
         "7cff73147f933d75155adb41e1e67e8fb4dee796ec4eb42f08cead83f95641c0",
         "0393817e2f35fd70694f56ac1e1e9ff12f178b9a406bb386b7c3bafb706b86e9",
         "c6376a19689d34360940581bb8dc6d128ab820c836bc74fcbef4b779f1777879",
-        "464c8b0da05cee05cbb9efdb4c3dff1dfda31cc5ea79e62977fd236ea898e98a"
+        "464c8b0da05cee05cbb9efdb4c3dff1dfda31cc5ea79e62977fd236ea898e98a",
+        "96b565dc20a05b75c28a61b22149052c01d7eabe6ff7fe55034428dd0ca4e5bb"
       ]
+    },
+    "skills/brigadier/worker/kimi_worker.py": {
+      "version": 1,
+      "sha256": "32a998f2fe55684847c1871f13ac30646ac2be3edb3052648018105a4bb462f2",
+      "history": []
     },
     "skills/brigadier/worker/providers/deepseek.json": {
       "version": 3,
@@ -898,8 +907,8 @@
       ]
     },
     "skills/brigadier/worker/worker.sh": {
-      "version": 9,
-      "sha256": "b0adee4b4912e450ffc6d065a0615a5a2e2a1136e51c156360d73e653fc584c7",
+      "version": 10,
+      "sha256": "48837bdbbd285de993ec76ebe17395e3fc739c9c58be7f9f2a2d6617518e8e49",
       "history": [
         "10f0ca3dfb911c8cb75bf3f5c18a1d5580f48aefbac52e9e8da2495db35a1fd5",
         "f08da0eee72ae47551fd1574d07366ede6f532b7e4edf100a310350bdf2f6805",
@@ -908,7 +917,8 @@
         "95416460ec0e4bb00a4cea270c885454cf039d1c205230ad2e5e500be5d71730",
         "942929691f15935cd6826fcd2a27c813a9d4384af5385ed7c8b0802498451ca5",
         "4a36e19efc464694d555879e34c70055888b4a28cd03800efa7af25765fb73be",
-        "a4d7485e9fa8379184c1665a44081e4f44b138f40d5332ca5e4ea26e4f07a7f6"
+        "a4d7485e9fa8379184c1665a44081e4f44b138f40d5332ca5e4ea26e4f07a7f6",
+        "b0adee4b4912e450ffc6d065a0615a5a2e2a1136e51c156360d73e653fc584c7"
       ]
     },
     "skills/codebase-design/DEEPENING.md": {
