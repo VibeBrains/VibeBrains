@@ -334,14 +334,15 @@
       "history": []
     },
     "providers/google-gemini.jsonc": {
-      "version": 6,
-      "sha256": "6ba5791ee14c4464aa1da213f028cd813e0ffa950101e2bf28fd962ad0daa155",
+      "version": 7,
+      "sha256": "2df99d725ed5da128c8df6327c0b78773aef4722a1a2814b8b61e75c644abc1d",
       "history": [
         "e99fdc24d0a41d56cc63f993b42e074c72d2bace7037dcfb6a272ad8b745b782",
         "942d775b4b4e4b906e41f956e2f59fe6b822f16b4c7f8defe40164f931961dbc",
         "ff3c7e518dc64314ed8e1bedf11497e78356b1ea3975929f1b41f2bb3a4cd731",
         "ecde0ff1ed000bdb11ba7fb4cbdcb1212e97beb57d0cd7e8be08fbcd11ca0300",
-        "f68369736b12fd96f67828a9c98721d8286fcc6a714c10ff511b65fff41f9a7a"
+        "f68369736b12fd96f67828a9c98721d8286fcc6a714c10ff511b65fff41f9a7a",
+        "6ba5791ee14c4464aa1da213f028cd813e0ffa950101e2bf28fd962ad0daa155"
       ]
     },
     "providers/google-vertex.jsonc": {
@@ -437,8 +438,8 @@
       ]
     },
     "providers/openai.jsonc": {
-      "version": 16,
-      "sha256": "27ca33387d85ebb73ac0daed884f5a25fcd4d20abf9768b8b439d211136c47c7",
+      "version": 17,
+      "sha256": "1764574486f85ed09acac70222d5f4c14a3e4c89c20b7b0aedd9b61eda06aada",
       "history": [
         "1957032a3a7879d5dbf0d35a26d8faf0b08136e878ec0a7009ff24f8ded4e0a5",
         "1cb8fb2d30905cd9bcb67a3efc1208b02ccaeb1f771a7d0086afb4f226f3f10c",
@@ -526,8 +527,8 @@
       ]
     },
     "providers/zai.jsonc": {
-      "version": 14,
-      "sha256": "efc638bdce23c90a15a313bf03b6e43725f0f5c88ea2f467ac256ceda21deab5",
+      "version": 15,
+      "sha256": "9e33319ac8728cd45a6304e63cddc8e94635910e9824103a3366b2cbd4dd20d7",
       "history": [
         "bc0e1025aa398b0d162764ac7e03f4a097b9b76da5ac904d92f537c782b913ef",
         "33c1f61375f204285975d9a05b8b6e17a9adfe23a7f6a39b5665de7c0b9fe6fa",
@@ -540,7 +541,8 @@
         "e8d837fdef40571bc56bbe231e4bb2e933642e33fb546a046394a9bee40c4238",
         "4ab1ac8a997cb028d6db9265340db4a3738b4f65476ba3cfdd3a15e3c4e30bfe",
         "61219054ccfc87fccf9495d6d673c3a01af5654705b45b9a804d91da7319130b",
-        "1b86b265ac3a2e2c3cf2d46501f82ad0cdfdf81bb607e98438db57862cdb1393"
+        "1b86b265ac3a2e2c3cf2d46501f82ad0cdfdf81bb607e98438db57862cdb1393",
+        "efc638bdce23c90a15a313bf03b6e43725f0f5c88ea2f467ac256ceda21deab5"
       ]
     },
     "requests.http": {

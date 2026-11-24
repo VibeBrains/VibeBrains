@@ -67,6 +67,16 @@
             "costAfter": { "input": 4.00, "output": 20.00 },
             "reasoning": { "effort": ["low", "medium", "high"] },
             "costNote": "вводная цена до 30.11.2026, docs.cloud.google.com …/gemini/4-carbon"
+          },
+          {
+            // Источник вторичный: apidog.com/blog/gemini-4-neon-benchmarks/ в сводке 23.11.2026.
+            // Страница вендора и живой запрос не проверены. Цена USD за 1M токенов.
+            "id": "gemini-4-neon",
+            "name": "Gemini 4 Neon",
+            "contextWindow": 1000000,
+            "vision": true,
+            "reasoning": { "effort": ["low", "medium", "high", "xhigh"] },
+            "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.15 }
           }
         ]
       }

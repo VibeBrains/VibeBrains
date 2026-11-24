@@ -115,7 +115,14 @@
         //     "contextWindow": 1050000, "maxOutputTokens": 128000, "vision": true,
         //     "reasoning": { "canTurnOff": true, "effort": ["low", "medium", "high", "xhigh", "max"] },
         //     "cost": { "input": 1, "output": 5, "cacheRead": 0.05, "cacheWrite": 1.25, "currency": "USD",
-        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } }
+        //       "longContext": { "overInputTokens": 272000, "input": 2, "cache": 2, "output": 1.5 } } },
+        //   // GPT-6.2 Astra и Sol: сводка 23.11.2026 ссылается на вторичные источники.
+        //   // Первоисточник не проверен. Уровни рассуждения и пределы контекста не заявляем.
+        //   // Инструменты требуют Responses. Цены USD за 1M токенов.
+        //   { "id": "gpt-6.2-astra", "name": "GPT-6.2 Astra", "protocol": "openai-responses",
+        //     "cost": { "input": 8, "output": 40, "currency": "USD" } },
+        //   { "id": "gpt-6.2-sol", "name": "GPT-6.2 Sol", "protocol": "openai-responses",
+        //     "cost": { "input": 2, "output": 10, "currency": "USD" } }
         // ]
       }
     }
