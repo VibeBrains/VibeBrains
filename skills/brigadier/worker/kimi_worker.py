@@ -14,7 +14,8 @@ import urllib.error
 import urllib.request
 
 MAX_TOOL_BYTES = 100_000
-MAX_TURNS = 40
+# Разведка по незнакомому репозиторию не укладывается в 40 ходов; настройка — переменная окружения
+MAX_TURNS = int(os.environ.get("BRIGADIER_MAX_TURNS", "120"))
 DELEGATED_BIN = "vibememory"
 BLOCKED_PARTS = {".env", ".git", ".license", ".ssh", "node_modules"}
 TOOLS = [
