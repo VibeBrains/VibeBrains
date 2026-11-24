@@ -17,13 +17,14 @@ MAX_TURNS = 40
 BLOCKED_PARTS = {".env", ".git", ".license", ".ssh", "node_modules"}
 TOOLS = [
     {"type": "function", "function": {"name": "list_files", "description": "List files below a relative directory", "parameters": {"type": "object", "properties": {"path": {"type": "string", "default": "."}}, "required": []}}},
-    {"type": "function", "function": {"name": "read_file", "description": "Read a UTF-8 text file", "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}}},
+    {"type": "function", "function": {"name": "read_file", "description": "Read a UTF-8 text file; large files page through offset/limit (1-based lines)", "parameters": {"type": "object", "properties": {"path": {"type": "string"}, "offset": {"type": "integer", "default": 1}, "limit": {"type": "integer", "default": 0}}, "required": ["path"]}}},
     {"type": "function", "function": {"name": "search_files", "description": "Search a literal string in text files below a relative directory", "parameters": {"type": "object", "properties": {"path": {"type": "string", "default": "."}, "query": {"type": "string"}}, "required": ["query"]}}},
-    {"type": "function", "function": {"name": "write_file", "description": "Replace a text file; only in write mode", "parameters": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "required": ["path", "content"]}}},
+    {"type": "function", "function": {"name": "write_file", "description": "Replace a text file; only in write mode. With old_string replaces the exactly-one occurrence of old_string with content, else writes content as the whole file", "parameters": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}, "old_string": {"type": "string"}}, "required": ["path", "content"]}}},
 ]
 SYSTEM = """Ты внешний исполнитель Kimi-бригадира. Работай сам, никому не делегируй.
 Действуй инструментами, не выдумывай содержимое. Работай только в переданном каталоге.
 Не читай секреты, .env, .git, .license и ключи. Не коммить и не пушь.
+Большие файлы читай порциями read_file с offset/limit; точечные правки делай write_file с old_string (ровно одно вхождение).
 Если тест падает дважды по одной причине — остановись и опиши, не перебирай вариации.
 В конце дай короткий итог: сделано, проверено, не удалось."""
 
@@ -83,10 +84,21 @@ def call_tool(root, name, arguments, write):
         lines = [str(p.relative_to(root)) for p in text_files(path)[:2000]]
         return "\n".join(lines) or "(пусто)"
     if name == "read_file":
-        data = path.read_bytes()
-        if len(data) > MAX_TOOL_BYTES:
-            return data[:MAX_TOOL_BYTES].decode(errors="replace") + "\n[обрезано]"
-        return data.decode()
+        text = path.read_bytes().decode(errors="replace")
+        lines = text.splitlines(keepends=True)
+        offset = max(int(arguments.get("offset") or 1), 1)
+        limit = max(int(arguments.get("limit") or 0), 0)
+        total = len(lines)
+        if offset > 1 or limit:
+            end = offset - 1 + limit if limit else total
+            text = "".join(lines[offset - 1:end])
+        encoded = text.encode()
+        if len(encoded) > MAX_TOOL_BYTES:
+            text = encoded[:MAX_TOOL_BYTES].decode(errors="replace") + "\n[обрезано]"
+        if offset > 1 or limit:
+            shown_end = min(offset - 1 + (limit or total), total)
+            text = f"[строки {offset}-{shown_end} из {total}]\n" + text
+        return text
     if name == "search_files":
         query = arguments["query"]
         matches = []
@@ -102,6 +114,14 @@ def call_tool(root, name, arguments, write):
         return "\n".join(matches) or "(не найдено)"
     if name == "write_file" and write:
         path.parent.mkdir(parents=True, exist_ok=True)
+        old = arguments.get("old_string")
+        if old is not None:
+            current = path.read_text(errors="replace")
+            count = current.count(old)
+            if count != 1:
+                raise ValueError(f"old_string встречается {count} раз, нужен ровно 1")
+            path.write_text(current.replace(old, arguments["content"], 1))
+            return f"патч применён: {path.relative_to(root)}"
         path.write_text(arguments["content"])
         return f"записано: {path.relative_to(root)}"
     raise ValueError("инструмент неизвестен или запись запрещена")
@@ -109,7 +129,8 @@ def call_tool(root, name, arguments, write):
 
 def prepare_worktree(source, base):
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    target = Path(os.environ.get("BRIGADIER_WORKER_WORKTREES", "/tmp/brigadier-worktrees")) / f"kimi-{stamp}-{os.getpid()}"
+    base_dir = Path(os.environ.get("BRIGADIER_WORKER_WORKTREES", "/tmp/brigadier-worktrees")).resolve()
+    target = base_dir / f"kimi-{stamp}-{os.getpid()}"
     target.parent.mkdir(parents=True, exist_ok=True)
     branch = f"brigadier/kimi-{stamp}-{os.getpid()}"
     subprocess.run(["git", "-C", str(source), "worktree", "add", "-b", branch, str(target), base], check=True)
