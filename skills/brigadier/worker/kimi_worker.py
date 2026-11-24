@@ -6,6 +6,7 @@ import base64
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -14,6 +15,7 @@ import urllib.request
 
 MAX_TOOL_BYTES = 100_000
 MAX_TURNS = 40
+DELEGATED_BIN = "vibememory"
 BLOCKED_PARTS = {".env", ".git", ".license", ".ssh", "node_modules"}
 TOOLS = [
     {"type": "function", "function": {"name": "list_files", "description": "List files below a relative directory", "parameters": {"type": "object", "properties": {"path": {"type": "string", "default": "."}}, "required": []}}},
@@ -27,6 +29,19 @@ SYSTEM = """Ты внешний исполнитель Kimi-бригадира. 
 Большие файлы читай порциями read_file с offset/limit; точечные правки делай write_file с old_string (ровно одно вхождение).
 Если тест падает дважды по одной причине — остановись и опиши, не перебирай вариации.
 В конце дай короткий итог: сделано, проверено, не удалось."""
+
+
+def delegated_note(*args):
+    """Отметить запуск в движке VibeMemory: тихо, необязательно, у самого исполнителя не срабатывает."""
+    if os.environ.get("BRIGADIER_WORKER") == "1":
+        return
+    try:
+        exe = shutil.which(DELEGATED_BIN)
+        if not exe:
+            return
+        subprocess.run([exe, "delegated", *args], capture_output=True, timeout=5)
+    except Exception:
+        pass
 
 
 def key_from_store():
@@ -140,11 +155,15 @@ def prepare_worktree(source, base):
 def run(args):
     source = Path(args.dir).resolve()
     worktree = branch = None
-    root = prepare_worktree(source, args.base) if args.mode == "write" else (source, None)
-    root, branch = root
-    brief = sys.stdin.read() if args.brief == "-" else Path(args.brief).read_text()
+    try:
+        root = prepare_worktree(source, args.base) if args.mode == "write" else (source, None)
+        root, branch = root
+        brief = sys.stdin.read() if args.brief == "-" else Path(args.brief).read_text()
+        key = key_from_store()
+    except Exception as error:
+        delegated_note("--failed", str(error))
+        raise
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": f"Каталог работы: текущий корень.\nРежим: {args.mode}.\nБриф:\n{brief}"}]
-    key = key_from_store()
     total = {"prompt_tokens": 0, "completion_tokens": 0}
     started = time.monotonic()
     try:
@@ -196,9 +215,14 @@ def main():
     parser.add_argument("--effort", choices=["low", "high", "max"], default="high")
     args = parser.parse_args()
     if args.command == "check":
-        answer = request(key_from_store(), args.model, [{"role": "user", "content": "Ответь: ok"}], "low")
+        try:
+            answer = request(key_from_store(), args.model, [{"role": "user", "content": "Ответь: ok"}], "low")
+        except Exception as error:
+            delegated_note("--failed", str(error))
+            raise
         print(f"DeepSeek Kimi worker: {answer['choices'][0]['message'].get('content', 'ok')}")
     else:
+        delegated_note("--ok")
         run(args)
 
 

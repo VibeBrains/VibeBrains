@@ -68,7 +68,21 @@ $WriteAllowed = "$ReadAllowed,Edit,Write"
 $WriteDenied = 'NotebookEdit,WebFetch,WebSearch,Agent,Task,Bash(git commit*),Bash(git push*),Bash(git reset*),Bash(git checkout*),Bash(git clean*),Bash(git rebase*),Bash(git merge*),Bash(rm *),Bash(del *),Bash(Remove-Item*)'
 $WorkerPrompt = 'Ты внешний исполнитель: делай задачу из брифа сам, никому её не передавай и субагентов не запускай. Не коммить и не пушь. В конце дай короткий итог: что сделано, что проверено, что не удалось.'
 
+# Отметка запуска в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
+$script:DelegatedActive = $false
+
+function Write-Delegated([string[]] $DelegatedArgs) {
+    if ($env:BRIGADIER_WORKER -eq '1') { return }
+    $exe = Get-Command vibememory -ErrorAction SilentlyContinue
+    if (-not $exe) { return }
+    try { & $exe.Source delegated @DelegatedArgs 2>&1 | Out-Null } catch { }
+}
+
 function Stop-Worker([string] $Message) {
+    if ($script:DelegatedActive) {
+        $script:DelegatedActive = $false
+        Write-Delegated @('--failed', $Message)
+    }
     [Console]::Error.WriteLine("ошибка: $Message")
     exit 1
 }
@@ -301,11 +315,14 @@ function Write-PricesAgeWarning($Prof, [string] $Name) {
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 function Invoke-Check([string] $Name) {
     if (-not $Name) { $Name = 'deepseek' }
+    $script:DelegatedActive = $true
     $prof = Read-Profile (Find-Profile $Name)
     $key = Read-Key $prof
     if (-not $key) {
         [Console]::Error.WriteLine("check: $Name — ключ не найден (Credential Manager или переменная окружения)")
         Write-LegacyKeyHint $prof $Name
+        $script:DelegatedActive = $false
+        Write-Delegated @('--failed', "ключ провайдера «$Name» не найден")
         exit 1
     }
     $model = $prof.tiers.cheap.model
@@ -316,10 +333,13 @@ function Invoke-Check([string] $Name) {
             -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec $CheckTimeoutSec
         Write-Output "check: $Name — ключ найден, сервер отвечает (модель $model)"
         Write-PricesAgeWarning $prof $Name
+        $script:DelegatedActive = $false
         exit 0
     } catch {
         $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
         [Console]::Error.WriteLine("check: $Name — сервер не ответил успехом (HTTP $status)")
+        $script:DelegatedActive = $false
+        Write-Delegated @('--failed', "сервер не ответил успехом (HTTP $status)")
         exit 1
     }
 }
@@ -557,6 +577,9 @@ function Write-RunLog {
 }
 
 function Invoke-Run {
+    # Отметить запуск в движке; отказ до старта модели ниже сообщит о провале
+    Write-Delegated @('--ok')
+    $script:DelegatedActive = $true
     # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
     if ($Tier -eq 'strong' -and -not $OwnerApproved) {
         Stop-Worker 'strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате'
@@ -720,6 +743,8 @@ function Invoke-Run {
         $argLine = ($claudeArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
         $claudeExe = (Get-Command $ClaudeBin).Source
         Push-Location $workDir
+        # Модель сейчас стартует: ошибки после этой точки — уже не «до старта модели»
+        $script:DelegatedActive = $false
         try {
             $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state $LiveFile
         } finally { Pop-Location }
