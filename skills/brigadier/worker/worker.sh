@@ -61,7 +61,20 @@ BRANCH_PREFIX="brigadier"
 # Добавка к системному промпту: без CLAUDE.md исполнитель не знает, кто он
 WORKER_PROMPT='Ты внешний исполнитель: делай задачу из брифа сам, никому её не передавай и субагентов не запускай. Не коммить и не пушь. В конце дай короткий итог: что сделано, что проверено, что не удалось.'
 
-die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
+# Отметка запуска в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
+delegated_note() {
+  [ "${BRIGADIER_WORKER:-}" = "1" ] && return 0
+  command -v vibememory >/dev/null 2>&1 && vibememory delegated "$@" >/dev/null 2>&1 || true
+}
+
+# BRIGADIER_DELEGATED=1 — команда ещё не дошла до модели: падение через die сообщает о провале запуска
+die() {
+  if [ "${BRIGADIER_DELEGATED:-0}" = "1" ]; then
+    BRIGADIER_DELEGATED=0
+    delegated_note --failed "$*"
+  fi
+  printf 'ошибка: %s\n' "$*" >&2; exit 1
+}
 
 usage() {
   sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
@@ -375,6 +388,7 @@ if age > int(sys.argv[3]):
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 cmd_check() {
   local provider="${1:-deepseek}" profile base model key code body_file
+  BRIGADIER_DELEGATED=1
   need_python
   profile="$(find_profile "$provider")" || exit 1
   base="$(prof_get "$profile" baseUrl)" || die "в профиле нет baseUrl"
@@ -383,6 +397,8 @@ cmd_check() {
   if [ -z "$key" ]; then
     echo "check: $provider — ключ не найден (хранилище секретов или переменная окружения)" >&2
     legacy_key_hint "$profile" "$provider" || true
+    BRIGADIER_DELEGATED=0
+    delegated_note --failed "ключ провайдера «$provider» не найден"
     return 1
   fi
   body_file="$(mktemp)"
@@ -398,6 +414,7 @@ cmd_check() {
     echo "check: $provider — ключ найден, сервер отвечает (модель $model)"
     rm -f "$body_file"
     prices_age_warning "$profile" "$provider"
+    BRIGADIER_DELEGATED=0
     return 0
   fi
   # Тело ответа сервера ключа не содержит; печатаем только тип ошибки
@@ -413,6 +430,8 @@ except Exception:
 ' "$body_file" 2>/dev/null)"
   rm -f "$body_file"
   echo "check: $provider — сервер ответил HTTP ${code:-000} ($reason)" >&2
+  BRIGADIER_DELEGATED=0
+  delegated_note --failed "сервер ответил HTTP ${code:-000} ($reason)"
   return 1
 }
 
@@ -860,6 +879,9 @@ cmd_run() {
       *) die "неизвестный аргумент: $1" ;;
     esac
   done
+  # Отметить запуск в движке; отказ до старта модели ниже сообщит о провале
+  delegated_note --ok
+  BRIGADIER_DELEGATED=1
   # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
   if [ "$tier" = "strong" ] && [ "$owner_approved" -eq 0 ]; then
     die "strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате"
@@ -1011,6 +1033,8 @@ cmd_run() {
   trap 'on_signal 2' INT
   # Закрытый терминал или снятая фоновая задача шлют HUP: без ловушки обёртка умирала, а claude оставался
   trap 'on_signal 1' HUP
+  # Модель сейчас стартует: ошибки после этой точки — уже не «до старта модели»
+  BRIGADIER_DELEGATED=0
   # Подмена сервера — только внутри этой подоболочки; ключ идёт через окружение, не через аргументы
   (
     cd "$dir" || exit 1
