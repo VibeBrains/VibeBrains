@@ -359,6 +359,30 @@ class ReceiptTest(unittest.TestCase):
             kimi_worker.write_receipt("check", "failed", "проверка", None, str(self.work))
         self.assertFalse(self.receipts.exists())
 
+    def test_successful_check_sends_check_ok_in_the_checked_dir(self):
+        calls = []
+        with (
+            mock.patch.dict(os.environ, {"VIBEMEMORY_DIR": str(self.base / "state")}),
+            mock.patch.object(kimi_worker, "key_from_store", return_value="test-key"),
+            mock.patch.object(kimi_worker, "request", return_value={"choices": [{"message": {"content": "ок"}}]}),
+            mock.patch.object(kimi_worker, "event", side_effect=lambda *a, **k: calls.append((a, k))),
+            mock.patch.object(sys, "argv", ["kimi_worker.py", "check", "--dir", str(self.work)]),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            kimi_worker.main()
+        # Без KIMI_CODE_SESSION_ID движок ищет активную сессию по cwd: событие идёт в каталог проекта
+        self.assertEqual(calls, [(("check-ok",), {"cwd": str(self.work)})])
+
+    def test_event_runs_the_engine_in_the_given_directory(self):
+        with (
+            mock.patch.dict(os.environ, {"BRIGADIER_WORKER": ""}),
+            mock.patch.object(kimi_worker.shutil, "which", return_value=sys.executable),
+            mock.patch.object(kimi_worker.subprocess, "run") as run,
+        ):
+            kimi_worker.event("check-ok", cwd=str(self.work))
+        self.assertEqual(run.call_args.args[0][1:], ["brigadier", "event", "check-ok"])
+        self.assertEqual(run.call_args.kwargs["cwd"], str(self.work))
+
 
 class EnginePathTest(unittest.TestCase):
     """Движок ищется в PATH, а без него — по абсолютному пути установки."""

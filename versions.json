@@ -841,8 +841,8 @@
       "history": []
     },
     "skills/brigadier/SKILL.md": {
-      "version": 23,
-      "sha256": "3ed85c95cd82622ab70c312cec9599c901ca018de29dd75502913ce9d0cef1c3",
+      "version": 24,
+      "sha256": "d1f2f737d5b9e9215f1e6305bccfcdefbcd4a46c9a6621578e4d8337a7f7456a",
       "history": [
         "0b9b4d3c24c8c1a68fe10d60dce64353a00dfcbe4506a37f0d2ecc6898578e9d",
         "341160d2a78b4351f5105c76cd9619db7f37a32c458015b4399870703eeead3a",
@@ -865,9 +865,10 @@
         "30e3931126c0ab26fa02fb501372834ca439f0aea13ca095ca820222c61abac4",
         "efd6894ad8808b56c82475cd7b418593404a218e6f8db0e0ef5565a07382d8ec",
         "0e11e5d27c6ba1201acd02abc073017627e7b8d5b8d0a6f7cd90cb851ec568df",
-        "bccb34170b9441f9e0092c78cbcc4f86bd66b8a2200fedb49a2063064ccc4320"
+        "bccb34170b9441f9e0092c78cbcc4f86bd66b8a2200fedb49a2063064ccc4320",
+        "3ed85c95cd82622ab70c312cec9599c901ca018de29dd75502913ce9d0cef1c3"
       ],
-      "vibeVersion": "1.4.12"
+      "vibeVersion": "1.4.13"
     },
     "skills/brigadier/evals/evals.json": {
       "version": 4,
@@ -908,8 +909,8 @@
       ]
     },
     "skills/brigadier/worker/kimi_worker.py": {
-      "version": 11,
-      "sha256": "ea85d8dd9423d05ff3b9088cbcef455b0497002e19f1adfc7e7657fa9134bda3",
+      "version": 12,
+      "sha256": "893dec499d112c6067a571b4f4cdc02a0c2b049aff54bb500c1c6cf032c338c9",
       "history": [
         "32a998f2fe55684847c1871f13ac30646ac2be3edb3052648018105a4bb462f2",
         "c8dfd383920d9b6dba3d6c145a9c440acfbf19096e6e62b1bf06851d06425a1a",
@@ -920,7 +921,8 @@
         "968a7c59552b8e0d6ee5a999340980dfa5034bee1b971888588302c421b14dd2",
         "16bb8f4e37c4e9167934827dc884b93daa01187c0c62deb3b122ad5cc246819b",
         "bc8406460da2865f6dbb9efc3d6e1ab953800630288387cf56a2d01a527e7669",
-        "af5a2bd5ce864b0970dc0464553e8613a3f4a43ffee0a2599920298c6a8b3561"
+        "af5a2bd5ce864b0970dc0464553e8613a3f4a43ffee0a2599920298c6a8b3561",
+        "ea85d8dd9423d05ff3b9088cbcef455b0497002e19f1adfc7e7657fa9134bda3"
       ]
     },
     "skills/brigadier/worker/providers/deepseek.json": {
@@ -932,13 +934,14 @@
       ]
     },
     "skills/brigadier/worker/test_kimi_worker.py": {
-      "version": 5,
-      "sha256": "bd52e995c54520451e8154628db7274da9124a59cb3305354e652997c42fccfc",
+      "version": 6,
+      "sha256": "36d253429c83b713c821b1dba009b8e501076566fd0292255456d189631c7229",
       "history": [
         "6eff71a435cacf5fbd20759334a918af9f72ee1c7011509878712a9e6d8e70dd",
         "aef6dbd81806893f43cf4443dbbd911e4a603b074e251e853e659a6b8ac72825",
         "415039b8279ea0e86a66525f34fc4a34f2c0bc564588d3ea95b96f2aa18923e8",
-        "969e7eff751ef2d68724d60b936ca9976f09e288ff48935ca5d263baf861c4c7"
+        "969e7eff751ef2d68724d60b936ca9976f09e288ff48935ca5d263baf861c4c7",
+        "bd52e995c54520451e8154628db7274da9124a59cb3305354e652997c42fccfc"
       ]
     },
     "skills/brigadier/worker/worker.ps1": {

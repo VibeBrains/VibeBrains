@@ -52,15 +52,19 @@ def engine_binary():
     return shutil.which(VIBEMEMORY_BIN) or str(Path.home() / ".vibememory" / "bin" / VIBEMEMORY_BIN)
 
 
-def event(*args):
-    """Событие состояния сессии в движке VibeMemory: тихо, необязательно, у самого исполнителя не срабатывает."""
+def event(*args, cwd=None):
+    """Событие состояния сессии в движке VibeMemory: тихо, необязательно, у самого исполнителя не срабатывает.
+
+    Без KIMI_CODE_SESSION_ID движок берёт активную сессию по каталогу, поэтому событие идёт
+    в каталоге проверяемого проекта (``cwd``), а не в том, откуда запустили воркер.
+    """
     if os.environ.get("BRIGADIER_WORKER") == "1":
         return
     try:
         exe = engine_binary()
         if not Path(exe).is_file():
             return
-        subprocess.run([exe, "brigadier", "event", *args], capture_output=True, timeout=5)
+        subprocess.run([exe, "brigadier", "event", *args], cwd=cwd, capture_output=True, timeout=5)
     except Exception:
         pass
 
@@ -399,7 +403,7 @@ def run(args):
     started = time.monotonic()
     # Id запуска — время и pid, штамп того же вида, что у worker.sh
     run_id = time.strftime("%Y%m%d-%H%M%S") + f"-{os.getpid()}"
-    event("run-started", "--run-id", run_id, "--mode", args.mode, "--model", args.model, "--effort", args.effort)
+    event("run-started", "--run-id", run_id, "--mode", args.mode, "--model", args.model, "--effort", args.effort, cwd=source)
     verdict = "успех"
     failure = None
     try:
@@ -450,7 +454,7 @@ def run(args):
         verdict = "ошибка"
         failure = str(error)
         print(f"worktree сохранён для разбора: {root}", file=sys.stderr)
-        event("run-failed", "--run-id", run_id, "--reason", failure or "запуск без итога")
+        event("run-failed", "--run-id", run_id, "--reason", failure or "запуск без итога", cwd=source)
         raise
     finally:
         # Снятие сигналом приходит SystemExit мимо except: итог и причину задаёт сигнал
@@ -481,9 +485,9 @@ def run(args):
         write_receipt("run", "ok" if verdict == "успех" else "failed", failure, args.model, source)
         if verdict == "успех":
             if line["costUsd"] is not None:
-                event("run-finished", "--run-id", run_id, "--model", args.model, "--effort", args.effort, "--cost", str(line["costUsd"]))
+                event("run-finished", "--run-id", run_id, "--model", args.model, "--effort", args.effort, "--cost", str(line["costUsd"]), cwd=source)
             else:
-                event("run-finished", "--run-id", run_id, "--model", args.model, "--effort", args.effort)
+                event("run-finished", "--run-id", run_id, "--model", args.model, "--effort", args.effort, cwd=source)
         # Итоговая строка: стоимость в форме worker.sh, токены числами вход/выход
         print(summary_line(args.model, args.effort, tokens_in, tokens_out, line["costUsd"], time.monotonic() - started))
 
@@ -510,11 +514,11 @@ def main():
             answer = request(key_from_store(), args.model, [{"role": "user", "content": "Ответь: ok"}], "low")
         except Exception as error:
             reason = str(error)
-            event("check-failed", "--reason", reason)
+            event("check-failed", "--reason", reason, cwd=args.dir)
             raise
         else:
             verdict = "ok"
-            event("check-ok")
+            event("check-ok", cwd=args.dir)
             print(f"DeepSeek Kimi worker: {answer['choices'][0]['message'].get('content', 'ok')}")
         finally:
             if SIGNAL_STATE["number"]:
