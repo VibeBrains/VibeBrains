@@ -68,20 +68,79 @@ $WriteAllowed = "$ReadAllowed,Edit,Write"
 $WriteDenied = 'NotebookEdit,WebFetch,WebSearch,Agent,Task,Bash(git commit*),Bash(git push*),Bash(git reset*),Bash(git checkout*),Bash(git clean*),Bash(git rebase*),Bash(git merge*),Bash(rm *),Bash(del *),Bash(Remove-Item*)'
 $WorkerPrompt = 'Ты внешний исполнитель: делай задачу из брифа сам, никому её не передавай и субагентов не запускай. Не коммить и не пушь. В конце дай короткий итог: что сделано, что проверено, что не удалось.'
 
-# Отметка запуска в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
-$script:DelegatedActive = $false
+# Событие состояния сессии в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
+# Фаза до итога: check — падение через Stop-Worker сообщает check-failed;
+# run с RunId — модель запущена, падение сообщает run-failed
+$script:EventActive = ''
+$script:RunId = ''
 
-function Write-Delegated([string[]] $DelegatedArgs) {
+function Write-BrigadierEvent([string[]] $EventArgs) {
     if ($env:BRIGADIER_WORKER -eq '1') { return }
     $exe = Get-Command vibememory -ErrorAction SilentlyContinue
     if (-not $exe) { return }
-    try { & $exe.Source delegated @DelegatedArgs 2>&1 | Out-Null } catch { }
+    try { & $exe.Source brigadier event @EventArgs 2>&1 | Out-Null } catch { }
+}
+
+# Квитанция запуска: независимый след в ${env:VIBEMEMORY_DIR:-$HOME/.vibememory}/brigadier-receipts.jsonl
+# Пишется на выходе check/run из finally; ошибка записи worker не валит
+$script:ReceiptActive = $false
+$script:ReceiptKind = ''
+$script:ReceiptVerdict = 'failed'
+$script:ReceiptReason = $null
+$script:ReceiptModel = $null
+$script:ReceiptCwd = ''
+
+function Get-ReceiptPath {
+    $base = if ($env:VIBEMEMORY_DIR) { $env:VIBEMEMORY_DIR } else { Join-Path $HOME '.vibememory' }
+    return Join-Path $base 'brigadier-receipts.jsonl'
+}
+
+function Start-Receipt([string] $Kind, [string] $Cwd, [string] $Model) {
+    $script:ReceiptKind = $Kind
+    $script:ReceiptCwd = $Cwd
+    $script:ReceiptModel = $Model
+    $script:ReceiptVerdict = 'failed'
+    $script:ReceiptReason = $null
+    $script:ReceiptActive = $true
+}
+
+function Write-PendingReceipt {
+    if (-not $script:ReceiptActive) { return }
+    $script:ReceiptActive = $false
+    $kind = $script:ReceiptKind; $verdict = $script:ReceiptVerdict
+    $reason = $script:ReceiptReason; $model = $script:ReceiptModel; $cwd = $script:ReceiptCwd
+    try {
+        $path = Get-ReceiptPath
+        $dir = Split-Path -Parent $path
+        if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        if (-not $cwd) { $cwd = (Get-Location).Path }
+        $line = [ordered]@{
+            ts = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            cwd = $cwd
+            kind = $kind
+            verdict = $verdict
+            reason = $(if ($reason) { [string]$reason } else { $null })
+            model = $(if ($model) { [string]$model } else { $null })
+            pid = $PID
+        } | ConvertTo-Json -Compress
+        [IO.File]::AppendAllText($path, $line + "`n", (New-Object Text.UTF8Encoding($false)))
+    } catch { [Console]::Error.WriteLine("квитанция не записана: $($_.Exception.Message)") }
 }
 
 function Stop-Worker([string] $Message) {
-    if ($script:DelegatedActive) {
-        $script:DelegatedActive = $false
-        Write-Delegated @('--failed', $Message)
+    # Причина отказа остаётся в квитанции: событие движка может и не дойти
+    if ($script:ReceiptActive) { $script:ReceiptReason = $Message }
+    switch ($script:EventActive) {
+        'check' {
+            $script:EventActive = ''
+            Write-BrigadierEvent @('check-failed', '--reason', $Message)
+        }
+        'run' {
+            if ($script:RunId) {
+                $script:EventActive = ''
+                Write-BrigadierEvent @('run-failed', '--run-id', $script:RunId, '--reason', $Message)
+            }
+        }
     }
     [Console]::Error.WriteLine("ошибка: $Message")
     exit 1
@@ -315,32 +374,45 @@ function Write-PricesAgeWarning($Prof, [string] $Name) {
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 function Invoke-Check([string] $Name) {
     if (-not $Name) { $Name = 'deepseek' }
-    $script:DelegatedActive = $true
-    $prof = Read-Profile (Find-Profile $Name)
-    $key = Read-Key $prof
-    if (-not $key) {
-        [Console]::Error.WriteLine("check: $Name — ключ не найден (Credential Manager или переменная окружения)")
-        Write-LegacyKeyHint $prof $Name
-        $script:DelegatedActive = $false
-        Write-Delegated @('--failed', "ключ провайдера «$Name» не найден")
-        exit 1
-    }
-    $model = $prof.tiers.cheap.model
-    $body = @{ model = $model; max_tokens = $CheckMaxTokens; messages = @(@{ role = 'user'; content = 'ответь одним словом: ок' }) } | ConvertTo-Json -Depth 5
-    $headers = @{ 'x-api-key' = $key; 'anthropic-version' = '2023-06-01' }
+    $script:EventActive = 'check'
+    Start-Receipt 'check' (Resolve-Path -LiteralPath '.').Path $null
     try {
-        $null = Invoke-RestMethod -Method Post -Uri "$($prof.baseUrl)/v1/messages" -Headers $headers -ContentType 'application/json' `
-            -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec $CheckTimeoutSec
-        Write-Output "check: $Name — ключ найден, сервер отвечает (модель $model)"
-        Write-PricesAgeWarning $prof $Name
-        $script:DelegatedActive = $false
-        exit 0
+        $prof = Read-Profile (Find-Profile $Name)
+        $key = Read-Key $prof
+        if (-not $key) {
+            [Console]::Error.WriteLine("check: $Name — ключ не найден (Credential Manager или переменная окружения)")
+            Write-LegacyKeyHint $prof $Name
+            $script:EventActive = ''
+            $script:ReceiptReason = "ключ провайдера «$Name» не найден"
+            Write-BrigadierEvent @('check-failed', '--reason', "ключ провайдера «$Name» не найден")
+            exit 1
+        }
+        $model = $prof.tiers.cheap.model
+        $script:ReceiptModel = $model
+        $body = @{ model = $model; max_tokens = $CheckMaxTokens; messages = @(@{ role = 'user'; content = 'ответь одним словом: ок' }) } | ConvertTo-Json -Depth 5
+        $headers = @{ 'x-api-key' = $key; 'anthropic-version' = '2023-06-01' }
+        try {
+            $null = Invoke-RestMethod -Method Post -Uri "$($prof.baseUrl)/v1/messages" -Headers $headers -ContentType 'application/json' `
+                -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec $CheckTimeoutSec
+            Write-Output "check: $Name — ключ найден, сервер отвечает (модель $model)"
+            Write-PricesAgeWarning $prof $Name
+            $script:EventActive = ''
+            $script:ReceiptVerdict = 'ok'
+            Write-BrigadierEvent @('check-ok')
+            exit 0
+        } catch {
+            $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
+            [Console]::Error.WriteLine("check: $Name — сервер не ответил успехом (HTTP $status)")
+            $script:EventActive = ''
+            $script:ReceiptReason = "сервер не ответил успехом (HTTP $status)"
+            Write-BrigadierEvent @('check-failed', '--reason', "сервер не ответил успехом (HTTP $status)")
+            exit 1
+        }
     } catch {
-        $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
-        [Console]::Error.WriteLine("check: $Name — сервер не ответил успехом (HTTP $status)")
-        $script:DelegatedActive = $false
-        Write-Delegated @('--failed', "сервер не ответил успехом (HTTP $status)")
-        exit 1
+        if (-not $script:ReceiptReason) { $script:ReceiptReason = $_.Exception.Message }
+        throw
+    } finally {
+        Write-PendingReceipt
     }
 }
 
@@ -577,226 +649,270 @@ function Write-RunLog {
 }
 
 function Invoke-Run {
-    # Отметить запуск в движке; отказ до старта модели ниже сообщит о провале
-    Write-Delegated @('--ok')
-    $script:DelegatedActive = $true
-    # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
-    if ($Tier -eq 'strong' -and -not $OwnerApproved) {
-        Stop-Worker 'strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате'
-    }
-    foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Brief', $Brief))) {
-        if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Brief' }
-    }
-    if (-not (Get-Command $ClaudeBin -ErrorAction SilentlyContinue)) { Stop-Worker "нет команды $ClaudeBin" }
-    $prof = Read-Profile (Find-Profile $Provider)
-    $tierNode = $prof.tiers.$Tier
-    if (-not $tierNode) { Stop-Worker "в профиле нет ступени «$Tier»" }
-    $model = $tierNode.model
-    $cheapModel = $prof.tiers.cheap.model
-    $efforts = @($prof.efforts)
-    if (-not $Effort) { $Effort = $prof.defaultEffort }
-    if (-not $Effort) { Stop-Worker 'не задан -Effort и нет defaultEffort' }
-    if ($efforts -notcontains $Effort) { Stop-Worker "уровень «$Effort» не из списка провайдера: $($efforts -join ',')" }
-    if ($Budget) {
-        if ($Budget -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker '-Budget — число в долларах, например 0.30' }
-        $cap = [double]::Parse($Budget, [Globalization.CultureInfo]::InvariantCulture)
-    } else {
-        # Потолок по умолчанию — страховка от зацикливания, maxRunUsd профиля; нет поля — запуск без потолка
-        $cap = $null
-        if ($null -ne $prof.maxRunUsd) {
-            if ("$($prof.maxRunUsd)" -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker 'maxRunUsd в профиле — число в долларах' }
-            $cap = [double]$prof.maxRunUsd
-        }
-    }
-    # Без цен в профиле реальную стоимость не посчитать: потолок не применим
-    $price = if ($prof.prices) { $prof.prices.$model } else { $null }
-    $capNote = ''
-    if (-not $price) { $cap = $null; $capNote = 'потолок не считается: в профиле нет цен' }
-    elseif ($null -eq $cap) { $capNote = 'потолок не задан: в профиле нет maxRunUsd' }
-    if ($env:BRIGADIER_WORKER_LOG) { $LogFile = $env:BRIGADIER_WORKER_LOG }
-    elseif ($prof.logFile) {
-        $LogFile = [Environment]::ExpandEnvironmentVariables([string]$prof.logFile)
-        if ($LogFile -match '^~[\\/]') { $LogFile = Join-Path $HOME $LogFile.Substring(2) }
-    } else { $LogFile = $DefaultLogFile }
-    # Каталог worktree: переменная сильнее, затем worktreesDir профиля, затем временный каталог
-    # Временный каталог лежит на системном диске, а исполнитель собирает проект внутри своей копии
-    if (-not $env:BRIGADIER_WORKER_WORKTREES -and $prof.worktreesDir) {
-        $WorktreesRoot = [Environment]::ExpandEnvironmentVariables([string]$prof.worktreesDir)
-        if ($WorktreesRoot -match '^~[\\/]') { $WorktreesRoot = Join-Path $HOME $WorktreesRoot.Substring(2) }
-    }
-    if (-not (Test-Path -LiteralPath $Dir -PathType Container)) { Stop-Worker "нет каталога $Dir" }
-    $workDir = (Resolve-Path -LiteralPath $Dir).Path
-
-    # Режим write: основное дерево репозитория не трогаем — worktree создаётся ниже, после проверок ключа и брифа
-    $makeWorktree = $false
-    if ($Mode -eq 'write' -and -not $AllowMainTree) {
-        $gitDir = (& git -C $workDir rev-parse --absolute-git-dir 2>$null)
-        if ($LASTEXITCODE -ne 0) { Stop-Worker "режим write: $workDir не в git-репозитории" }
-        $commonDir = (& git -C $workDir rev-parse --path-format=absolute --git-common-dir 2>$null)
-        if ($gitDir -eq $commonDir) { $makeWorktree = $true; $repoRoot = $workDir }
-    }
-
-    $key = Read-Key $prof
-    if (-not $key) {
-        Write-LegacyKeyHint $prof $Provider
-        Stop-Worker "ключ провайдера «$Provider» не найден: worker.ps1 set-key $Provider"
-    }
-
-    if ($Mode -eq 'read') { $allowed = $ReadAllowed; $denied = $ReadDenied } else { $allowed = $WriteAllowed; $denied = $WriteDenied }
-    foreach ($extra in $BashAllow) { $allowed = "$allowed,Bash($extra)" }
-
-    if ($Brief -eq '-') { $briefText = [Console]::In.ReadToEnd() } else {
-        if (-not (Test-Path -LiteralPath $Brief)) { Stop-Worker "нет файла брифа $Brief" }
-        $briefText = Get-Content -LiteralPath $Brief -Raw -Encoding UTF8
-    }
-    $briefFile = [IO.Path]::GetTempFileName()
-    [IO.File]::WriteAllText($briefFile, $briefText, (New-Object Text.UTF8Encoding($false)))
-
-    # Первая строка брифа нужна для сообщения коммита
-    $briefTitle = ($briefText -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -First 1)
-    if (-not $briefTitle) { $briefTitle = 'задача исполнителя' }
-    if ($briefTitle.Length -gt 100) { $briefTitle = $briefTitle.Substring(0, 100) }
-
-    # Журнал хода: каталог и имя считаются заранее, штамп тот же, что у ветки worktree
-    $LiveRoot = Get-LiveRoot $Provider
-    $runStamp = (Get-Date).ToString('yyyyMMdd-HHmmss') + "-$PID"
-    $LiveFile = Join-Path $LiveRoot "$runStamp.log"
-    try { New-Item -ItemType Directory -Path $LiveRoot -Force | Out-Null } catch { Stop-Worker "не создать каталог журналов $LiveRoot" }
-    try { [IO.File]::WriteAllText($LiveFile, '', (New-Object Text.UTF8Encoding($false))) } catch { Stop-Worker "не создать журнал хода $LiveFile" }
-    Clear-OldLive $LiveRoot
-    [Console]::Error.WriteLine("ход вживую: $LiveFile")
-
-    $wtPath = ''; $wtBranch = ''; $wtBase = ''
-    if ($makeWorktree) {
-        # База worktree: -Base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
-        $baseRef = if ($Base) { $Base } else { 'HEAD' }
-        $null = & git -C $workDir rev-parse --verify --quiet "$baseRef^{commit}" 2>$null
-        if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет ref «$baseRef»: worktree не от чего создавать" }
-        $wtBase = (& git -C $workDir rev-parse --short "$baseRef^{commit}" 2>$null)
-        if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет коммитов: нечего брать за основу worktree" }
-        # Штамп с суффиксом процесса общий с журналом хода: исполнители в одну секунду не совпадают именами
-        $wtBranch = "$BranchPrefix/$runStamp"
-        New-Item -ItemType Directory -Path $WorktreesRoot -Force | Out-Null
-        $wtPath = Join-Path $WorktreesRoot ('wt.' + [Guid]::NewGuid().ToString('N').Substring(0, 6))
-        & git -C $workDir worktree add -q -b $wtBranch $wtPath $baseRef 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
-        if ($LASTEXITCODE -ne 0) { Stop-Worker 'git worktree add не удался' }
-        $workDir = $wtPath
-    }
-
-    # Подмена сервера живёт только в этом процессе и его детях, затем возвращается как было
-    $names = @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'ANTHROPIC_MODEL',
-        'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-        'CLAUDE_CODE_SUBAGENT_MODEL', 'CLAUDE_CODE_EFFORT_LEVEL', 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', 'BRIGADIER_WORKER',
-        'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')
-    $extraEnv = @{}
-    if ($prof.extraEnv) { foreach ($p in $prof.extraEnv.PSObject.Properties) { $extraEnv[$p.Name] = [string]$p.Value; $names += $p.Name } }
-    $saved = @{}
-    foreach ($n in $names) { $saved[$n] = [Environment]::GetEnvironmentVariable($n, 'Process') }
-
-    $errFile = [IO.Path]::GetTempFileName()
-    $started = Get-Date
-    $state = @{
-        logFile = $LogFile; provider = $Provider; tier = $Tier; model = $model; effort = $Effort; mode = $Mode
-        dir = $workDir; price = $price; cap = $cap; ownerApproved = [bool]$OwnerApproved; started = $started
-        msgs = @{}; outChars = 0; thinkTokens = 0; wrote = $false; usageSeen = $false; proc = $null
-    }
-    $script:RunState = $state
-    # Снятие с клавиатуры: выход делаем сами, чтобы журнал успел получить строку с verdict «снят»
-    # Повторный Ctrl+C вторую строку не добавляет — Write-RunLog смотрит на script:JournalWritten
-    $interruptHandler = [ConsoleCancelEventHandler]{
-        param($sender, $e)
-        $e.Cancel = $true
-        try {
-            $st = $script:RunState
-            if ($st) {
-                if ($st.proc -and -not $st.proc.HasExited) { & taskkill /T /F /PID $st.proc.Id 2>&1 | Out-Null }
-                Write-RunLog -State $st -Verdict 'снят' -Partial $true
-            }
-        } finally {
-            # Выход обязателен: иначе отменённый Ctrl+C оставит запуск работать
-            [Environment]::Exit(130)
-        }
-    }
-    try { [Console]::add_CancelKeyPress($interruptHandler) } catch {
-        # Без консоли (перенаправленный ввод, служба) Ctrl+C не приходит — обычный путь не меняется
-    }
+    # Квитанция попытки run: каталог -Dir (или текущий), даже если отказ случится ниже
+    $receiptCwd = if ($Dir -and (Test-Path -LiteralPath $Dir -PathType Container)) { (Resolve-Path -LiteralPath $Dir).Path } else { (Resolve-Path -LiteralPath '.').Path }
+    Start-Receipt 'run' $receiptCwd $null
     try {
-        foreach ($n in @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')) {
-            [Environment]::SetEnvironmentVariable($n, $null, 'Process')
+        # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
+        if ($Tier -eq 'strong' -and -not $OwnerApproved) {
+            Stop-Worker 'strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате'
         }
-        $env:ANTHROPIC_BASE_URL = $prof.baseUrl
-        $env:ANTHROPIC_AUTH_TOKEN = $key
-        $env:ANTHROPIC_MODEL = $model
-        $env:ANTHROPIC_DEFAULT_OPUS_MODEL = $model
-        $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $model
-        $env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $cheapModel
-        $env:CLAUDE_CODE_SUBAGENT_MODEL = $model
-        $env:CLAUDE_CODE_EFFORT_LEVEL = $Effort
-        $env:CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1'
-        $env:BRIGADIER_WORKER = '1'
-        foreach ($k in $extraEnv.Keys) { [Environment]::SetEnvironmentVariable($k, $extraEnv[$k], 'Process') }
+        foreach ($pair in @(@('Provider', $Provider), @('Tier', $Tier), @('Mode', $Mode), @('Dir', $Dir), @('Brief', $Brief))) {
+            if (-not $pair[1]) { Stop-Worker 'обязательны -Provider -Tier -Mode -Dir -Brief' }
+        }
+        if (-not (Get-Command $ClaudeBin -ErrorAction SilentlyContinue)) { Stop-Worker "нет команды $ClaudeBin" }
+        $prof = Read-Profile (Find-Profile $Provider)
+        $tierNode = $prof.tiers.$Tier
+        if (-not $tierNode) { Stop-Worker "в профиле нет ступени «$Tier»" }
+        $model = $tierNode.model
+        $script:ReceiptModel = $model
+        $cheapModel = $prof.tiers.cheap.model
+        $efforts = @($prof.efforts)
+        if (-not $Effort) { $Effort = $prof.defaultEffort }
+        if (-not $Effort) { Stop-Worker 'не задан -Effort и нет defaultEffort' }
+        if ($efforts -notcontains $Effort) { Stop-Worker "уровень «$Effort» не из списка провайдера: $($efforts -join ',')" }
+        if ($Budget) {
+            if ($Budget -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker '-Budget — число в долларах, например 0.30' }
+            $cap = [double]::Parse($Budget, [Globalization.CultureInfo]::InvariantCulture)
+        } else {
+            # Потолок по умолчанию — страховка от зацикливания, maxRunUsd профиля; нет поля — запуск без потолка
+            $cap = $null
+            if ($null -ne $prof.maxRunUsd) {
+                if ("$($prof.maxRunUsd)" -notmatch '^[0-9]+(\.[0-9]+)?$') { Stop-Worker 'maxRunUsd в профиле — число в долларах' }
+                $cap = [double]$prof.maxRunUsd
+            }
+        }
+        # Без цен в профиле реальную стоимость не посчитать: потолок не применим
+        $price = if ($prof.prices) { $prof.prices.$model } else { $null }
+        $capNote = ''
+        if (-not $price) { $cap = $null; $capNote = 'потолок не считается: в профиле нет цен' }
+        elseif ($null -eq $cap) { $capNote = 'потолок не задан: в профиле нет maxRunUsd' }
+        if ($env:BRIGADIER_WORKER_LOG) { $LogFile = $env:BRIGADIER_WORKER_LOG }
+        elseif ($prof.logFile) {
+            $LogFile = [Environment]::ExpandEnvironmentVariables([string]$prof.logFile)
+            if ($LogFile -match '^~[\\/]') { $LogFile = Join-Path $HOME $LogFile.Substring(2) }
+        } else { $LogFile = $DefaultLogFile }
+        # Каталог worktree: переменная сильнее, затем worktreesDir профиля, затем временный каталог
+        # Временный каталог лежит на системном диске, а исполнитель собирает проект внутри своей копии
+        if (-not $env:BRIGADIER_WORKER_WORKTREES -and $prof.worktreesDir) {
+            $WorktreesRoot = [Environment]::ExpandEnvironmentVariables([string]$prof.worktreesDir)
+            if ($WorktreesRoot -match '^~[\\/]') { $WorktreesRoot = Join-Path $HOME $WorktreesRoot.Substring(2) }
+        }
+        if (-not (Test-Path -LiteralPath $Dir -PathType Container)) { Stop-Worker "нет каталога $Dir" }
+        $workDir = (Resolve-Path -LiteralPath $Dir).Path
 
-        $claudeArgs = @('-p', '--bare', '--no-session-persistence', '--output-format', 'stream-json', '--verbose',
-            '--model', $model, '--permission-mode', 'dontAsk',
-            '--allowedTools', $allowed, '--disallowedTools', $denied, '--append-system-prompt', $WorkerPrompt)
-        # Аргументы собираются одной строкой: элементы с пробелами берём в кавычки сами (двойных кавычек внутри аргументов нет)
-        $argLine = ($claudeArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
-        $claudeExe = (Get-Command $ClaudeBin).Source
-        Push-Location $workDir
-        # Модель сейчас стартует: ошибки после этой точки — уже не «до старта модели»
-        $script:DelegatedActive = $false
+        # Режим write: основное дерево репозитория не трогаем — worktree создаётся ниже, после проверок ключа и брифа
+        $makeWorktree = $false
+        if ($Mode -eq 'write' -and -not $AllowMainTree) {
+            $gitDir = (& git -C $workDir rev-parse --absolute-git-dir 2>$null)
+            if ($LASTEXITCODE -ne 0) { Stop-Worker "режим write: $workDir не в git-репозитории" }
+            $commonDir = (& git -C $workDir rev-parse --path-format=absolute --git-common-dir 2>$null)
+            if ($gitDir -eq $commonDir) { $makeWorktree = $true; $repoRoot = $workDir }
+        }
+
+        $key = Read-Key $prof
+        if (-not $key) {
+            Write-LegacyKeyHint $prof $Provider
+            Stop-Worker "ключ провайдера «$Provider» не найден: worker.ps1 set-key $Provider"
+        }
+
+        if ($Mode -eq 'read') { $allowed = $ReadAllowed; $denied = $ReadDenied } else { $allowed = $WriteAllowed; $denied = $WriteDenied }
+        foreach ($extra in $BashAllow) { $allowed = "$allowed,Bash($extra)" }
+
+        if ($Brief -eq '-') { $briefText = [Console]::In.ReadToEnd() } else {
+            if (-not (Test-Path -LiteralPath $Brief)) { Stop-Worker "нет файла брифа $Brief" }
+            $briefText = Get-Content -LiteralPath $Brief -Raw -Encoding UTF8
+        }
+        $briefFile = [IO.Path]::GetTempFileName()
+        [IO.File]::WriteAllText($briefFile, $briefText, (New-Object Text.UTF8Encoding($false)))
+
+        # Первая строка брифа нужна для сообщения коммита: без «Задача (write):», по символам и границе слова
+        $briefTitle = ($briefText -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -First 1)
+        if (-not $briefTitle) { $briefTitle = 'задача исполнителя' }
+        $briefTitle = $briefTitle.Trim()
+        if ($briefTitle.StartsWith('Задача (write):')) { $briefTitle = $briefTitle.Substring(('Задача (write):').Length).Trim() }
+        $briefTitle = ($briefTitle -replace '\s+', ' ')
+        if ($briefTitle.Length -gt 72) {
+            $cut = $briefTitle.Substring(0, 72)
+            $space = $cut.LastIndexOf(' ')
+            if ($space -gt 0) { $cut = $cut.Substring(0, $space) }
+            $briefTitle = $cut.TrimEnd(' ', ',', ';', ':', '—', '-')
+        }
+        if (-not $briefTitle) { $briefTitle = 'задача исполнителя' }
+
+        # Журнал хода: каталог и имя считаются заранее, штамп тот же, что у ветки worktree
+        $LiveRoot = Get-LiveRoot $Provider
+        $runStamp = (Get-Date).ToString('yyyyMMdd-HHmmss') + "-$PID"
+        $LiveFile = Join-Path $LiveRoot "$runStamp.log"
+        try { New-Item -ItemType Directory -Path $LiveRoot -Force | Out-Null } catch { Stop-Worker "не создать каталог журналов $LiveRoot" }
+        try { [IO.File]::WriteAllText($LiveFile, '', (New-Object Text.UTF8Encoding($false))) } catch { Stop-Worker "не создать журнал хода $LiveFile" }
+        Clear-OldLive $LiveRoot
+        [Console]::Error.WriteLine("ход вживую: $LiveFile")
+
+        $wtPath = ''; $wtBranch = ''; $wtBase = ''
+        if ($makeWorktree) {
+            # База worktree: -Base, по умолчанию HEAD — основное дерево может стоять на чужой ветке
+            $baseRef = if ($Base) { $Base } else { 'HEAD' }
+            $null = & git -C $workDir rev-parse --verify --quiet "$baseRef^{commit}" 2>$null
+            if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет ref «$baseRef»: worktree не от чего создавать" }
+            $wtBase = (& git -C $workDir rev-parse --short "$baseRef^{commit}" 2>$null)
+            if ($LASTEXITCODE -ne 0) { Stop-Worker "в репозитории $workDir нет коммитов: нечего брать за основу worktree" }
+            # Штамп с суффиксом процесса общий с журналом хода: исполнители в одну секунду не совпадают именами
+            $wtBranch = "$BranchPrefix/$runStamp"
+            New-Item -ItemType Directory -Path $WorktreesRoot -Force | Out-Null
+            $wtPath = Join-Path $WorktreesRoot ('wt.' + [Guid]::NewGuid().ToString('N').Substring(0, 6))
+            & git -C $workDir worktree add -q -b $wtBranch $wtPath $baseRef 2>&1 | ForEach-Object { [Console]::Error.WriteLine($_) }
+            if ($LASTEXITCODE -ne 0) { Stop-Worker 'git worktree add не удался' }
+            $workDir = $wtPath
+        }
+
+        # Аргументы проверены, worktree создан: модель стартует ниже, поэтому событие идёт до старта
+        # Id запуска — время и pid, тот же штамп, что у журнала хода и ветки worktree
+        $runId = $runStamp
+        $script:RunId = $runId
+        Write-BrigadierEvent @('run-started', '--run-id', $runId, '--mode', $Mode, '--model', $model, '--effort', $Effort)
+        $script:EventActive = 'run'
+
+        # Подмена сервера живёт только в этом процессе и его детях, затем возвращается как было
+        $names = @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'ANTHROPIC_MODEL',
+            'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL',
+            'CLAUDE_CODE_SUBAGENT_MODEL', 'CLAUDE_CODE_EFFORT_LEVEL', 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', 'BRIGADIER_WORKER',
+            'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')
+        $extraEnv = @{}
+        if ($prof.extraEnv) { foreach ($p in $prof.extraEnv.PSObject.Properties) { $extraEnv[$p.Name] = [string]$p.Value; $names += $p.Name } }
+        $saved = @{}
+        foreach ($n in $names) { $saved[$n] = [Environment]::GetEnvironmentVariable($n, 'Process') }
+
+        $errFile = [IO.Path]::GetTempFileName()
+        $started = Get-Date
+        $state = @{
+            logFile = $LogFile; provider = $Provider; tier = $Tier; model = $model; effort = $Effort; mode = $Mode
+            dir = $workDir; price = $price; cap = $cap; ownerApproved = [bool]$OwnerApproved; started = $started
+            msgs = @{}; outChars = 0; thinkTokens = 0; wrote = $false; usageSeen = $false; proc = $null
+        }
+        $script:RunState = $state
+        # Снятие с клавиатуры: выход делаем сами, чтобы журнал успел получить строку с verdict «снят»
+        # Повторный Ctrl+C вторую строку не добавляет — Write-RunLog смотрит на script:JournalWritten
+        $interruptHandler = [ConsoleCancelEventHandler]{
+            param($sender, $e)
+            $e.Cancel = $true
+            try {
+                $st = $script:RunState
+                if ($st) {
+                    if ($st.proc -and -not $st.proc.HasExited) { & taskkill /T /F /PID $st.proc.Id 2>&1 | Out-Null }
+                    Write-RunLog -State $st -Verdict 'снят' -Partial $true
+                }
+                if ($script:RunId -and $script:EventActive -eq 'run') {
+                    $script:EventActive = ''
+                    Write-BrigadierEvent @('run-failed', '--run-id', $script:RunId, '--reason', 'снят')
+                }
+            } finally {
+                # Environment.Exit не выполняет finally функций: квитанцию пишем здесь
+                $script:ReceiptVerdict = 'failed'
+                $script:ReceiptReason = 'снят'
+                Write-PendingReceipt
+                # Выход обязателен: иначе отменённый Ctrl+C оставит запуск работать
+                [Environment]::Exit(130)
+            }
+        }
+        try { [Console]::add_CancelKeyPress($interruptHandler) } catch {
+            # Без консоли (перенаправленный ввод, служба) Ctrl+C не приходит — обычный путь не меняется
+        }
         try {
-            $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state $LiveFile
-        } finally { Pop-Location }
+            foreach ($n in @('CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY')) {
+                [Environment]::SetEnvironmentVariable($n, $null, 'Process')
+            }
+            $env:ANTHROPIC_BASE_URL = $prof.baseUrl
+            $env:ANTHROPIC_AUTH_TOKEN = $key
+            $env:ANTHROPIC_MODEL = $model
+            $env:ANTHROPIC_DEFAULT_OPUS_MODEL = $model
+            $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $model
+            $env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $cheapModel
+            $env:CLAUDE_CODE_SUBAGENT_MODEL = $model
+            $env:CLAUDE_CODE_EFFORT_LEVEL = $Effort
+            $env:CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1'
+            $env:BRIGADIER_WORKER = '1'
+            foreach ($k in $extraEnv.Keys) { [Environment]::SetEnvironmentVariable($k, $extraEnv[$k], 'Process') }
+
+            $claudeArgs = @('-p', '--bare', '--no-session-persistence', '--output-format', 'stream-json', '--verbose',
+                '--model', $model, '--permission-mode', 'dontAsk',
+                '--allowedTools', $allowed, '--disallowedTools', $denied, '--append-system-prompt', $WorkerPrompt)
+            # Аргументы собираются одной строкой: элементы с пробелами берём в кавычки сами (двойных кавычек внутри аргументов нет)
+            $argLine = ($claudeArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
+            $claudeExe = (Get-Command $ClaudeBin).Source
+            Push-Location $workDir
+            # Модель сейчас стартует: ошибки после этой точки — уже не «до старта модели»
+            try {
+                $run = Invoke-ClaudeStream $claudeExe $argLine $briefFile $price $cap $errFile $state $LiveFile
+            } finally { Pop-Location }
+        } finally {
+            foreach ($n in $names) { [Environment]::SetEnvironmentVariable($n, $saved[$n], 'Process') }
+            Remove-Item -LiteralPath $briefFile -Force -ErrorAction SilentlyContinue
+        }
+
+        $err = (Get-Content -LiteralPath $errFile -Raw -Encoding UTF8)
+        Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
+
+        $result = [string]$run.result; $verdict = $run.verdict; $partial = $run.partial
+        $realCost = $run.costUsd; $noUsage = [bool]$run.noUsage; $counter = $run.counter; $exact = $run.exact; $readLoop = [bool]$run.readLoop
+        $tokensIn = $run.tokMiss + $run.tokHit; $tokensOut = $run.tokOut
+        if (-not $result -and $verdict -eq 'упёрся в бюджет') { $result = '(обрыв по потолку до первого текстового ответа исполнителя)' }
+        elseif (-not $result -and $verdict -eq 'нет счёта токенов') { $result = '(обрыв: в потоке не было счёта токенов, провайдер мог списать деньги)' }
+        elseif ($verdict -ne 'успех' -and -not $result) {
+            $tail = if ($err) { $err.Substring(0, [Math]::Min(500, $err.Length)) } else { 'пусто' }
+            $result = "(пустой ответ; stderr: $tail)"
+        } elseif ($partial -and $result) { $result = "[частичный результат: последний ответ исполнителя до обрыва]`n" + $result }
+        $seconds = [int]((Get-Date) - $started).TotalSeconds
+
+        # Строка журнала без текста брифа; снятие сюда не доходит — его пишет обработчик Ctrl+C
+        Write-RunLog -State $state -Verdict $verdict -Partial $partial -Run $run
+
+        # Итог запуска в движке: успех — run-finished со стоимостью, иначе run-failed с причиной
+        $script:EventActive = ''
+        if ($verdict -eq 'успех') {
+            $eventArgs = @('run-finished', '--run-id', $runId, '--model', $model, '--effort', $Effort)
+            if ($null -ne $realCost) {
+                $eventArgs += @('--cost', [string]::Format([Globalization.CultureInfo]::InvariantCulture, '{0}', [double]$realCost))
+            }
+            Write-BrigadierEvent $eventArgs
+        } else {
+            Write-BrigadierEvent @('run-failed', '--run-id', $runId, '--reason', $verdict)
+        }
+
+        Write-Output $result
+        Write-Output '---'
+        Write-Output "исполнитель: провайдер=$Provider ступень=$Tier модель=$model уровень=$Effort режим=$Mode"
+        # Чужая модель: claude не знает её и может не присылать usage, тогда счёт по потоку не сходится с кабинетом провайдера
+        if ($err -match 'unrecognized_model') {
+            Write-Output "внимание: claude не знает модель $model (stderr: unrecognized_model) — счёта токенов по потоку может не быть"
+        }
+        Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
+        if ($readLoop) {
+            Write-Output ("внимание: вход {0} токенов перевалил порог {1} без единого вызова записи — признак чтения по кругу" -f $tokensIn, $ReadLoopInputTokens)
+        }
+        if ($noUsage) {
+            Write-Output 'стоимость: неизвестна — провайдер мог списать деньги, сверить по его кабинету'
+        } else {
+            $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' }
+            elseif ($exact) { ('${0:N4}' -f $realCost) }
+            else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
+            $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
+            Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
+        }
+        if ($null -ne $cap) { Write-Output ('потолок: ${0:N4} (в настоящих долларах провайдера)' -f $cap) }
+        elseif ($capNote) { Write-Output $capNote }
+        if ($partial) { Write-Output 'результат частичный' }
+        Write-Output "итог: $verdict"
+        Write-Output "журнал хода: $LiveFile"
+        if ($wtPath) { Write-WorktreeResult $wtPath $wtBranch $wtBase $briefTitle $repoRoot }
+        if ($verdict -eq 'успех') { $script:ReceiptVerdict = 'ok' } else { $script:ReceiptReason = $verdict }
+        switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
+    } catch {
+        if (-not $script:ReceiptReason) { $script:ReceiptReason = $_.Exception.Message }
+        throw
     } finally {
-        foreach ($n in $names) { [Environment]::SetEnvironmentVariable($n, $saved[$n], 'Process') }
-        Remove-Item -LiteralPath $briefFile -Force -ErrorAction SilentlyContinue
+        Write-PendingReceipt
     }
-
-    $err = (Get-Content -LiteralPath $errFile -Raw -Encoding UTF8)
-    Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
-
-    $result = [string]$run.result; $verdict = $run.verdict; $partial = $run.partial
-    $realCost = $run.costUsd; $noUsage = [bool]$run.noUsage; $counter = $run.counter; $exact = $run.exact; $readLoop = [bool]$run.readLoop
-    $tokensIn = $run.tokMiss + $run.tokHit; $tokensOut = $run.tokOut
-    if (-not $result -and $verdict -eq 'упёрся в бюджет') { $result = '(обрыв по потолку до первого текстового ответа исполнителя)' }
-    elseif (-not $result -and $verdict -eq 'нет счёта токенов') { $result = '(обрыв: в потоке не было счёта токенов, провайдер мог списать деньги)' }
-    elseif ($verdict -ne 'успех' -and -not $result) {
-        $tail = if ($err) { $err.Substring(0, [Math]::Min(500, $err.Length)) } else { 'пусто' }
-        $result = "(пустой ответ; stderr: $tail)"
-    } elseif ($partial -and $result) { $result = "[частичный результат: последний ответ исполнителя до обрыва]`n" + $result }
-    $seconds = [int]((Get-Date) - $started).TotalSeconds
-
-    # Строка журнала без текста брифа; снятие сюда не доходит — его пишет обработчик Ctrl+C
-    Write-RunLog -State $state -Verdict $verdict -Partial $partial -Run $run
-
-    Write-Output $result
-    Write-Output '---'
-    Write-Output "исполнитель: провайдер=$Provider ступень=$Tier модель=$model уровень=$Effort режим=$Mode"
-    # Чужая модель: claude не знает её и может не присылать usage, тогда счёт по потоку не сходится с кабинетом провайдера
-    if ($err -match 'unrecognized_model') {
-        Write-Output "внимание: claude не знает модель $model (stderr: unrecognized_model) — счёта токенов по потоку может не быть"
-    }
-    Write-Output ("токены: вход={0} выход={1}; время: {2}с" -f $tokensIn, $tokensOut, $seconds)
-    if ($readLoop) {
-        Write-Output ("внимание: вход {0} токенов перевалил порог {1} без единого вызова записи — признак чтения по кругу" -f $tokensIn, $ReadLoopInputTokens)
-    }
-    if ($noUsage) {
-        Write-Output 'стоимость: неизвестна — провайдер мог списать деньги, сверить по его кабинету'
-    } else {
-        $costText = if ($null -eq $realCost) { 'неизвестна (нет prices в профиле)' }
-        elseif ($exact) { ('${0:N4}' -f $realCost) }
-        else { ('~${0:N4} (оценка: выход по длине текста, итога от claude нет)' -f $realCost) }
-        $counterText = if ($null -eq $counter) { 'нет итогового события' } else { ('${0:N4}' -f $counter) }
-        Write-Output ("стоимость: {0}; счётчик claude (справочно, по ценам Claude): {1}" -f $costText, $counterText)
-    }
-    if ($null -ne $cap) { Write-Output ('потолок: ${0:N4} (в настоящих долларах провайдера)' -f $cap) }
-    elseif ($capNote) { Write-Output $capNote }
-    if ($partial) { Write-Output 'результат частичный' }
-    Write-Output "итог: $verdict"
-    Write-Output "журнал хода: $LiveFile"
-    if ($wtPath) { Write-WorktreeResult $wtPath $wtBranch $wtBase $briefTitle $repoRoot }
-    switch ($verdict) { 'успех' { exit 0 } 'упёрся в бюджет' { exit 2 } default { exit 1 } }
 }
 
 # Показ журнала хода вживую: путь или самый свежий в каталоге журналов

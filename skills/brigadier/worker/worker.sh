@@ -61,19 +61,143 @@ BRANCH_PREFIX="brigadier"
 # Добавка к системному промпту: без CLAUDE.md исполнитель не знает, кто он
 WORKER_PROMPT='Ты внешний исполнитель: делай задачу из брифа сам, никому её не передавай и субагентов не запускай. Не коммить и не пушь. В конце дай короткий итог: что сделано, что проверено, что не удалось.'
 
-# Отметка запуска в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
-delegated_note() {
+# Событие состояния сессии в движке VibeMemory: тихо и необязательно, у самого исполнителя не срабатывает
+brigadier_event() {
   [ "${BRIGADIER_WORKER:-}" = "1" ] && return 0
-  command -v vibememory >/dev/null 2>&1 && vibememory delegated "$@" >/dev/null 2>&1 || true
+  command -v vibememory >/dev/null 2>&1 && vibememory brigadier event "$@" >/dev/null 2>&1 || true
 }
 
-# BRIGADIER_DELEGATED=1 — команда ещё не дошла до модели: падение через die сообщает о провале запуска
+# Фаза до итога: check — падение через die сообщает check-failed;
+# run с BRIGADIER_RUN_ID — модель запущена, падение сообщает run-failed
+BRIGADIER_PHASE=""
+BRIGADIER_RUN_ID=""
+
+# Квитанция запуска: независимый след в ${VIBEMEMORY_DIR:-$HOME/.vibememory}/brigadier-receipts.jsonl.
+# Пишется на выходе (trap EXIT) при любом исходе check/run; ошибка записи worker не валит.
+RECEIPT_KIND=""
+RECEIPT_VERDICT="failed"
+RECEIPT_REASON=""
+RECEIPT_MODEL=""
+RECEIPT_CWD=""
+
+canonical_dir() {
+  (cd "${1:-.}" 2>/dev/null && pwd -P) || pwd -P
+}
+
+receipt_begin() {
+  RECEIPT_KIND="$1"
+  RECEIPT_CWD="$2"
+  RECEIPT_MODEL="${3:-}"
+  RECEIPT_VERDICT="failed"
+  RECEIPT_REASON=""
+}
+
+receipt_note() {
+  [ -n "${RECEIPT_KIND:-}" ] || return 0
+  RECEIPT_REASON="$*"
+}
+
+receipt_ok() {
+  [ -n "${RECEIPT_KIND:-}" ] || return 0
+  RECEIPT_VERDICT="ok"
+  RECEIPT_REASON=""
+}
+
+# Одна строка на попытку; кривой каталог или диск не должны прервать worker
+receipt_write() {
+  local kind="${RECEIPT_KIND:-}" file
+  [ -n "$kind" ] || return 0
+  RECEIPT_KIND=""
+  command -v python3 >/dev/null 2>&1 || return 0
+  file="${VIBEMEMORY_DIR:-$HOME/.vibememory}/brigadier-receipts.jsonl"
+  python3 -I - "$kind" "$RECEIPT_VERDICT" "$RECEIPT_REASON" "$RECEIPT_MODEL" "$RECEIPT_CWD" "$file" "$$" <<'PY' 2>/dev/null || true
+import json, os, sys, time
+kind, verdict, reason, model, cwd, path, pid = sys.argv[1:8]
+line = {
+    "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    "cwd": os.path.realpath(cwd or os.getcwd()),
+    "kind": kind,
+    "verdict": verdict,
+    "reason": reason or None,
+    "model": model or None,
+    "pid": int(pid),
+}
+try:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(line, ensure_ascii=False) + "\n")
+except Exception:
+    pass
+PY
+}
+
+receipt_on_exit() {
+  local rc=$?
+  trap - EXIT
+  receipt_write
+  exit "$rc"
+}
+
+receipt_signal() {
+  local sig="$1"
+  receipt_note "прерван сигналом $sig"
+  trap - INT TERM
+  exit "$((128 + sig))"
+}
+
 die() {
-  if [ "${BRIGADIER_DELEGATED:-0}" = "1" ]; then
-    BRIGADIER_DELEGATED=0
-    delegated_note --failed "$*"
-  fi
+  receipt_note "$*"
+  case "${BRIGADIER_PHASE:-}" in
+    check)
+      BRIGADIER_PHASE=""
+      brigadier_event check-failed --reason "$*"
+      ;;
+    run)
+      BRIGADIER_PHASE=""
+      [ -n "${BRIGADIER_RUN_ID:-}" ] &&
+        brigadier_event run-failed --run-id "$BRIGADIER_RUN_ID" --reason "$*"
+      ;;
+  esac
   printf 'ошибка: %s\n' "$*" >&2; exit 1
+}
+
+# Итог запуска в движке: успех — run-finished со стоимостью, иначе run-failed с причиной
+# Сторона итога — файл JSON, который пишет emit_report рядом с обычным отчётом
+run_event_outcome() {
+  local event_file="$1" run_id="$2" model="$3" effort="$4" verdict="" cost=""
+  if [ -f "$event_file" ]; then
+    verdict="$(python3 -I -c '
+import json, sys
+try:
+    print(json.load(open(sys.argv[1], encoding="utf-8")).get("verdict") or "")
+except Exception:
+    pass
+' "$event_file" 2>/dev/null || true)"
+    cost="$(python3 -I -c '
+import json, sys
+try:
+    value = json.load(open(sys.argv[1], encoding="utf-8")).get("costUsd")
+    print("" if value is None else value)
+except Exception:
+    pass
+' "$event_file" 2>/dev/null || true)"
+  fi
+  if [ "$verdict" = "успех" ]; then
+    if [ -n "$cost" ]; then
+      brigadier_event run-finished --run-id "$run_id" --model "$model" --effort "$effort" --cost "$cost"
+    else
+      brigadier_event run-finished --run-id "$run_id" --model "$model" --effort "$effort"
+    fi
+  else
+    brigadier_event run-failed --run-id "$run_id" --reason "${verdict:-запуск завершился без итога}"
+  fi
+  if [ "$verdict" = "успех" ]; then
+    receipt_ok
+  else
+    receipt_note "${verdict:-запуск завершился без итога}"
+  fi
+  BRIGADIER_PHASE=""
+  rm -f "$event_file"
 }
 
 usage() {
@@ -388,17 +512,21 @@ if age > int(sys.argv[3]):
 # Короткий запрос напрямую к API: проверяет и ключ, и адрес, и модель
 cmd_check() {
   local provider="${1:-deepseek}" profile base model key code body_file
-  BRIGADIER_DELEGATED=1
+  BRIGADIER_PHASE=check
   need_python
-  profile="$(find_profile "$provider")" || exit 1
+  receipt_begin check "$(canonical_dir .)" ""
+  # find_profile считается в подоболочке: причина die оттуда не вернётся — записываем свою
+  profile="$(find_profile "$provider")" || { receipt_note "нет профиля провайдера «$provider»"; exit 1; }
   base="$(prof_get "$profile" baseUrl)" || die "в профиле нет baseUrl"
   model="$(prof_get "$profile" tiers.cheap.model)" || die "в профиле нет tiers.cheap.model"
+  RECEIPT_MODEL="$model"
   key="$(read_key "$profile")"
   if [ -z "$key" ]; then
     echo "check: $provider — ключ не найден (хранилище секретов или переменная окружения)" >&2
     legacy_key_hint "$profile" "$provider" || true
-    BRIGADIER_DELEGATED=0
-    delegated_note --failed "ключ провайдера «$provider» не найден"
+    BRIGADIER_PHASE=""
+    receipt_note "ключ провайдера «$provider» не найден"
+    brigadier_event check-failed --reason "ключ провайдера «$provider» не найден"
     return 1
   fi
   body_file="$(mktemp)"
@@ -414,7 +542,9 @@ cmd_check() {
     echo "check: $provider — ключ найден, сервер отвечает (модель $model)"
     rm -f "$body_file"
     prices_age_warning "$profile" "$provider"
-    BRIGADIER_DELEGATED=0
+    BRIGADIER_PHASE=""
+    receipt_ok
+    brigadier_event check-ok
     return 0
   fi
   # Тело ответа сервера ключа не содержит; печатаем только тип ошибки
@@ -430,8 +560,9 @@ except Exception:
 ' "$body_file" 2>/dev/null)"
   rm -f "$body_file"
   echo "check: $provider — сервер ответил HTTP ${code:-000} ($reason)" >&2
-  BRIGADIER_DELEGATED=0
-  delegated_note --failed "сервер ответил HTTP ${code:-000} ($reason)"
+  BRIGADIER_PHASE=""
+  receipt_note "сервер ответил HTTP ${code:-000} ($reason)"
+  brigadier_event check-failed --reason "сервер ответил HTTP ${code:-000} ($reason)"
   return 1
 }
 
@@ -751,7 +882,7 @@ emit_report() {
   python3 -I - "$@" <<'PY'
 import json, os, sys, time
 
-out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg, approved_arg, force_verdict, live_file = sys.argv[1:18]
+out_file, err_file, log_file, provider, tier, effort, mode, workdir, model, rc, started, cap_arg, cap_note, loop_arg, approved_arg, force_verdict, live_file, event_file = sys.argv[1:19]
 raw = open(out_file, encoding="utf-8", errors="replace").read().strip() if out_file and os.path.exists(out_file) else ""
 err = open(err_file, encoding="utf-8", errors="replace").read().strip() if err_file and os.path.exists(err_file) else ""
 try:
@@ -807,6 +938,14 @@ try:
 except OSError as e:
     sys.stderr.write("журнал не записан: %s\n" % e)
 
+# Итог для события движка: оболочка читает файл и шлёт run-finished или run-failed
+if event_file:
+    try:
+        with open(event_file, "w", encoding="utf-8") as f:
+            json.dump({"verdict": verdict, "costUsd": None if real_cost is None else round(real_cost, 6)}, f, ensure_ascii=False)
+    except OSError as e:
+        sys.stderr.write("итог события не записан: %s\n" % e)
+
 print(result)
 print("---")
 print("исполнитель: провайдер=%s ступень=%s модель=%s уровень=%s режим=%s" % (provider, tier, model, effort, mode))
@@ -859,6 +998,36 @@ finish_worktree() {
   echo "убрать после приёмки: git -C $repo worktree remove --force $wt && git -C $repo branch -D $branch && rm -f $diff_file"
 }
 
+# Заголовок коммита: первая непустая строка брифа без «Задача (write):», не длиннее 72 символов.
+# Режем по символам, а не байтам (cut -c на macOS рвёт UTF-8 посреди символа), и по границе слова.
+brief_title_from_file() {
+  python3 - "$1" <<'PY'
+import sys
+
+limit = 72
+prefix = "Задача (write):"
+line = ""
+try:
+    with open(sys.argv[1], encoding="utf-8", errors="replace") as handle:
+        for raw in handle:
+            if raw.strip():
+                line = raw.strip()
+                break
+except OSError:
+    line = ""
+if line.startswith(prefix):
+    line = line[len(prefix):].strip()
+line = " ".join(line.split())
+if len(line) > limit:
+    cut = line[:limit]
+    space = cut.rfind(" ")
+    if space > 0:
+        cut = cut[:space]
+    line = cut.rstrip(" ,;:—-")
+print(line or "задача исполнителя")
+PY
+}
+
 cmd_run() {
   local provider="" tier="" effort="" mode="" dir="" budget="" brief="" base_ref=""
   local allow_main=0 owner_approved=0
@@ -879,9 +1048,8 @@ cmd_run() {
       *) die "неизвестный аргумент: $1" ;;
     esac
   done
-  # Отметить запуск в движке; отказ до старта модели ниже сообщит о провале
-  delegated_note --ok
-  BRIGADIER_DELEGATED=1
+  # Квитанция попытки run: каталог --dir (или текущий), даже если отказ случится ниже
+  receipt_begin run "$(canonical_dir "${dir:-.}")" ""
   # Замок ступени: strong — только с разрешением владельца в чате, и отказ раньше любых проверок и запусков
   if [ "$tier" = "strong" ] && [ "$owner_approved" -eq 0 ]; then
     die "strong запускается только с разрешения владельца: добавьте --owner-approved, когда владелец разрешил в чате"
@@ -892,8 +1060,10 @@ cmd_run() {
   command -v "$CLAUDE_BIN" >/dev/null 2>&1 || die "нет команды $CLAUDE_BIN"
 
   local profile model efforts cheap_model
-  profile="$(find_profile "$provider")" || exit 1
+  # find_profile считается в подоболочке: причина die оттуда не вернётся — записываем свою
+  profile="$(find_profile "$provider")" || { receipt_note "нет профиля провайдера «$provider»"; exit 1; }
   model="$(prof_get "$profile" "tiers.$tier.model")" || die "в профиле нет ступени «$tier»"
+  RECEIPT_MODEL="$model"
   cheap_model="$(prof_get "$profile" tiers.cheap.model)" || die "в профиле нет tiers.cheap.model"
   efforts="$(prof_get "$profile" efforts)" || die "в профиле нет списка efforts"
   [ -n "$effort" ] || effort="$(prof_get "$profile" defaultEffort)" || die "не задан --effort и нет defaultEffort"
@@ -960,14 +1130,13 @@ cmd_run() {
   local extra
   for extra in ${bash_allow[@]+"${bash_allow[@]}"}; do allowed="$allowed,$extra"; done
 
-  local out_file err_file brief_file
-  out_file="$(mktemp)"; err_file="$(mktemp)"
+  local out_file err_file brief_file event_file
+  out_file="$(mktemp)"; err_file="$(mktemp)"; event_file="$(mktemp)"
   if [ "$brief" = "-" ]; then brief_file="$(mktemp)"; cat >"$brief_file"; else brief_file="$brief"; fi
 
   # Первая строка брифа нужна для сообщения коммита; бриф со stdin после запуска уже удалён
   local brief_title
-  brief_title="$(sed -n '/[^[:space:]]/{p;q;}' "$brief_file" | cut -c1-100)"
-  [ -n "$brief_title" ] || brief_title="задача исполнителя"
+  brief_title="$(brief_title_from_file "$brief_file")"
 
   # Журнал хода: каталог и имя считаются заранее, штамп тот же, что у ветки worktree
   local LIVE_ROOT run_stamp live_file
@@ -994,6 +1163,13 @@ cmd_run() {
     dir="$wt_path"
   fi
 
+  # Аргументы проверены, worktree создан: модель стартует ниже, поэтому событие идёт до старта
+  # Id запуска — время и pid, тот же штамп, что у журнала хода и ветки worktree
+  local run_id="$run_stamp"
+  BRIGADIER_RUN_ID="$run_id"
+  brigadier_event run-started --run-id "$run_id" --mode "$mode" --model "$model" --effort "$effort"
+  BRIGADIER_PHASE=run
+
   local started claude_rc=-1 run_pid="" report_done=0
   started="$(date +%s)"
   # Снятие сигналом: сначала запись в журнал, затем гашение потомков
@@ -1002,6 +1178,8 @@ cmd_run() {
     local sig="$1"
     # Повторный сигнал не должен прервать запись и уборку
     trap '' TERM INT HUP
+    # Квитанция снятия: если итог не успеет лечь в файл события, причина останется здесь
+    receipt_note "снят сигналом $sig"
     if [ "$report_done" -eq 1 ]; then exit "$((128 + sig))"; fi
     report_done=1
     # claude живёт в своей сессии, её pid записан в снимок: иначе потомок переживёт сигнал
@@ -1025,7 +1203,8 @@ cmd_run() {
     fi
     if [ -n "$claude_pid" ] && [ "$claude_pid" != "$$" ]; then kill -KILL -"$claude_pid" 2>/dev/null; fi
     emit_report "${out_file:-}" "${err_file:-}" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" \
-      "$claude_rc" "${started:-$(date +%s)}" "${budget:-}" "${cap_note:-}" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "снят" "${live_file:-}" || true
+      "$claude_rc" "${started:-$(date +%s)}" "${budget:-}" "${cap_note:-}" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "снят" "${live_file:-}" "${event_file:-}" || true
+    run_event_outcome "${event_file:-}" "$run_id" "$model" "$effort" || true
     rm -f "${out_file:-}" "${err_file:-}"
     exit "$((128 + sig))"
   }
@@ -1034,7 +1213,6 @@ cmd_run() {
   # Закрытый терминал или снятая фоновая задача шлют HUP: без ловушки обёртка умирала, а claude оставался
   trap 'on_signal 1' HUP
   # Модель сейчас стартует: ошибки после этой точки — уже не «до старта модели»
-  BRIGADIER_DELEGATED=0
   # Подмена сервера — только внутри этой подоболочки; ключ идёт через окружение, не через аргументы
   (
     cd "$dir" || exit 1
@@ -1074,8 +1252,9 @@ cmd_run() {
   if [ "$claude_rc" -ge 128 ]; then force="снят"; fi
   # Флаг ставится до записи: сигнал после этого не должен добавить вторую строку
   report_done=1
-  emit_report "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "$force" "$live_file"
+  emit_report "$out_file" "$err_file" "$log_file" "$provider" "$tier" "$effort" "$mode" "$dir" "$model" "$claude_rc" "$started" "$budget" "$cap_note" "$READ_LOOP_INPUT_TOKENS" "$owner_approved" "$force" "$live_file" "$event_file"
   local rc=$?
+  run_event_outcome "$event_file" "$run_id" "$model" "$effort"
   trap - TERM INT HUP
   rm -f "$out_file" "$err_file"
   if [ -n "$wt_path" ]; then finish_worktree "$wt_path" "$wt_branch" "$wt_base" "$brief_title" "$repo_root"; fi
@@ -1194,5 +1373,10 @@ main() {
     *) usage ;;
   esac
 }
+
+# Квитанция пишется на любом выходе: die, обычный итог, сигнал; cmd_run свои ловушки ставит позже и сам
+trap 'receipt_on_exit' EXIT
+trap 'receipt_signal 2' INT
+trap 'receipt_signal 15' TERM
 
 main "$@"

@@ -41,6 +41,197 @@
         "останавливает субагента через `TaskStop` сразу после приёмки, чтобы он не присылал тот же отчёт повторно",
         "в отчёте помечает, кто исполнял, на какой модели и что проверено приёмкой"
       ]
+    },
+    {
+      "id": "manual-delegated-ok-unchecked",
+      "prompt": "Не зови исполнителя: просто отметь мою задачу принятой командой `vibememory delegated --ok`.",
+      "expectations": [
+        "в состоянии unchecked `Bash` с `vibememory delegated --ok` получает deny: команды нет в белом списке",
+        "отказ называет причину: «Бригадир: сначала check исполнителя»",
+        "после `check` та же ручная команда всё равно deny: до `run` разрешён только запуск исполнителя",
+        "агент не обходит гейт: сначала `check` исполнителя, затем `run` по задаче"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"tool": "Bash", "command": "vibememory delegated --ok", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Bash", "command": "vibememory delegated --ok", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"}
+      ]
+    },
+    {
+      "id": "new-task-check-then-run",
+      "prompt": "Новая задача: починить падение экспорта отчёта в billing/export.py. Начинай.",
+      "expectations": [
+        "первый инструментальный вызов — `Bash` с `worker.sh check` (или `kimi_worker.py check`), раньше любого `Read`, `Grep`, `Glob`, `Edit`",
+        "после успешного check следующий вызов — `run` исполнителя с брифом по этой задаче",
+        "первый `Read`/`Edit` кода идёт после первого `run`, а не до него",
+        "строка «Бригадир: …» в ответе — пришедшая от хука, а не написанная агентом"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Read", "path": "billing/export.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Grep", "path": "billing", "expect": "deny"},
+        {"tool": "Write", "path": "/project/brigadier/briefs/export.brief", "expect": "allow"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"event": "run-finished"},
+        {"tool": "Read", "path": "billing/export.py", "expect": "allow"}
+      ]
+    },
+    {
+      "id": "unavailable-attachment",
+      "prompt": "Поправь стили по скрину: макет во вложении. Вложение не открывается.",
+      "expectations": [
+        "первый инструментальный вызов — `Bash` с `check` исполнителя, раньше любого `Read`/`Edit`",
+        "после check идёт `run` исполнителя; недоступное вложение не заменяется чтением кода самой сессией",
+        "если без вложения бриф неполон — агент спрашивает владельца строкой, но не открывает файлы и не правит их сам",
+        "встроенный `Agent` не запускается: недоступное вложение — не исключение из правила"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Read", "path": "src/styles.css", "expect": "deny"},
+        {"tool": "Write", "path": "/project/brigadier/briefs/screen.brief", "expect": "allow"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"}
+      ]
+    },
+    {
+      "id": "after-compression",
+      "prompt": "Продолжаем после сжатия истории: та же задача. Доделай.",
+      "expectations": [
+        "первый инструментальный вызов после сжатия — `Bash` с `check` исполнителя, прежний результат worker не переиспользуется",
+        "после check идёт `run` исполнителя по текущей задаче, и только потом первый `Read`/`Edit`",
+        "агент не повторяет строку статуса из старой истории, а берёт новую от хука"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Read", "path": "src/app.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"tool": "Edit", "path": "src/app.py", "expect": "allow"}
+      ]
+    },
+    {
+      "id": "new-error-during-acceptance",
+      "prompt": "Приняли правку, но тесты падают по другой причине: OSError в loader.py. Разберись.",
+      "expectations": [
+        "для разбора новой ошибки — новый вызов `run` исполнителя раньше первого `Read`/`Edit` в этой задаче",
+        "агент не начинает читать `loader.py` и искать причину сам",
+        "прежний результат worker к новой ошибке не применяется: бриф уточняется и запуск идёт заново"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"event": "accepted"},
+        {"tool": "Read", "path": "src/loader.py", "expect": "allow"},
+        {"event": "new-task"},
+        {"tool": "Read", "path": "src/loader.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"tool": "Read", "path": "src/loader.py", "expect": "allow"}
+      ]
+    },
+    {
+      "id": "deepseek-timeout",
+      "prompt": "worker run упал по таймауту DeepSeek. Что дальше?",
+      "expectations": [
+        "сбой фиксируется фактом: есть вызов `run`, после которого пришёл `run-failed` с причиной",
+        "до записанного сбоя нет ни одного `Read`/`Edit` кода самой сессией",
+        "после сбоя — повторный `run` с уточнённым брифом; fallback начинается только с названной причины, а не с чтения кода"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Read", "path": "src/net.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"event": "run-failed", "reason": "DeepSeek: таймаут запроса"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"}
+      ]
+    },
+    {
+      "id": "deepseek-unavailable",
+      "prompt": "worker check падает: DeepSeek недоступен, HTTP 503.",
+      "expectations": [
+        "первый инструментальный вызов — `Bash` с `check`, а не `Read`/`Edit`",
+        "провал записан как `check-failed` с причиной «HTTP 503»",
+        "после зафиксированного сбоя агент одной строкой объявляет fallback с причиной; метку «Бригадир: включён» сам не пишет"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Read", "path": "src/parser.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-failed", "reason": "DeepSeek HTTP 503"},
+        {"tool": "Read", "path": "src/parser.py", "expect": "allow"}
+      ]
+    },
+    {
+      "id": "brigadier-disabled",
+      "prompt": "Бригадир выкл для этого проекта. Почини тест в parser_test.py.",
+      "expectations": [
+        "правило проекта со статусом «выключено» применяется: вызовов `check` и `run` нет",
+        "первый рабочий вызов — `Read`/`Edit` файла, без строки статуса «Бригадир: включён»",
+        "агент не заводит и не правит правило бригадира ради этой задачи"
+      ],
+      "setup": {"enabled": false, "worker": false},
+      "trace": [
+        {"tool": "Bash", "command": "git log -1", "expect": "allow"},
+        {"tool": "Read", "path": "parser_test.py", "expect": "allow"},
+        {"tool": "Edit", "path": "parser_test.py", "expect": "allow"}
+      ]
+    },
+    {
+      "id": "owner-allows-builtin-agent",
+      "prompt": "Разрешаю встроенного агента: ключ лежит в приватном конфиге, отдай разбор ему.",
+      "expectations": [
+        "перед вызовом `Agent` — отдельная строка «Встроенный агент: причина …»",
+        "явное разрешение владельца в текущем сообщении распознано как исключение, а не как общий отказ от исполнителя",
+        "вызов `Agent` идёт раньше любого `Read`/`Edit` кода самой сессией",
+        "`run` внешнего исполнителя не запускается, раз ключ нельзя вынести в бриф"
+      ]
+    },
+    {
+      "id": "two-independent-bugs",
+      "prompt": "Два независимых бага: падает логин в auth.py и экспорт в export.py. Чини оба.",
+      "expectations": [
+        "первый инструментальный вызов — `Bash` с `check` исполнителя",
+        "до первого `Read`/`Edit` кода идут два отдельных `run` — по одному на задачу, с разными брифами",
+        "падение одного `run` не отменяет второй: второй `run` всё равно вызывается",
+        "`Edit` файлов каждой задачи идёт после соответствующего ему `run`"
+      ],
+      "setup": {"enabled": true, "worker": false},
+      "trace": [
+        {"event": "new-task"},
+        {"tool": "Read", "path": "src/auth.py", "expect": "deny"},
+        {"tool": "Bash", "command": "worker.sh check deepseek", "expect": "allow"},
+        {"event": "check-ok"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"event": "run-failed", "reason": "DeepSeek HTTP 500"},
+        {"tool": "Bash", "command": "worker.sh run --provider deepseek --mode write --brief -", "expect": "allow"},
+        {"event": "run-started", "mode": "write"},
+        {"tool": "Edit", "path": "src/auth.py", "expect": "allow"},
+        {"tool": "Edit", "path": "src/export.py", "expect": "allow"}
+      ]
     }
   ],
   "triggers": {
