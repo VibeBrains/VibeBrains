@@ -1200,19 +1200,26 @@
       "history": []
     },
     "skills/implement-specs/SKILL.md": {
-      "version": 5,
-      "sha256": "51dfca2d954458c1fd70db5acd3ff4798fefa505021ed91637bffa719d03fd12",
+      "version": 6,
+      "sha256": "00b3114cc4338ed928acbe97a8713251b1c7ac9b96958ff90af877927e2135d1",
       "history": [
         "971456e56d1ff47cf3d3262034f5c7ef7301dfa7b282724b167609e840113f9a",
         "985c9f69020faf73bccab38c75a38bb3041a0efd47fe2efe5180ccdc7efcdb63",
         "656a731cbcd90133d4c77779d360bbe6a09382a88018c701be68c52f36dfda8c",
-        "43e03b56bb6ffb43ab879cbc0179dcb2db938bf269a157f15240e018d92aebc3"
+        "43e03b56bb6ffb43ab879cbc0179dcb2db938bf269a157f15240e018d92aebc3",
+        "51dfca2d954458c1fd70db5acd3ff4798fefa505021ed91637bffa719d03fd12"
       ],
-      "vibeVersion": "1.1.0"
+      "vibeVersion": "1.2.0"
     },
     "skills/incident-review/SKILL.md": {
       "version": 1,
       "sha256": "b99d44335b4949445c70ef7b338a4bb52e93ea2b8f28c2c3a94e4f3526dd11b7",
+      "history": [],
+      "vibeVersion": "1.0.0"
+    },
+    "skills/manage-spec-change/SKILL.md": {
+      "version": 1,
+      "sha256": "c22f0db870df4b3231e4866839f3bd4c52390bf844d7ed100705f0b04a00fd31",
       "history": [],
       "vibeVersion": "1.0.0"
     },
@@ -1434,15 +1441,16 @@
       "history": []
     },
     "skills/spec-driven-implementation/SKILL.md": {
-      "version": 5,
-      "sha256": "343e0b759dd325bf3759e54f60c0ec7a56239093ac98a460080b3d50e6a86b70",
+      "version": 6,
+      "sha256": "e890fc46538618760a4ba7b4c4579358e5b8eb56e12fec14e9e4ddbe2b1f6f48",
       "history": [
         "5a66167e446e8f1e59945cadd2e4ad00d32c9e33fe64d799d95768266df5cc67",
         "6f6e898e5010214275c1c516aac9574284b8fd2d32bf2cc8a4dd424f70af9883",
         "3fdd6ec6ab9266c311624ed09f10bdd05bdd4e56e76da227db3526e74ca0ab20",
-        "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913"
+        "92fef6228c41b400a4aa7186a83a7037eeb19a60f92b8a2a53f4d120c92f1913",
+        "343e0b759dd325bf3759e54f60c0ec7a56239093ac98a460080b3d50e6a86b70"
       ],
-      "vibeVersion": "1.1.0"
+      "vibeVersion": "1.2.0"
     },
     "skills/tdd/LICENSE": {
       "version": 1,
