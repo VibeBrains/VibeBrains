@@ -8,7 +8,8 @@
 #   worker.sh import-key <провайдер> [--from-file <путь> | --from-legacy]
 #   worker.sh check [провайдер]
 #   worker.sh watch [путь к журналу хода] — печатать ход исполнителя вживую
-#   worker.sh gates --dir <worktree> -- <команда гейтов…> — прогнать гейты и записать отпечаток дерева
+#   worker.sh gates --dir <worktree> [--target-dir <путь>] -- <команда гейтов…> — гейты и отпечаток дерева
+#   (--target-dir у run и gates сильнее общего кэша Cargo; выключатель кэша — BRIGADIER_WORKER_CARGO_TARGET=off)
 #   worker.sh merge --dir <основное дерево> --branch <ветка> — влить ветку, только если отпечаток совпал
 #   worker.sh run --provider <имя> --tier cheap|strong --effort <уровень> --mode read|write \
 #                 --dir <путь> --brief <файл или -> [--base <ref>] [--budget <usd>] [--bash-allow "<шаблон>"]… [--allow-main-tree] [--owner-approved]
@@ -82,6 +83,189 @@ RECEIPT_CWD=""
 
 canonical_dir() {
   (cd "${1:-.}" 2>/dev/null && pwd -P) || pwd -P
+}
+
+# --- Общий кэш сборки Cargo ---
+# Исполнитель работает в своей копии worktree, и без общего CARGO_TARGET_DIR каждая копия заново качает
+# и собирает те же зависимости. Кэш общий для всех worktree одного git-common-dir и одного Cargo workspace;
+# разные репозитории и разные workspace внутри репозитория получают разные каталоги.
+CARGO_CACHE_PATH=""
+CARGO_CACHE_TOKEN=""
+CARGO_CACHE_NOTE=""
+cargo_config_hit=""
+
+# Корень Cargo workspace подъёмом от каталога до корня рабочего дерева git
+# Печатает "<корень worktree>\t<относительный путь>"; код 1 — Cargo.toml нет, поведение прежнее
+cargo_workspace() {
+  local dir="$1" top cur
+  top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)" || return 1
+  top="$(cd "$top" 2>/dev/null && pwd -P)" || return 1
+  cur="$(cd "$dir" 2>/dev/null && pwd -P)" || return 1
+  while : ; do
+    case "$cur" in
+      "$top")
+        [ -f "$top/Cargo.toml" ] || return 1
+        printf '%s\t.\n' "$top"
+        return 0
+        ;;
+      "$top"/*)
+        if [ -f "$cur/Cargo.toml" ]; then
+          printf '%s\t%s\n' "$top" "${cur#"$top"/}"
+          return 0
+        fi
+        ;;
+      *) return 1 ;;
+    esac
+    case "$cur" in
+      */*) cur="${cur%/*}" ;;
+      *) return 1 ;;
+    esac
+    [ -n "$cur" ] || cur="/"
+  done
+}
+
+# Первые 12 hex от sha256 строки: python3, затем shasum, затем sha256sum; код 1 — инструмента нет
+sha256_12() {
+  local text="$1" hex=""
+  if command -v python3 >/dev/null 2>&1; then
+    hex="$(printf '%s' "$text" | python3 -I -c 'import hashlib,sys; sys.stdout.write(hashlib.sha256(sys.stdin.buffer.read()).hexdigest())' 2>/dev/null || true)"
+  fi
+  if [ -z "$hex" ] && command -v shasum >/dev/null 2>&1; then
+    hex="$(printf '%s' "$text" | shasum -a 256 2>/dev/null | awk '{print $1}')"
+  fi
+  if [ -z "$hex" ] && command -v sha256sum >/dev/null 2>&1; then
+    hex="$(printf '%s' "$text" | sha256sum 2>/dev/null | awk '{print $1}')"
+  fi
+  [ "${#hex}" -ge 12 ] || return 1
+  printf '%s\n' "${hex:0:12}"
+}
+
+# Свой build.target-dir в конфиге Cargo: .cargo/config.toml или .cargo/config от каталога вверх плюс конфиг CARGO_HOME
+# Код 0 — задан, путь файла в cargo_config_hit: такой каталог сборки не перекрываем
+cargo_config_target_dir() {
+  local dir="$1" cur top f home="${CARGO_HOME:-${HOME:-}/.cargo}"
+  top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)" || top="$dir"
+  top="$(cd "$top" 2>/dev/null && pwd -P)" || top="$dir"
+  cur="$(cd "$dir" 2>/dev/null && pwd -P)" || cur="$dir"
+  while : ; do
+    for f in "$cur/.cargo/config.toml" "$cur/.cargo/config"; do
+      if [ -f "$f" ] && grep -Eq '^[[:space:]]*target-dir[[:space:]]*=' "$f" 2>/dev/null; then
+        cargo_config_hit="$f"
+        return 0
+      fi
+    done
+    [ "$cur" != "$top" ] || break
+    case "$cur" in
+      */*) cur="${cur%/*}" ;;
+      *) break ;;
+    esac
+    [ -n "$cur" ] || cur="/"
+  done
+  if [ -n "$home" ]; then
+    for f in "$home/config.toml" "$home/config"; do
+      if [ -f "$f" ] && grep -Eq '^[[:space:]]*target-dir[[:space:]]*=' "$f" 2>/dev/null; then
+        cargo_config_hit="$f"
+        return 0
+      fi
+    done
+  fi
+  return 1
+}
+
+# Выбор CARGO_TARGET_DIR для запускаемого процесса; аргументы: каталог, путь из --target-dir, задан ли
+# CARGO_TARGET_DIR в extraEnv профиля (0/1)
+# Результат в CARGO_CACHE_PATH (пусто — не задаём), CARGO_CACHE_TOKEN (короткая причина для квитанции)
+# и CARGO_CACHE_NOTE (причина человеку). Порядок от сильного к слабому: --target-dir, выключатель
+# BRIGADIER_WORKER_CARGO_TARGET=off|none, его значение-путь, уже заданный CARGO_TARGET_DIR, собственный
+# build.target-dir конфига Cargo, затем автоматический общий кэш
+cargo_cache_plan() {
+  local dir="$1" arg_dir="${2:-}" extra_env="${3:-0}" ws top rel common repo root key
+  CARGO_CACHE_PATH=""
+  CARGO_CACHE_TOKEN=""
+  CARGO_CACHE_NOTE=""
+  if [ -n "$arg_dir" ]; then
+    CARGO_CACHE_PATH="$arg_dir"
+    CARGO_CACHE_TOKEN="arg"
+    CARGO_CACHE_NOTE="путь из --target-dir"
+    return 0
+  fi
+  case "$(printf '%s' "${BRIGADIER_WORKER_CARGO_TARGET:-}" | tr '[:upper:]' '[:lower:]')" in
+    "")
+      ;;
+    off | none | no | 0)
+      CARGO_CACHE_TOKEN="off"
+      CARGO_CACHE_NOTE="выключен: BRIGADIER_WORKER_CARGO_TARGET=$BRIGADIER_WORKER_CARGO_TARGET"
+      return 0
+      ;;
+    *)
+      CARGO_CACHE_PATH="$BRIGADIER_WORKER_CARGO_TARGET"
+      CARGO_CACHE_TOKEN="path"
+      CARGO_CACHE_NOTE="путь из BRIGADIER_WORKER_CARGO_TARGET"
+      return 0
+      ;;
+  esac
+  if [ -n "${CARGO_TARGET_DIR:-}" ]; then
+    CARGO_CACHE_TOKEN="env"
+    CARGO_CACHE_NOTE="не трогаю: CARGO_TARGET_DIR уже задан окружением ($CARGO_TARGET_DIR)"
+    return 0
+  fi
+  if cargo_config_target_dir "$dir"; then
+    CARGO_CACHE_TOKEN="config"
+    CARGO_CACHE_NOTE="не трогаю: build.target-dir задан конфигом Cargo ($cargo_config_hit)"
+    return 0
+  fi
+  if [ "$extra_env" = "1" ]; then
+    CARGO_CACHE_TOKEN="extraenv"
+    CARGO_CACHE_NOTE="не трогаю: CARGO_TARGET_DIR задан extraEnv профиля"
+    return 0
+  fi
+  if ! ws="$(cargo_workspace "$dir")"; then
+    CARGO_CACHE_TOKEN="nocargo"
+    CARGO_CACHE_NOTE="нет: Cargo workspace от $dir до корня worktree не найден"
+    return 0
+  fi
+  top="${ws%%$'\t'*}"
+  rel="${ws#*$'\t'}"
+  common="$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" || common=""
+  [ -n "$common" ] || common="$top"
+  common="$(cd "$common" 2>/dev/null && pwd -P)" || common="$top"
+  if ! key="$(sha256_12 "$common"$'\n'"$rel")"; then
+    CARGO_CACHE_TOKEN="nohash"
+    CARGO_CACHE_NOTE="нет: нечем посчитать sha256 ключа кэша (нет python3, shasum и sha256sum)"
+    return 0
+  fi
+  repo="$(basename "$(dirname "$common")")"
+  [ "$(basename "$common")" = ".git" ] || repo="$(basename "$common")"
+  repo="$(printf '%s' "$repo" | sed 's/[^A-Za-z0-9._-]/_/g')"
+  [ -n "$repo" ] || repo="repo"
+  root="${BRIGADIER_WORKER_CARGO_TARGETS:-$(dirname "$WORKTREES_ROOT")/targets}"
+  if ! mkdir -p "$root" 2>/dev/null; then
+    CARGO_CACHE_TOKEN="nomkdir"
+    CARGO_CACHE_NOTE="нет: не создать каталог кэша $root"
+    return 0
+  fi
+  CARGO_CACHE_PATH="$root/$repo-$key"
+  CARGO_CACHE_TOKEN="cache"
+  CARGO_CACHE_NOTE="общий кэш worktree ($common + $rel)"
+  return 0
+}
+
+# Строка о каталоге сборки в stderr: выбранный путь или причина пропуска
+cargo_cache_print() {
+  if [ -n "$CARGO_CACHE_PATH" ]; then
+    printf 'cargo cache: %s (%s)\n' "$CARGO_CACHE_PATH" "$CARGO_CACHE_NOTE" >&2
+  else
+    printf 'cargo cache: не задан — %s\n' "${CARGO_CACHE_NOTE:-нет причины}" >&2
+  fi
+}
+
+# Значение для квитанции гейтов: путь или короткая причина
+cargo_cache_receipt() {
+  if [ -n "$CARGO_CACHE_PATH" ]; then
+    printf '%s' "$CARGO_CACHE_PATH"
+  else
+    printf '%s' "${CARGO_CACHE_TOKEN:-none}"
+  fi
 }
 
 receipt_begin() {
@@ -201,7 +385,7 @@ except Exception:
 }
 
 usage() {
-  sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 1
 }
 
@@ -1029,7 +1213,7 @@ PY
 }
 
 cmd_run() {
-  local provider="" tier="" effort="" mode="" dir="" budget="" brief="" base_ref=""
+  local provider="" tier="" effort="" mode="" dir="" budget="" brief="" base_ref="" target_dir=""
   local allow_main=0 owner_approved=0
   local -a bash_allow=()
   while [ $# -gt 0 ]; do
@@ -1042,6 +1226,7 @@ cmd_run() {
       --base) base_ref="${2:-}"; shift 2 ;;
       --budget) budget="${2:-}"; shift 2 ;;
       --brief) brief="${2:-}"; shift 2 ;;
+      --target-dir) target_dir="${2:-}"; [ -n "$target_dir" ] || die "--target-dir: нужен путь"; shift 2 ;;
       --bash-allow) bash_allow+=("Bash(${2:-})"); shift 2 ;;
       --allow-main-tree) allow_main=1; shift ;;
       --owner-approved) owner_approved=1; shift ;;
@@ -1163,6 +1348,12 @@ cmd_run() {
     dir="$wt_path"
   fi
 
+  # Общий кэш сборки Cargo выбирается до старта модели: строка в stderr, путь уходит в окружение исполнителя
+  local extra_env_cargo=0
+  case "$(prof_get "$profile" extraEnv 2>/dev/null || true)" in *CARGO_TARGET_DIR=*) extra_env_cargo=1 ;; esac
+  cargo_cache_plan "$dir" "$target_dir" "$extra_env_cargo"
+  cargo_cache_print
+
   # Аргументы проверены, worktree создан: модель стартует ниже, поэтому событие идёт до старта
   # Id запуска — время и pid, тот же штамп, что у журнала хода и ветки worktree
   local run_id="$run_stamp"
@@ -1234,6 +1425,8 @@ cmd_run() {
     while IFS='=' read -r name value; do
       [ -n "$name" ] && export "$name=$value"
     done < <(prof_get "$profile" extraEnv 2>/dev/null || true)
+    # Общий кэш Cargo сильнее extraEnv: профиль не должен задавать один кэш на все запуски
+    if [ -n "$CARGO_CACHE_PATH" ]; then export CARGO_TARGET_DIR="$CARGO_CACHE_PATH"; fi
     run_stream "$out_file" "$brief_file" "$err_file" "$profile" "$model" "$budget" "$CHARS_PER_TOKEN" "$KILL_GRACE_SEC" "$READ_LOOP_INPUT_TOKENS" "$NO_USAGE_SEC" "$live_file" \
       "$CLAUDE_BIN" -p --bare --no-session-persistence --output-format stream-json --verbose --model "$model" \
       --permission-mode dontAsk \
@@ -1298,10 +1491,11 @@ gates_receipt_file() { printf '%s/brigadier-gates\n' "$(git -C "$1" rev-parse --
 tracked_dirty() { ! git -C "$1" diff --quiet HEAD -- 2>/dev/null; }
 
 cmd_gates() {
-  local dir=""
+  local dir="" arg_target=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --dir) dir="${2:-}"; shift 2 ;;
+      --target-dir) arg_target="${2:-}"; [ -n "$arg_target" ] || die "gates: --target-dir: нужен путь"; shift 2 ;;
       --) shift; break ;;
       *) die "gates: неизвестный ключ $1; команда гейтов идёт после --" ;;
     esac
@@ -1309,7 +1503,7 @@ cmd_gates() {
   [ -n "$dir" ] || die "gates: нужен --dir <worktree>"
   [ $# -gt 0 ] || die "gates: нужна команда гейтов после --"
   git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "gates: $dir не в git-репозитории"
-  local receipt tree head untracked rc=0
+  local receipt tree head untracked rc=0 cache_note
   receipt="$(gates_receipt_file "$dir")"
   rm -f "$receipt"
   if tracked_dirty "$dir"; then
@@ -1321,7 +1515,11 @@ cmd_gates() {
   if [ -n "$untracked" ]; then
     printf 'gates: неотслеживаемые файлы участвуют в гейтах, но не вольются:\n%s\n' "$untracked" >&2
   fi
-  (cd "$dir" && "$@") || rc=$?
+  # Каталог сборки Cargo выбирается до запуска гейтов: строка в stderr, путь — в квитанцию
+  cargo_cache_plan "$dir" "$arg_target" 0
+  cargo_cache_print
+  cache_note="$(cargo_cache_receipt)"
+  (cd "$dir" && { [ -z "$CARGO_CACHE_PATH" ] || export CARGO_TARGET_DIR="$CARGO_CACHE_PATH"; } && "$@") || rc=$?
   if [ "$rc" -ne 0 ]; then
     echo "gates: красные (код $rc) — отпечатка нет"
     return "$rc"
@@ -1330,8 +1528,12 @@ cmd_gates() {
     echo "gates: за время гейтов дерево изменилось — отпечатка нет, прогони заново" >&2
     return 1
   fi
-  printf 'tree=%s\nhead=%s\nat=%s\ncmd=%s\n' "$tree" "$head" "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >"$receipt"
-  echo "gates: зелёные, отпечаток ${tree:0:12} записан"
+  printf 'tree=%s\nhead=%s\nat=%s\ncmd=%s\ncache=%s\n' "$tree" "$head" "$(date '+%Y-%m-%d %H:%M:%S')" "$*" "$cache_note" >"$receipt"
+  if [ -n "$CARGO_CACHE_PATH" ]; then
+    echo "gates: зелёные, отпечаток ${tree:0:12} записан; cargo cache: $CARGO_CACHE_PATH"
+  else
+    echo "gates: зелёные, отпечаток ${tree:0:12} записан; cargo cache: не задан — ${CARGO_CACHE_NOTE:-нет причины}"
+  fi
 }
 
 cmd_merge() {
